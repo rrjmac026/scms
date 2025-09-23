@@ -5,31 +5,39 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Feedback extends Model
+class Offense extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'student_id',
         'counselor_id',
-        'appointment_id',
-        'rating',
-        'comments',
-        'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10',
+        'offense',
+        'remarks',
+        'date',
+        'status',
+        'resolved',
+        'solution',
     ];
 
+    protected $casts = [
+        'resolved' => 'boolean',
+        'date' => 'date',
+    ];
+
+    /**
+     * The student who committed the offense.
+     */
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
+    /**
+     * The counselor who recorded or handled the offense.
+     */
     public function counselor()
     {
         return $this->belongsTo(Counselor::class);
-    }
-
-    public function appointment()
-    {
-        return $this->belongsTo(Appointment::class);
     }
 }

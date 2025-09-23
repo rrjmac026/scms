@@ -13,8 +13,14 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->foreignId('counselor_id')->constrained()->onDelete('cascade');
             $table->foreignId('appointment_id')->constrained()->onDelete('cascade');
-            $table->tinyInteger('rating')->unsigned()->comment('1–5 rating');
+            $table->tinyInteger('rating')->unsigned()->comment('1–5 overall rating');
             $table->text('comments')->nullable();
+
+            // 1 to 10 nani na question aron di na mag isa2 og code sa table
+            for ($i = 1; $i <= 10; $i++) {
+                $table->tinyInteger("q$i")->unsigned()->nullable()->comment("Question $i rating");
+            }
+
             $table->timestamps();
         });
     }
