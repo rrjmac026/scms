@@ -5,16 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Student extends Model
+class Counselor extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'student_number',
-        'course',
-        'year_level',
-        'special_needs',
+        'employee_number',
+        'specialization',
+        'availability_schedule',
+    ];
+
+    protected $casts = [
+        'availability_schedule' => 'array',
     ];
 
     public function user()
@@ -30,11 +33,6 @@ class Student extends Model
     public function sessions()
     {
         return $this->hasMany(Session::class);
-    }
-
-    public function behaviorIncidents()
-    {
-        return $this->hasMany(BehaviorIncident::class);
     }
 
     public function feedbacks()

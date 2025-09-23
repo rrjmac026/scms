@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Counseler;
+use App\Models\BehaviorIncident;
 use Illuminate\Http\Request;
 
-class CounselerController extends Controller
+class BehaviorIncidentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class CounselerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Counseler $counseler)
+    public function show(BehaviorIncident $behaviorIncident)
     {
         //
     }
@@ -42,7 +42,7 @@ class CounselerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Counseler $counseler)
+    public function edit(BehaviorIncident $behaviorIncident)
     {
         //
     }
@@ -50,7 +50,7 @@ class CounselerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Counseler $counseler)
+    public function update(Request $request, BehaviorIncident $behaviorIncident)
     {
         //
     }
@@ -58,7 +58,7 @@ class CounselerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Counseler $counseler)
+    public function destroy(BehaviorIncident $behaviorIncident)
     {
         //
     }

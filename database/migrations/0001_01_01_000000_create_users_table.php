@@ -13,10 +13,25 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+
+            // User Info
+            $table->string('first_name');
+            $table->string('middle_name')->nullable();
+            $table->string('last_name');
+            
+            // Contact & Address
             $table->string('email')->unique();
+            $table->string('contact_number')->nullable();
+            $table->string('address')->nullable();
+            
+            // Role & Auth
+            $table->enum('role', ['admin', 'counselor', 'student'])->default('student');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            
+            // Profile photo from Jetstream
+            $table->string('profile_photo_path', 2048)->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });
@@ -42,8 +57,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

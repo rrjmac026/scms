@@ -10,13 +10,15 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 
+
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens;
-    use HasFactory;
-    use HasProfilePhoto;
-    use Notifiable;
-    use TwoFactorAuthenticatable;
+    use
+    // HasApiTokens, 
+    HasFactory, 
+    // HasProfilePhoto, 
+    Notifiable;
+    // TwoFactorAuthenticatable;
 
     protected $fillable = [
         'first_name',
@@ -45,5 +47,35 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_photo_url',
     ];
 
+    // Relationships
+    public function student()
+    {
+        return $this->hasOne(Student::class);
+    }
 
+    public function counselor()
+    {
+        return $this->hasOne(Counselor::class);
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'student_id');
+    }
+
+    public function sessions()
+    {
+        return $this->hasMany(Session::class, 'student_id');
+    }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class);
+    }
+
+    public function getNameAttribute(): string
+    {
+        $middle = $this->middle_name ? " {$this->middle_name}" : '';
+        return "{$this->first_name}{$middle} {$this->last_name}";
+    }
 }
