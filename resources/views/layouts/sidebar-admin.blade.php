@@ -26,4 +26,31 @@
                 <span>{{ __('Dashboard') }}</span>
             </x-nav-link>
         </div>
+
+        <!-- User Management Section -->
+        <div class="mb-6">
+            <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-4">
+                {{ __('Management') }}
+            </h3>
+            <div class="space-y-1">
+                <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')"
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('admin.users.*') ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
+                    <i class="fas fa-users w-5 h-5 mr-3"></i>
+                    <span>{{ __('Manage Users') }}</span>
+                </x-nav-link>
+
+                <x-nav-link :href="route('admin.students.index')" :active="request()->routeIs('admin.students.*')"
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('admin.students.*') ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
+                    <i class="fas fa-user-graduate w-5 h-5 mr-3"></i>
+                    <span>{{ __('Manage Students') }}</span>
+                </x-nav-link>
+
+                <x-nav-link :href="route('admin.counselors.index')" :active="request()->routeIs('admin.counselors.*')"
+                    class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('admin.counselors.*') ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
+                    <i class="fas fa-user-tie w-5 h-5 mr-3"></i>
+                    <span>{{ __('Manage Counselors') }}</span>
+                </x-nav-link>
+            </div>
+        </div>
+    </div>
 </nav>

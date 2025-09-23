@@ -27,11 +27,6 @@ class Student extends Model
         return $this->hasMany(Appointment::class);
     }
 
-    public function sessions()
-    {
-        return $this->hasMany(Session::class);
-    }
-
     public function behaviorIncidents()
     {
         return $this->hasMany(BehaviorIncident::class);
@@ -41,4 +36,10 @@ class Student extends Model
     {
         return $this->hasMany(Feedback::class);
     }
+
+    public function counselingSessions()
+    {
+        return $this->hasMany(CounselingSession::class);
+    }
+
 }

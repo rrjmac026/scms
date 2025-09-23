@@ -73,6 +73,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(AuditLog::class);
     }
 
+    
+
     public function getNameAttribute(): string
     {
         $middle = $this->middle_name ? " {$this->middle_name}" : '';
