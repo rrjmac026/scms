@@ -17,7 +17,7 @@ class AdminFeedbackController extends Controller
                              ->latest()
                              ->paginate(20); // optional pagination
 
-        return view('admin.feedback.index', compact('feedbacks'));
+        return view('admin.feedbacks.index', compact('feedbacks'));
     }
 
     /**
@@ -27,6 +27,6 @@ class AdminFeedbackController extends Controller
     {
         $feedback->load('student', 'counselor', 'appointment');
 
-        return view('admin.feedback.show', compact('feedback'));
+        return view('admin.feedbacks.show', compact('feedback'));
     }
 }

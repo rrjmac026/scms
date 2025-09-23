@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use PragmaRX\Google2FA\Google2FA;
 
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -17,8 +18,8 @@ class User extends Authenticatable implements MustVerifyEmail
     // HasApiTokens, 
     HasFactory, 
     // HasProfilePhoto, 
-    Notifiable;
-    // TwoFactorAuthenticatable;
+    Notifiable,
+    TwoFactorAuthenticatable;
 
     protected $fillable = [
         'first_name',
@@ -79,5 +80,41 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $middle = $this->middle_name ? " {$this->middle_name}" : '';
         return "{$this->first_name}{$middle} {$this->last_name}";
+    }
+
+    public function verifyTwoFactorCode(string $code): bool
+    {
+        if (!$this->two_factor_secret) {
+            return false;
+        }
+
+        $google2fa = new Google2FA();
+
+        return $google2fa->verifyKey(
+            decrypt($this->two_factor_secret),
+            $code
+        );
+    }
+
+    /**
+     * Verify a recovery code (optional)
+     */
+    public function verifyRecoveryCode(string $code): bool
+    {
+        if (!$this->two_factor_recovery_codes) {
+            return false;
+        }
+
+        $codes = json_decode(decrypt($this->two_factor_recovery_codes), true);
+
+        if (in_array($code, $codes)) {
+            // Remove the used code
+            $codes = array_diff($codes, [$code]);
+            $this->two_factor_recovery_codes = encrypt(json_encode(array_values($codes)));
+            $this->save();
+            return true;
+        }
+
+        return false;
     }
 }

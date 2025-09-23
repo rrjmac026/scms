@@ -7,12 +7,15 @@ use App\Http\Controllers\Admin\CounselorController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminFeedbackController;
+use App\Http\Controllers\Admin\AppointmentController;
 //Counselor ni siya na Routes
 use App\Http\Controllers\Counselor\CounselorAppointmentController;
 use App\Http\Controllers\Counselor\CounselorFeedbackController;
 //Student ni siya na ROutes
 use App\Http\Controllers\Student\StudentFeedbackController;
 use Illuminate\Support\Facades\Route;
+//Auth
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,6 +31,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    //2FA shit
+Route::post('/profile/2fa/enable', [ProfileController::class, 'enableTwoFactor'])->name('profile.enableTwoFactor');
+    Route::post('/profile/2fa/verify', [ProfileController::class, 'verifyTwoFactor'])->name('profile.verifyTwoFactor');
+    Route::delete('/profile/2fa/disable', [ProfileController::class, 'disableTwoFactor'])->name('profile.disableTwoFactor');
+});
+
+Route::middleware(['guest'])->group(function () {
+    Route::get('/two-factor-challenge', [AuthenticatedSessionController::class, 'showTwoFactorChallenge'])
+         ->name('two-factor.challenge');
+    Route::post('/two-factor-challenge', [AuthenticatedSessionController::class, 'twoFactorChallenge'])
+         ->name('two-factor.verify');
 });
 
 /*
@@ -40,12 +55,16 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     
-    // User Management Routes
+
     Route::post('/users/import', [UserController::class, 'import'])->name('users.import');
     Route::get('/users/template', [UserController::class, 'downloadTemplate'])->name('users.template');
+
     Route::resource('users', UserController::class);
     Route::resource('students', StudentController::class);
     Route::resource('counselors', CounselorController::class);
+
+    Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 
     Route::get('feedback', [AdminFeedbackController::class, 'index'])
          ->name('feedback.index');
