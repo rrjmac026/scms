@@ -18,6 +18,15 @@ class Appointment extends Model
         'concern',
     ];
 
+    protected $casts = [
+        'preferred_date' => 'date',
+    ];
+
+    public function getFormattedTimeAttribute()
+    {
+        return \Carbon\Carbon::createFromFormat('H:i:s', $this->preferred_time)->format('h:i A');
+    }
+
     public function student()
     {
         return $this->belongsTo(Student::class);
@@ -28,9 +37,9 @@ class Appointment extends Model
         return $this->belongsTo(Counselor::class);
     }
 
-    public function session()
+    public function counselingSession()
     {
-        return $this->hasOne(Session::class);
+        return $this->hasOne(CounselingSession::class);
     }
 
     public function feedback()

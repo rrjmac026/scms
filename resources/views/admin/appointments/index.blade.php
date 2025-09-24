@@ -87,23 +87,6 @@
                                                    title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('admin.appointments.edit', $appointment) }}" 
-                                                   class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
-                                                   title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form action="{{ route('admin.appointments.destroy', $appointment) }}" 
-                                                      method="POST" 
-                                                      class="inline"
-                                                      onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" 
-                                                            class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                                                            title="Cancel">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </form>
                                             </div>
                                         </td>
                                     </tr>

@@ -1,19 +1,29 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Counselor;
 
+use App\Http\Controllers\Controller;
 use App\Models\CounselingSession;
+use App\Models\Student;
 use Illuminate\Http\Request;
 
 class CounselingSessionController extends Controller
 {
-    // List all sessions
+    // Show all counseling sessions in a view
     public function index()
     {
-        return CounselingSession::with(['student', 'counselor'])->get();
+        // Eager load student and counselor relationships
+        $counselor = auth()->user()->counselor;
+
+        $sessions = $counselor->counselingSessions()
+                            ->with('student.user')
+                            ->latest()
+                            ->paginate(10);
+
+        return view('counselors.counseling-sessions.index', compact('sessions'));
     }
 
-    // Store a new session (initially pending)
+    // Store a new counseling session
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -27,17 +37,27 @@ class CounselingSessionController extends Controller
         $data['started_at'] = null;
         $data['ended_at'] = null;
 
-        return CounselingSession::create($data);
+        CounselingSession::create($data);
+
+        return redirect()->route('counselors.counseling-sessions.index')
+                         ->with('success', 'Counseling session created successfully.');
     }
 
-    // Show a single session
+    // Show a specific counseling session
     public function show(CounselingSession $counselingSession)
     {
-        $counselingSession->load(['student', 'counselor']);
-        return $counselingSession;
+        $counselingSession->load(['student.user', 'counselor.user']);
+
+        return view('counselors.counseling-sessions.show', compact('counselingSession'));
     }
 
-    // Update session details (notes, concern, status)
+    // Optionally: edit session
+    public function edit(CounselingSession $counselingSession)
+    {
+        return view('counselors.counseling-sessions.edit', compact('counselingSession'));
+    }
+
+    // Update session
     public function update(Request $request, CounselingSession $counselingSession)
     {
         $data = $request->validate([
@@ -48,40 +68,16 @@ class CounselingSessionController extends Controller
 
         $counselingSession->update($data);
 
-        return $counselingSession;
+        return redirect()->route('counselors.counseling-sessions.index')
+                         ->with('success', 'Session updated successfully.');
     }
 
-    // Start a session (sets started_at and status to 'ongoing')
-    public function start(CounselingSession $counselingSession)
-    {
-        $counselingSession->update([
-            'started_at' => now(),
-            'status'     => 'ongoing',
-        ]);
-
-        return $counselingSession;
-    }
-
-    // End a session (sets ended_at, calculates duration, updates status to 'completed')
-    public function end(CounselingSession $counselingSession)
-    {
-        $counselingSession->update([
-            'ended_at' => now(),
-            'status'   => 'completed',
-        ]);
-
-        // Optional: calculate duration in minutes
-        $duration = $counselingSession->ended_at->diffInMinutes($counselingSession->started_at);
-        $counselingSession->duration = $duration;
-        $counselingSession->save();
-
-        return $counselingSession;
-    }
-
-    // Delete a session
+    // Delete session
     public function destroy(CounselingSession $counselingSession)
     {
         $counselingSession->delete();
-        return response()->noContent();
+
+        return redirect()->route('counselors.counseling-sessions.index')
+                         ->with('success', 'Session deleted successfully.');
     }
 }

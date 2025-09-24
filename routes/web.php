@@ -8,9 +8,12 @@ use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\AdminSessionController;
 //Counselor ni siya na Routes
 use App\Http\Controllers\Counselor\CounselorAppointmentController;
 use App\Http\Controllers\Counselor\CounselorFeedbackController;
+use App\Http\Controllers\Counselor\CounselorController;
+use App\Http\Controllers\Counselor\CounselingSessionController;
 //Student ni siya na ROutes
 use App\Http\Controllers\Student\StudentFeedbackController;
 use App\Http\Controllers\Student\StudentAppointmentController;
@@ -70,21 +73,27 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 
+    Route::resource('counseling-sessions', AdminSessionController::class);
+    
     Route::get('feedback', [AdminFeedbackController::class, 'index'])
          ->name('feedback.index');
     Route::get('feedback/{feedback}', [AdminFeedbackController::class, 'show'])
          ->name('feedback.show'); 
+
 });
 
 // 🟡 Counselor routes
 Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counselor.')->group(function () {
-    Route::get('/dashboard', [CounselorController::class, 'index'])->name('dashboard');
-    Route::get('/appointments', [CounselorController::class, 'appointments'])->name('appointments');
+    Route::get('/dashboard', [CounselorController::class, 'dashboard'])->name('dashboard');
     Route::get('/sessions', [CounselorController::class, 'sessions'])->name('sessions');
 
-    Route::get('appointments', [CounselorAppointmentController::class, 'index'])->name('appointments.index');
-    Route::get('appointments/{appointment}', [CounselorAppointmentController::class, 'show'])->name('appointments.show');
-    Route::patch('appointments/{appointment}/status', [CounselorAppointmentController::class, 'updateStatus'])->name('appointments.updateStatus');
+    // Appointment routes
+    Route::get('/appointments', [CounselorAppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments/{appointment}', [CounselorAppointmentController::class, 'show'])->name('appointments.show');
+    Route::patch('/appointments/{appointment}/status', [CounselorAppointmentController::class, 'updateStatus'])
+        ->name('appointments.update-status');
+    
+    Route::resource('counseling-sessions', CounselingSessionController::class);
 
     Route::resource('offenses', OffenseController::class);
     Route::patch('offenses/{offense}/resolve', [OffenseController::class, 'resolve'])

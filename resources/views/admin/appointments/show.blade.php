@@ -8,10 +8,6 @@
                 <x-secondary-button onclick="history.back()">
                     <i class="fas fa-arrow-left mr-2"></i>{{ __('Back') }}
                 </x-secondary-button>
-                <a href="{{ route('admin.appointments.edit', $appointment) }}" 
-                   class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-                    <i class="fas fa-edit mr-2"></i>{{ __('Edit') }}
-                </a>
             </div>
         </div>
     </x-slot>

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Counselor;
+
+use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Counselor;
 use Illuminate\Http\Request;
@@ -16,7 +18,7 @@ class CounselorAppointmentController extends Controller
                             ->orderBy('preferred_date')
                             ->get();
 
-        return view('counselor.appointments.index', compact('appointments'));
+        return view('counselors.appointments.index', compact('appointments'));
     }
 
     
@@ -41,7 +43,7 @@ class CounselorAppointmentController extends Controller
     public function show(Appointment $appointment)
     {
         $appointment->load('student.user');
-        return view('counselor.appointments.show', compact('appointment'));
+        return view('counselors.appointments.show', compact('appointment'));
     }
 }
 

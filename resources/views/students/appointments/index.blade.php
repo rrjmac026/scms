@@ -76,7 +76,7 @@
                                                     {{ $appointment->preferred_date->format('M d, Y') }}
                                                 </div>
                                                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ $appointment->preferred_time }}
+                                                    {{ $appointment->formatted_time }}
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">

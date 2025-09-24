@@ -24,7 +24,7 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        $appointment->load(['student.user', 'counselor.user', 'session', 'feedback']);
+        $appointment->load(['student.user', 'counselor.user', 'counselingSession', 'feedback']);
         return view('admin.appointments.show', compact('appointment'));
     }
 }

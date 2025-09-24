@@ -18,6 +18,7 @@ class Counselor extends Model
 
     protected $casts = [
         'availability_schedule' => 'array',
+        
     ];
 
     public function user()
@@ -30,10 +31,11 @@ class Counselor extends Model
         return $this->hasMany(Appointment::class);
     }
 
-    public function sessions()
+    public function counselingSessions()
     {
-        return $this->hasMany(Session::class);
+        return $this->hasMany(CounselingSession::class);
     }
+
 
     public function feedbacks()
     {

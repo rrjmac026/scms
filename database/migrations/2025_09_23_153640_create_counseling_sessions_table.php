@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('counselor_id')
                   ->constrained('counselors')
                   ->onDelete('cascade');
+            $table->foreignId('appointment_id')->nullable()->constrained()->onDelete('cascade');
             $table->text('notes')->nullable();
             $table->text('concern')->nullable();
             $table->timestamp('started_at')->nullable();

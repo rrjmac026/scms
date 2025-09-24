@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Counselor;
+use App\Models\CounselingSession;
 use Illuminate\Http\Request;
+
 
 class StudentAppointmentController extends Controller
 {
@@ -53,12 +55,13 @@ class StudentAppointmentController extends Controller
             'student_id' => $student->id,
             'counselor_id' => $validated['counselor_id'],
             'preferred_date' => $validated['preferred_date'],
-            'preferred_time' => $validated['preferred_time'],
+            'preferred_time' => date('H:i:s', strtotime($validated['preferred_time'])),
             'concern' => $validated['concern'],
             'status' => 'pending',
         ]);
 
-        return redirect()->route('students.appointments.index')
+
+        return redirect()->route('student.appointments.index')
                          ->with('success', 'Appointment request submitted.');
     }
 
@@ -67,9 +70,14 @@ class StudentAppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        $this->authorize('view', $appointment);
-        $appointment->load(['counselor.user', 'student.user', 'session', 'feedback']);
-        return view('student.appointments.show', compact('appointment'));
+        $student = auth()->user()->student;
+
+        if ($appointment->student_id !== $student->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $appointment->load(['counselor.user', 'student.user', 'counselingSession', 'feedback']);
+        return view('students.appointments.show', compact('appointment'));
     }
 
     /**

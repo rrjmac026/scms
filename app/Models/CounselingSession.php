@@ -13,6 +13,7 @@ class CounselingSession extends Model
     protected $fillable = [
         'student_id',
         'counselor_id',
+        'appointment_id',
         'concern',
         'notes',
         'started_at',
@@ -43,5 +44,10 @@ class CounselingSession extends Model
             return $this->ended_at->diffInMinutes($this->started_at);
         }
         return null;
+    }
+    
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class);
     }
 }
