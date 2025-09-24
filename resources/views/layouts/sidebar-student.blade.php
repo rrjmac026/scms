@@ -1,118 +1,153 @@
 {{-- layouts/sidebar-student.blade.php --}}
-<div>
-    <div class="flex flex-col h-full bg-white dark:bg-gray-800">
-        <!-- Header -->
-        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-graduation-cap text-white text-lg"></i>
+<nav class="flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+    <!-- Header -->
+    <div class="px-6 py-8">
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);">
+                    <i class="fas fa-user-graduate text-white text-lg"></i>
                 </div>
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white">{{ __('Student Portal') }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Your Counseling Hub') }}</p>
-                </div>
+                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
             </div>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="flex-1 p-6 space-y-2 overflow-y-auto">
-            <!-- Home Section -->
-            <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-4">
-                    {{ __('Home') }}
-                </h3>
-                <x-nav-link :href="route('student.dashboard')" :active="request()->routeIs('student.dashboard')"
-                    class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('student.dashboard') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
-                    <i class="fas fa-home w-5 h-5 mr-3 transition-colors duration-200"></i>
-                    <span>{{ __('Dashboard') }}</span>
-                </x-nav-link>
-            </div>
-
-            <!-- Appointments Section -->
-            <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-4">
-                    {{ __('Appointments') }}
-                </h3>
-                <div class="space-y-1">
-                    <x-nav-link :href="route('student.appointments.create')" :active="request()->routeIs('student.appointments.create*')"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('student.appointments.create*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
-                        <i class="fas fa-calendar-plus w-5 h-5 mr-3 transition-colors duration-200"></i>
-                        <span>{{ __('Book Appointment') }}</span>
-                    </x-nav-link>
-                    
-                    <x-nav-link :href="route('student.appointments')" :active="request()->routeIs('student.appointments') || request()->routeIs('student.appointments.index')"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('student.appointments') || request()->routeIs('student.appointments.index') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
-                        <i class="fas fa-calendar-alt w-5 h-5 mr-3 transition-colors duration-200"></i>
-                        <span>{{ __('My Appointments') }}</span>
-                        @php
-                            $upcomingAppointments = 2; // This would come from your controller/model
-                        @endphp
-                        @if($upcomingAppointments > 0)
-                            <span class="ml-auto bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded-full">{{ $upcomingAppointments }}</span>
-                        @endif
-                    </x-nav-link>
-                    
-                    <x-nav-link :href="route('student.appointments.history')" :active="request()->routeIs('student.appointments.history*')"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('student.appointments.history*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
-                        <i class="fas fa-clock w-5 h-5 mr-3 transition-colors duration-200"></i>
-                        <span>{{ __('Appointment History') }}</span>
-                    </x-nav-link>
-                </div>
-            </div>
-
-            <!-- Feedback Section -->
-            <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-4">
-                    {{ __('Feedback') }}
-                </h3>
-                <div class="space-y-1">
-                    <x-nav-link :href="route('student.feedback')" :active="request()->routeIs('student.feedback*')"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('student.feedback*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
-                        <i class="fas fa-star w-5 h-5 mr-3 transition-colors duration-200"></i>
-                        <span>{{ __('Rate Sessions') }}</span>
-                    </x-nav-link>
-                    
-                    <x-nav-link :href="route('student.feedback.create')" :active="request()->routeIs('student.feedback.create*')"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('student.feedback.create*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
-                        <i class="fas fa-comment-alt w-5 h-5 mr-3 transition-colors duration-200"></i>
-                        <span>{{ __('Send Feedback') }}</span>
-                    </x-nav-link>
-                </div>
-            </div>
-
-            <!-- Resources Section -->
-            <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-4">
-                    {{ __('Resources') }}
-                </h3>
-                <div class="space-y-1">
-                    <x-nav-link :href="route('student.resources')" :active="request()->routeIs('student.resources*')"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('student.resources*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
-                        <i class="fas fa-book-open w-5 h-5 mr-3 transition-colors duration-200"></i>
-                        <span>{{ __('Self-Help Resources') }}</span>
-                    </x-nav-link>
-                    
-                    <x-nav-link :href="route('student.emergency')" :active="request()->routeIs('student.emergency*')"
-                        class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out {{ request()->routeIs('student.emergency*') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:translate-x-1' }}">
-                        <i class="fas fa-phone w-5 h-5 mr-3 transition-colors duration-200"></i>
-                        <span>{{ __('Emergency Contacts') }}</span>
-                    </x-nav-link>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Quick Actions -->
-        <div class="p-6 border-t border-gray-100 dark:border-gray-700">
-            <div class="space-y-3">
-                <x-primary-button class="w-full justify-center" onclick="location.href='{{ route('student.appointments.create') }}'">
-                    <i class="fas fa-plus mr-2"></i>
-                    {{ __('Book New Appointment') }}
-                </x-primary-button>
-                <x-secondary-button class="w-full justify-center">
-                    <i class="fas fa-question-circle mr-2"></i>
-                    {{ __('Need Help?') }}
-                </x-secondary-button>
+            <div class="flex-1 min-w-0">
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white truncate">Student Portal</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your Counseling Hub</p>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Navigation -->
+    <div class="flex-1 px-4 pb-6 overflow-y-auto">
+        <!-- Dashboard Section -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-2 px-3 mb-4">
+                <div class="w-1 h-4 bg-gradient-to-b from-pink-400 to-pink-500 rounded-full" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);"></div>
+                <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {{ __('Overview') }}
+                </h2>
+            </div>
+            
+            <div class="space-y-1">
+                <x-nav-link :href="route('student.dashboard')" :active="request()->routeIs('student.dashboard')"
+                    class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('student.dashboard') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                    style="{{ request()->routeIs('student.dashboard') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('student.dashboard') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
+                        <i class="fas fa-home text-lg {{ request()->routeIs('student.dashboard') ? 'text-white' : 'text-pink-500' }}" style="{{ request()->routeIs('student.dashboard') ? '' : 'color: #FF92C2;' }}"></i>
+                    </div>
+                    <span class="flex-1">{{ __('Dashboard') }}</span>
+                    @if(request()->routeIs('student.dashboard'))
+                        <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
+                    @else
+                        <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>
+                    @endif
+                </x-nav-link>
+            </div>
+        </div>
+
+        <!-- Appointments Section -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-2 px-3 mb-4">
+                <div class="w-1 h-4 bg-gradient-to-b from-pink-400 to-pink-500 rounded-full" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);"></div>
+                <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {{ __('Appointments') }}
+                </h2>
+            </div>
+            
+            <div class="space-y-1">
+                <x-nav-link :href="route('student.appointments.index')" :active="request()->routeIs('student.appointments.index')"
+                    class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('student.appointments.index') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                    style="{{ request()->routeIs('student.appointments.index') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('student.appointments.index') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
+                        <i class="fas fa-calendar-alt text-lg {{ request()->routeIs('student.appointments.index') ? 'text-white' : 'text-pink-500' }}" style="{{ request()->routeIs('student.appointments.index') ? '' : 'color: #FF92C2;' }}"></i>
+                    </div>
+                    <span class="flex-1">{{ __('My Appointments') }}</span>
+                </x-nav-link>
+                
+                <x-nav-link :href="route('student.appointments.create')" :active="request()->routeIs('student.appointments.create')"
+                    class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('student.appointments.create') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                    style="{{ request()->routeIs('student.appointments.create') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('student.appointments.create') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
+                        <i class="fas fa-calendar-plus text-lg {{ request()->routeIs('student.appointments.create') ? 'text-white' : 'text-pink-500' }}" style="{{ request()->routeIs('student.appointments.create') ? '' : 'color: #FF92C2;' }}"></i>
+                    </div>
+                    <span class="flex-1">{{ __('Book Appointment') }}</span>
+                    @if(request()->routeIs('student.appointments.create'))
+                        <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
+                    @else
+                        <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>
+                    @endif
+                </x-nav-link>
+            </div>
+        </div>
+
+        <!-- Counseling History Section -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-2 px-3 mb-4">
+                <div class="w-1 h-4 bg-gradient-to-b from-pink-400 to-pink-500 rounded-full"
+                    style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);"></div>
+                <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {{ __('History') }}
+                </h2>
+            </div>
+
+            <div class="space-y-1">
+                <x-nav-link :href="route('student.counseling.history')" 
+                            :active="request()->routeIs('student.counseling.history')"
+                            class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('student.counseling.history') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                            style="{{ request()->routeIs('student.counseling.history') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('student.counseling.history') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
+                        <i class="fas fa-history text-lg {{ request()->routeIs('student.counseling.history') ? 'text-white' : 'text-pink-500' }}" style="{{ request()->routeIs('student.counseling.history') ? '' : 'color: #FF92C2;' }}"></i>
+                    </div>
+                    <span class="flex-1">{{ __('Counseling History') }}</span>
+                    @if(request()->routeIs('student.counseling.history'))
+                        <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
+                    @else
+                        <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>
+                    @endif
+                </x-nav-link>
+            </div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-2 px-3 mb-4">
+                <div class="w-1 h-4 bg-gradient-to-b from-pink-400 to-pink-500 rounded-full" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);"></div>
+                <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {{ __('Feedback') }}
+                </h2>
+            </div>
+            
+            <div class="space-y-1">
+                <x-nav-link :href="route('student.feedback.index')" :active="request()->routeIs('student.feedback.index')"
+                    class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('student.feedback.index') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                    style="{{ request()->routeIs('student.feedback.index') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('student.feedback.index') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
+                        <i class="fas fa-star text-lg {{ request()->routeIs('student.feedback.index') ? 'text-white' : 'text-pink-500' }}" style="{{ request()->routeIs('student.feedback.index') ? '' : 'color: #FF92C2;' }}"></i>
+                    </div>
+                    <span class="flex-1">{{ __('My Feedback') }}</span>
+                </x-nav-link>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Status Card -->
+    <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="relative overflow-hidden rounded-2xl p-4 shadow-lg" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);">
+            <div class="absolute top-0 right-0 w-32 h-32 -mt-16 -mr-16 bg-white opacity-5 rounded-full"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 -mb-12 -ml-12 bg-white opacity-5 rounded-full"></div>
+            <div class="relative flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <i class="fas fa-user-graduate text-white text-lg"></i>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white font-semibold text-sm truncate">Student Portal</p>
+                    <p class="text-white/75 text-xs">Active Session</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

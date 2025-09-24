@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Student;
 
+use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Counselor;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class StudentAppointmentController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('student.appointments.index', compact('appointments'));
+        return view('students.appointments.index', compact('appointments'));
     }
 
     /**
@@ -30,7 +31,7 @@ class StudentAppointmentController extends Controller
     public function create()
     {
         $counselors = Counselor::with('user')->get();
-        return view('student.appointments.create', compact('counselors'));
+        return view('students.appointments.create', compact('counselors'));
     }
 
     /**
@@ -57,7 +58,7 @@ class StudentAppointmentController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('student.appointments.index')
+        return redirect()->route('students.appointments.index')
                          ->with('success', 'Appointment request submitted.');
     }
 
@@ -79,11 +80,11 @@ class StudentAppointmentController extends Controller
         $this->authorize('delete', $appointment);
         if ($appointment->status === 'pending') {
             $appointment->delete();
-            return redirect()->route('student.appointments.index')
+            return redirect()->route('students.appointments.index')
                              ->with('success', 'Appointment request cancelled.');
         }
 
-        return redirect()->route('student.appointments.index')
+        return redirect()->route('students.appointments.index')
                          ->with('error', 'Only pending appointments can be cancelled.');
     }
 }

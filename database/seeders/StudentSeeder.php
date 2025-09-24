@@ -4,32 +4,18 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Student;
 use Illuminate\Support\Facades\Hash;
 
-class AdminSeeder extends Seeder
+class StudentSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // Admin
-        User::updateOrCreate(
-            ['email' => 'admin@admin.com'], 
-            [
-                'first_name' => 'System',
-                'middle_name' => 'Main',
-                'last_name' => 'Administrator',
-                'role' => 'admin',
-                'contact_number' => '09123456789',
-                'address' => 'University Campus',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        // Student
-        User::updateOrCreate(
+        // Create a user for the student
+        $studentUser = User::updateOrCreate(
             ['email' => 'jam@student.com'],
             [
                 'first_name' => 'Rey',
@@ -40,6 +26,17 @@ class AdminSeeder extends Seeder
                 'address' => 'University Campus',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+            ]
+        );
+
+        // Create the student record
+        Student::updateOrCreate(
+            ['user_id' => $studentUser->id],
+            [
+                'student_number' => 'STU0001',
+                'course' => 'BSCS',
+                'year_level' => 1,
+                'special_needs' => null,
             ]
         );
     }

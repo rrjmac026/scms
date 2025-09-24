@@ -10,7 +10,7 @@ use App\Models\Counselor;
 use App\Models\CounselingSession;
 use Illuminate\Http\Request;
 
-class StudentController extends Controller
+class StudentManagementController extends Controller
 {
     /**
      * Display a listing of students.

@@ -3,8 +3,8 @@
 use App\Http\Controllers\ProfileController;
 //ADmin ni siya
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\CounselorController;
-use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\CounselorManagementController;
+use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AppointmentController;
@@ -13,6 +13,10 @@ use App\Http\Controllers\Counselor\CounselorAppointmentController;
 use App\Http\Controllers\Counselor\CounselorFeedbackController;
 //Student ni siya na ROutes
 use App\Http\Controllers\Student\StudentFeedbackController;
+use App\Http\Controllers\Student\StudentAppointmentController;
+use App\Http\Controllers\Student\StudentController;
+use App\Http\Controllers\Student\CounselingHistoryController;
+
 use Illuminate\Support\Facades\Route;
 //Auth
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -60,8 +64,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/users/template', [UserController::class, 'downloadTemplate'])->name('users.template');
 
     Route::resource('users', UserController::class);
-    Route::resource('students', StudentController::class);
-    Route::resource('counselors', CounselorController::class);
+    Route::resource('students', StudentManagementController::class);
+    Route::resource('counselors', CounselorManagementController::class);
 
     Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
@@ -94,10 +98,16 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
 
 // 🔵 Student routes
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
-    Route::get('/dashboard', [StudentController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('dashboard');
     Route::get('/feedback', [StudentController::class, 'feedback'])->name('feedback');
 
     Route::resource('appointments', StudentAppointmentController::class);
+
+    // Listahan nis counseling sessions
+    Route::get('/counseling-history', [CounselingHistoryController::class, 'index'])
+              ->name('counseling.history');
+    Route::get('/counseling-history/{id}', [CounselingHistoryController::class, 'show'])
+              ->name('counseling.history.show');
 
 
     Route::get('appointments/{appointment}/feedback/create', [StudentFeedbackController::class, 'create'])

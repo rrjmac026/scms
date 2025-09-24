@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-class CounselorController extends Controller
+class CounselorManagementController extends Controller
 {
     /**
      * Display a listing of counselors.
