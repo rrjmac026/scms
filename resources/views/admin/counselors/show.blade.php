@@ -49,15 +49,20 @@
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Availability</dt>
                                     <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                        @if($counselor->availability_schedule)
-                                            <ul class="list-disc list-inside">
-                                                @foreach($counselor->availability_schedule as $day)
-                                                    <li>{{ $day }}</li>
-                                                @endforeach
-                                            </ul>
-                                        @else
-                                            Not specified
-                                        @endif
+                                    @if(is_array($counselor->availability_schedule))
+                                        @foreach($counselor->availability_schedule as $day => $times)
+                                            <li>
+                                                <strong>{{ ucfirst($day) }}:</strong>
+                                                <ul>
+                                                    @foreach($times as $time)
+                                                        <li>{{ $time }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </li>
+                                        @endforeach
+                                    @else
+                                        <p>No schedule available</p>
+                                    @endif
                                     </dd>
                                 </div>
                             </dl>
@@ -72,7 +77,7 @@
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                             <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Sessions</h4>
                             <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                {{ $counselor->sessions->count() }}
+                                {{ $counselor->sessions ? $counselor->sessions->count() : 0 }}
                             </p>
                         </div>
                         <!-- Add more statistics cards as needed -->
@@ -83,7 +88,7 @@
                         <div class="p-6">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Recent Sessions</h3>
                             <div class="space-y-4">
-                                @forelse($counselor->sessions->take(5) as $session)
+                                @forelse($counselor->counselingSessions ? $counselor->counselingSessions->take(5) : collect() as $session)
                                     <div class="border-l-4 border-red-500 pl-4">
                                         <div class="text-sm text-gray-600 dark:text-gray-400">
                                             {{ $session->date->format('M d, Y') }}

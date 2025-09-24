@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CounselingSession;
 
 class Counselor extends Model
 {
@@ -18,7 +19,6 @@ class Counselor extends Model
 
     protected $casts = [
         'availability_schedule' => 'array',
-        
     ];
 
     public function user()
@@ -36,9 +36,9 @@ class Counselor extends Model
         return $this->hasMany(CounselingSession::class);
     }
 
-
     public function feedbacks()
     {
         return $this->hasMany(Feedback::class);
     }
 }
+

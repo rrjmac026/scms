@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Counselor;
 use App\Models\User;
+use App\Models\CounselingSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -63,7 +64,7 @@ class CounselorManagementController extends Controller
             'user_id' => $user->id,
             'employee_number' => $validated['employee_number'],
             'specialization' => $validated['specialization'] ?? null,
-            'availability_schedule' => $validated['availability_schedule'] ?? null,
+            'availability_schedule' => json_encode($validated['availability_schedule'] ?? []),
         ]);
 
         return redirect()->route('admin.counselors.index')
@@ -115,7 +116,7 @@ class CounselorManagementController extends Controller
         $counselor->update([
             'employee_number' => $validated['employee_number'],
             'specialization' => $validated['specialization'] ?? null,
-            'availability_schedule' => $validated['availability_schedule'] ?? null,
+            'availability_schedule' => json_encode($validated['availability_schedule'] ?? []),
         ]);
 
         return redirect()->route('admin.counselors.index')
@@ -139,7 +140,7 @@ class CounselorManagementController extends Controller
      */
     public function show(Counselor $counselor)
     {
-        $counselor->load(['user', 'appointments', 'sessions', 'feedbacks']);
+        $counselor->load(['user', 'appointments', 'counselingSessions', 'feedbacks']);
         return view('admin.counselors.show', compact('counselor'));
     }
 }
