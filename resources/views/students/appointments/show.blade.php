@@ -59,14 +59,12 @@
                                             <i class="fas fa-user-tie text-pink-500"></i>
                                         </div>
                                     </div>
-                                    <div class="ml-4">
-                                        <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                            {{ $appointment->counselor->user->name }}
-                                        </h4>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $appointment->counselor->specialization }}
-                                        </p>
-                                    </div>
+                                    <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $appointment->counselor?->user?->name ?? 'Not yet assigned' }}
+                                    </h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $appointment->counselor?->specialization ?? '' }}
+                                    </p>
                                 </div>
                             </div>
                         </div>

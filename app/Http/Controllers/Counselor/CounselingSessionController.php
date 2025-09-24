@@ -9,10 +9,8 @@ use Illuminate\Http\Request;
 
 class CounselingSessionController extends Controller
 {
-    // Show all counseling sessions in a view
     public function index()
     {
-        // Eager load student and counselor relationships
         $counselor = auth()->user()->counselor;
 
         $sessions = $counselor->counselingSessions()
@@ -23,7 +21,6 @@ class CounselingSessionController extends Controller
         return view('counselors.counseling-sessions.index', compact('sessions'));
     }
 
-    // Store a new counseling session
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -36,6 +33,7 @@ class CounselingSessionController extends Controller
         $data['status'] = 'pending';
         $data['started_at'] = null;
         $data['ended_at'] = null;
+        $data['duration'] = null;
 
         CounselingSession::create($data);
 
@@ -43,7 +41,6 @@ class CounselingSessionController extends Controller
                          ->with('success', 'Counseling session created successfully.');
     }
 
-    // Show a specific counseling session
     public function show(CounselingSession $counselingSession)
     {
         $counselingSession->load(['student.user', 'counselor.user']);
@@ -51,13 +48,11 @@ class CounselingSessionController extends Controller
         return view('counselors.counseling-sessions.show', compact('counselingSession'));
     }
 
-    // Optionally: edit session
     public function edit(CounselingSession $counselingSession)
     {
         return view('counselors.counseling-sessions.edit', compact('counselingSession'));
     }
 
-    
     public function update(Request $request, CounselingSession $counselingSession)
     {
         $data = $request->validate([
@@ -66,28 +61,43 @@ class CounselingSessionController extends Controller
             'status'  => 'required|in:pending,ongoing,completed',
         ]);
 
-        //kung ang status kay on going ug wala pa nag sugod imong e set
-        if ($data['status'] === 'ongoing' && !$counselingSession->started_at) {
-            $data['started_at'] = now();
+        // Handle status transitions
+        if ($data['status'] === 'ongoing') {
+            // Starting a session - set started_at if not already set
+            if (!$counselingSession->started_at) {
+                $data['started_at'] = now();
+            }
+            // Clear any previous end data
+            $data['ended_at'] = null;
+            $data['duration'] = null;
         }
-
-        //kung ang session kay humana ug wala pa nag end
-        if ($data['status'] === 'completed') {
-            $endTime = now();
-            $data['ended_at'] = $endTime;
-
-            $startTime = $counselingSession->started_at ?? now();
-            $data['duration'] = $endTime->diffInMinutes($startTime);
+        
+        elseif ($data['status'] === 'completed') {
+            // Completing a session
+            $data['ended_at'] = now();
+            
+            // Calculate duration from started_at if it exists
+            if ($counselingSession->started_at) {
+                $data['duration'] = $counselingSession->started_at->diffInMinutes(now());
+            } else {
+                // Fallback if somehow started_at is missing
+                $data['duration'] = 0;
+            }
+        }
+        
+        elseif ($data['status'] === 'pending') {
+            // Resetting to pending - clear all timing data
+            $data['started_at'] = null;
+            $data['ended_at'] = null;
+            $data['duration'] = null;
         }
 
         $counselingSession->update($data);
 
         return redirect()
-            ->route('counselor.counseling-sessions.index')
+            ->route('counselor.counseling-sessions.show', $counselingSession)
             ->with('success', 'Session updated successfully.');
     }
-
-
 
     public function destroy(CounselingSession $counselingSession)
     {

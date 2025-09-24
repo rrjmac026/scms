@@ -20,11 +20,20 @@ class Appointment extends Model
 
     protected $casts = [
         'preferred_date' => 'date',
+        'preferred_time' => 'string',
     ];
 
     public function getFormattedTimeAttribute()
     {
         return \Carbon\Carbon::createFromFormat('H:i:s', $this->preferred_time)->format('h:i A');
+    }
+
+    public function getPreferredDateTimeAttribute()
+    {
+        return Carbon::createFromFormat(
+            'Y-m-d H:i',
+            $this->preferred_date->format('Y-m-d') . ' ' . $this->preferred_time
+        );
     }
 
     public function student()

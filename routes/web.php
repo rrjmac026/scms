@@ -72,6 +72,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
+    Route::post('appointments/{appointment}/assign', [AppointmentController::class, 'assignCounselor'])
+         ->name('appointments.assign');
 
     Route::resource('counseling-sessions', AdminSessionController::class);
     
@@ -125,6 +127,7 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
          ->name('feedback.store');
     Route::get('feedback', [StudentFeedbackController::class, 'index'])
          ->name('feedback.index');
+         
 
     });
 

@@ -63,10 +63,10 @@
                                                     </div>
                                                     <div class="ml-4">
                                                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                            {{ $appointment->counselor->user->name }}
+                                                            {{ $appointment->counselor?->user?->name ?? 'Not yet assigned' }}
                                                         </div>
                                                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                            {{ $appointment->counselor->specialization }}
+                                                            {{ $appointment->counselor?->specialization ?? '' }}
                                                         </div>
                                                     </div>
                                                 </div>

@@ -9,6 +9,17 @@ use Illuminate\Http\Request;
 
 class StudentFeedbackController extends Controller
 {
+    public function index()
+    {
+        $student = auth()->user()->student;
+
+        $feedbacks = Feedback::with('counselor', 'appointment')
+                             ->where('student_id', $student->id)
+                             ->latest()
+                             ->get();
+
+        return view('students.feedback.index', compact('feedbacks'));
+    }
     /**
      * Show feedback form for a specific appointment.
      */
@@ -21,7 +32,7 @@ class StudentFeedbackController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        return view('student.feedback.create', compact('appointment'));
+        return view('students.feedback.create', compact('appointment'));
     }
 
     /**
@@ -60,15 +71,5 @@ class StudentFeedbackController extends Controller
     /**
      * Optionally: show feedback submitted by the student
      */
-    public function index()
-    {
-        $student = auth()->user()->student;
-
-        $feedbacks = Feedback::with('counselor', 'appointment')
-                             ->where('student_id', $student->id)
-                             ->latest()
-                             ->get();
-
-        return view('student.feedback.index', compact('feedbacks'));
-    }
+    
 }

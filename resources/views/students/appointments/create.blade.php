@@ -11,21 +11,6 @@
                 <div class="p-6">
                     <form action="{{ route('student.appointments.store') }}" method="POST" class="space-y-6">
                         @csrf
-                        
-                        <!-- Counselor Selection -->
-                        <div>
-                            <x-input-label for="counselor_id" :value="__('Select Counselor')" />
-                            <select id="counselor_id" name="counselor_id" required
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 dark:focus:ring-pink-800">
-                                <option value="">Choose a counselor</option>
-                                @foreach($counselors as $counselor)
-                                    <option value="{{ $counselor->id }}">
-                                        {{ $counselor->user->name }} - {{ $counselor->specialization }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('counselor_id')" class="mt-2" />
-                        </div>
 
                         <!-- Preferred Date -->
                         <div>
@@ -41,13 +26,13 @@
                             <select id="preferred_time" name="preferred_time" required
                                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 dark:focus:ring-pink-800">
                                 <option value="">Select time slot</option>
-                                <option value="09:00 AM">9:00 AM</option>
-                                <option value="10:00 AM">10:00 AM</option>
-                                <option value="11:00 AM">11:00 AM</option>
-                                <option value="01:00 PM">1:00 PM</option>
-                                <option value="02:00 PM">2:00 PM</option>
-                                <option value="03:00 PM">3:00 PM</option>
-                                <option value="04:00 PM">4:00 PM</option>
+                                <option value="09:00">9:00 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="13:00">1:00 PM</option>
+                                <option value="14:00">2:00 PM</option>
+                                <option value="15:00">3:00 PM</option>
+                                <option value="16:00">4:00 PM</option>
                             </select>
                             <x-input-error :messages="$errors->get('preferred_time')" class="mt-2" />
                         </div>

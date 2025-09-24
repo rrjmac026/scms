@@ -11,10 +11,13 @@ return new class extends Migration
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
-            $table->foreignId('counselor_id')->constrained()->onDelete('cascade');
+            $table->foreignId('counselor_id')
+                ->nullable()
+                ->constrained()
+                ->onDelete('cascade');
             $table->date('preferred_date');
             $table->time('preferred_time');
-            $table->enum('status', ['pending', 'approved', 'declined', 'completed'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'declined', 'completed', 'rejected'])->default('pending');
             $table->text('concern')->nullable();
             $table->timestamps();
         });

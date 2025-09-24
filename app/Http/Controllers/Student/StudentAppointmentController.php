@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
-use App\Models\Counselor;
-use App\Models\CounselingSession;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
 
 class StudentAppointmentController extends Controller
 {
@@ -18,8 +16,7 @@ class StudentAppointmentController extends Controller
     {
         $student = auth()->user()->student;
 
-        // Load appointments with counselor info
-        $appointments = Appointment::with('counselor.user')
+        $appointments = Appointment::with(['counselor.user'])
             ->where('student_id', $student->id)
             ->latest()
             ->paginate(10);
@@ -32,8 +29,8 @@ class StudentAppointmentController extends Controller
      */
     public function create()
     {
-        $counselors = Counselor::with('user')->get();
-        return view('students.appointments.create', compact('counselors'));
+
+        return view('students.appointments.create');
     }
 
     /**
@@ -42,24 +39,21 @@ class StudentAppointmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'counselor_id' => 'required|exists:counselors,id',
-            'preferred_date' => 'required|date',
-            'preferred_time' => 'required',
-            'concern' => 'required|string|max:500',
+            'preferred_date' => 'required|date|after_or_equal:today',
+            'preferred_time' => 'required|date_format:H:i',
+            'concern'        => 'required|string|max:500',
         ]);
 
-        
         $student = auth()->user()->student;
 
         Appointment::create([
-            'student_id' => $student->id,
-            'counselor_id' => $validated['counselor_id'],
+            'student_id'     => $student->id,
+            'counselor_id'   => null, // assigned later by admin
             'preferred_date' => $validated['preferred_date'],
-            'preferred_time' => date('H:i:s', strtotime($validated['preferred_time'])),
-            'concern' => $validated['concern'],
-            'status' => 'pending',
+            'preferred_time' => $validated['preferred_time'],
+            'concern'        => $validated['concern'],
+            'status'         => 'pending',
         ]);
-
 
         return redirect()->route('student.appointments.index')
                          ->with('success', 'Appointment request submitted.');
@@ -77,22 +71,45 @@ class StudentAppointmentController extends Controller
         }
 
         $appointment->load(['counselor.user', 'student.user', 'counselingSession', 'feedback']);
+
         return view('students.appointments.show', compact('appointment'));
     }
 
     /**
-     * Optionally: cancel an appointment
+     * Cancel an appointment (only if 1 day before and still pending).
      */
     public function destroy(Appointment $appointment)
     {
-        $this->authorize('delete', $appointment);
-        if ($appointment->status === 'pending') {
-            $appointment->delete();
-            return redirect()->route('students.appointments.index')
-                             ->with('success', 'Appointment request cancelled.');
+        $student = auth()->user()->student;
+
+        if ($appointment->student_id !== $student->id) {
+            abort(403, 'Unauthorized action.');
         }
 
-        return redirect()->route('students.appointments.index')
-                         ->with('error', 'Only pending appointments can be cancelled.');
+        if ($appointment->status !== 'pending') {
+            return redirect()->route('student.appointments.index')
+                            ->with('error', 'Only pending appointments can be cancelled.');
+        }
+
+        // ✅ Ensure both are strings in the right format
+        $date = $appointment->preferred_date instanceof \Carbon\Carbon
+            ? $appointment->preferred_date->format('Y-m-d')
+            : $appointment->preferred_date;
+
+        $time = substr($appointment->preferred_time, 0, 5); // get HH:MM only
+
+        $appointmentDateTime = Carbon::createFromFormat('Y-m-d H:i', "$date $time");
+
+        if ($appointmentDateTime->isBefore(now()->addDay())) {
+            return redirect()->route('student.appointments.index')
+                            ->with('error', 'You can only cancel at least 1 day before the appointment.');
+        }
+
+        $appointment->delete();
+
+        return redirect()->route('student.appointments.index')
+                        ->with('success', 'Appointment request cancelled.');
     }
+
+
 }
