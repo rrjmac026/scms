@@ -34,9 +34,11 @@
                                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 dark:focus:ring-pink-800">
                                 <option value="">Choose a student</option>
                                 @foreach($students as $student)
-                                    <option value="{{ $student->id }}">
-                                        {{ $student->user->name }} - {{ $student->student_number }}
-                                    </option>
+                                    @if($student->appointments->where('status', 'approved')->count())
+                                        <option value="{{ $student->id }}">
+                                            {{ $student->user->name }} - {{ $student->student_number }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                             <x-input-error :messages="$errors->get('student_id')" class="mt-2" />

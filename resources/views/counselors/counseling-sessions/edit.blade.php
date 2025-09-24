@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <form action="{{ route('counselor.sessions.update', $session) }}" method="POST" class="space-y-6">
+                    <form action="{{ route('counselor.counseling-sessions.update', $counselingSession) }}" method="POST" class="space-y-6">
                         @csrf
                         @method('PATCH')
 
@@ -18,9 +18,9 @@
                             <x-input-label for="status" :value="__('Session Status')" />
                             <select id="status" name="status" required
                                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 dark:focus:ring-pink-800">
-                                <option value="pending" {{ $session->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="ongoing" {{ $session->status === 'ongoing' ? 'selected' : '' }}>Ongoing</option>
-                                <option value="completed" {{ $session->status === 'completed' ? 'selected' : '' }}>Completed</option>
+                                <option value="pending" {{ $counselingSession->status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="ongoing" {{ $counselingSession->status === 'ongoing' ? 'selected' : '' }}>Ongoing</option>
+                                <option value="completed" {{ $counselingSession->status === 'completed' ? 'selected' : '' }}>Completed</option>
                             </select>
                         </div>
 
@@ -28,7 +28,7 @@
                         <div>
                             <x-input-label for="notes" :value="__('Session Notes')" />
                             <textarea id="notes" name="notes" rows="6"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 dark:focus:ring-pink-800">{{ old('notes', $session->notes) }}</textarea>
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 dark:focus:ring-pink-800">{{ old('notes', $counselingSession->notes) }}</textarea>
                             <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                         </div>
 

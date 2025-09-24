@@ -57,22 +57,38 @@ class CounselingSessionController extends Controller
         return view('counselors.counseling-sessions.edit', compact('counselingSession'));
     }
 
-    // Update session
+    
     public function update(Request $request, CounselingSession $counselingSession)
     {
         $data = $request->validate([
             'notes'   => 'nullable|string',
             'concern' => 'nullable|string|max:500',
-            'status'  => 'nullable|in:pending,ongoing,completed',
+            'status'  => 'required|in:pending,ongoing,completed',
         ]);
+
+        //kung ang status kay on going ug wala pa nag sugod imong e set
+        if ($data['status'] === 'ongoing' && !$counselingSession->started_at) {
+            $data['started_at'] = now();
+        }
+
+        //kung ang session kay humana ug wala pa nag end
+        if ($data['status'] === 'completed') {
+            $endTime = now();
+            $data['ended_at'] = $endTime;
+
+            $startTime = $counselingSession->started_at ?? now();
+            $data['duration'] = $endTime->diffInMinutes($startTime);
+        }
 
         $counselingSession->update($data);
 
-        return redirect()->route('counselors.counseling-sessions.index')
-                         ->with('success', 'Session updated successfully.');
+        return redirect()
+            ->route('counselor.counseling-sessions.index')
+            ->with('success', 'Session updated successfully.');
     }
 
-    // Delete session
+
+
     public function destroy(CounselingSession $counselingSession)
     {
         $counselingSession->delete();

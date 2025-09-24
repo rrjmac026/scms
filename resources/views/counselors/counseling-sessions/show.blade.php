@@ -8,12 +8,6 @@
                 <x-secondary-button onclick="history.back()">
                     <i class="fas fa-arrow-left mr-2"></i>{{ __('Back') }}
                 </x-secondary-button>
-                @if($session->status !== 'completed')
-                    <a href="{{ route('counselor.sessions.edit', $session) }}" 
-                       class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-                        <i class="fas fa-edit mr-2"></i>{{ __('Update Session') }}
-                    </a>
-                @endif
             </div>
         </div>
     </x-slot>
@@ -25,61 +19,86 @@
                 <div class="md:col-span-2">
                     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6">
-                            <div class="mb-6">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                                    Session Information
-                                </h3>
-                                <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-8">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                                Session Information
+                            </h3>
+                            <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-8">
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
+                                    <dd class="mt-1">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                            {{ $counselingSession->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                               ($counselingSession->status === 'ongoing' ? 'bg-blue-100 text-blue-800' : 
+                                               'bg-green-100 text-green-800') }}">
+                                            {{ ucfirst($counselingSession->status) }}
+                                        </span>
+                                    </dd>
+                                </div>
+
+                                @if($counselingSession->started_at)
                                     <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
-                                        <dd class="mt-1">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                {{ $session->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                                   ($session->status === 'ongoing' ? 'bg-blue-100 text-blue-800' : 
-                                                   'bg-green-100 text-green-800') }}">
-                                                {{ ucfirst($session->status) }}
-                                            </span>
-                                        </dd>
-                                    </div>
-                                    
-                                    @if($session->started_at)
-                                        <div>
-                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Started At</dt>
-                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $session->started_at->format('F d, Y g:i A') }}
-                                            </dd>
-                                        </div>
-                                    @endif
-
-                                    @if($session->ended_at)
-                                        <div>
-                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Ended At</dt>
-                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $session->ended_at->format('F d, Y g:i A') }}
-                                            </dd>
-                                        </div>
-                                        <div>
-                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Duration</dt>
-                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $session->duration }} minutes
-                                            </dd>
-                                        </div>
-                                    @endif
-
-                                    <div class="md:col-span-2">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Primary Concern</dt>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Started At</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $session->concern }}
+                                            {{ $counselingSession->started_at->format('F d, Y g:i A') }}
                                         </dd>
                                     </div>
+                                @endif
 
-                                    <div class="md:col-span-2">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Session Notes</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                                            {{ $session->notes ?? 'No notes recorded.' }}
+                                @if($counselingSession->ended_at)
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Ended At</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                                            {{ $counselingSession->ended_at->format('F d, Y g:i A') }}
                                         </dd>
                                     </div>
-                                </dl>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Duration</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                                           @if($counselingSession->duration !== null)
+                                                {{ $counselingSession->duration }} minutes
+                                            @else
+                                                Not completed yet
+                                            @endif
+                                        </dd>
+                                    </div>
+                                @endif
+
+                                <div class="md:col-span-2">
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Primary Concern</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $counselingSession->concern }}
+                                    </dd>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Session Notes</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                                        {{ $counselingSession->notes ?? 'No notes recorded.' }}
+                                    </dd>
+                                </div>
+                            </dl>
+
+                            <!-- Action Buttons -->
+                            <div class="mt-6 flex gap-3">
+                                @if($counselingSession->status === 'pending')
+                                    <form action="{{ route('counselor.counseling-sessions.update', $counselingSession) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="ongoing">
+                                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                            Start Session
+                                        </button>
+                                    </form>
+                                @elseif($counselingSession->status === 'ongoing')
+                                    <form action="{{ route('counselor.counseling-sessions.update', $counselingSession) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="completed">
+                                        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                            End Session
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -100,10 +119,10 @@
                                 </div>
                                 <div class="ml-4">
                                     <div class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                        {{ $session->student->user->name }}
+                                        {{ $counselingSession->student->user->name }}
                                     </div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $session->student->student_number }}
+                                        {{ $counselingSession->student->student_number }}
                                     </div>
                                 </div>
                             </div>

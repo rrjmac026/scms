@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('concern')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ended_at')->nullable();
+            $table->integer('duration')->nullable();
             $table->enum('status', ['pending', 'ongoing', 'completed'])->default('pending');
             $table->timestamps();
         });

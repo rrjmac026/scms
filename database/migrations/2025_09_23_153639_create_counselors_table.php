@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('employee_number')->unique();
             $table->string('specialization')->nullable();
-            $table->json('availability_schedule')->nullable(); // stored as JSON
+            $table->json('availability_schedule')->nullable();
             $table->timestamps();
         });
     }

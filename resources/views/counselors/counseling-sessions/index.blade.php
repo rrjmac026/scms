@@ -74,11 +74,11 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex items-center gap-3">
-                                                    <a href="{{ route('counselor.sessions.show', $session) }}" 
+                                                    <a href="{{ route('counselor.counseling-sessions.show', $session) }}" 
                                                        class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('counselor.sessions.edit', $session) }}" 
+                                                    <a href="{{ route('counselor.counseling-sessions.edit', $session) }}" 
                                                        class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
                                                         <i class="fas fa-edit"></i>
                                                     </a>

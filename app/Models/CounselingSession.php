@@ -18,6 +18,7 @@ class CounselingSession extends Model
         'notes',
         'started_at',
         'ended_at',
+        'duration',
         'status',
     ];
 
@@ -37,13 +38,21 @@ class CounselingSession extends Model
         return $this->belongsTo(Counselor::class);
     }
 
-    // Accessor for duration in minutes
-    public function getDurationAttribute()
+    public function getFormattedDurationAttribute()
     {
-        if ($this->started_at && $this->ended_at) {
-            return $this->ended_at->diffInMinutes($this->started_at);
+        if ($this->duration) {
+            $hours = floor($this->duration / 60);
+            $minutes = $this->duration % 60;
+
+            return sprintf('%02dh %02dm', $hours, $minutes);
         }
-        return null;
+
+        if ($this->started_at && $this->ended_at) {
+            $diffInSeconds = $this->ended_at->diffInSeconds($this->started_at);
+            return gmdate('H:i:s', $diffInSeconds);
+        }
+
+        return 'N/A';
     }
     
     public function appointment()

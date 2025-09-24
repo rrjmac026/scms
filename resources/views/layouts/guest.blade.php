@@ -13,8 +13,32 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- Alpine.js -->
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.store('darkMode', {
+                    on: localStorage.getItem('darkMode') === 'true',
+                    toggle() {
+                        this.on = !this.on;
+                        localStorage.setItem('darkMode', this.on);
+                        document.documentElement.classList.toggle('dark', this.on);
+                    },
+                    init() {
+                        if (localStorage.getItem('darkMode') === 'true') {
+                            document.documentElement.classList.add('dark');
+                        }
+                    }
+                });
+            });
+        </script>
     </head>
-    <body class="font-sans text-gray-900 antialiased">
+    <body class="font-sans text-gray-900 antialiased"
+          x-data
+          x-init="$store.darkMode.init()"
+          :class="{ 'dark': $store.darkMode.on }">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
             <!-- <div>
                 <a href="/">
