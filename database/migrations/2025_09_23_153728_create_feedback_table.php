@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->foreignId('counselor_id')->constrained()->onDelete('cascade');
-            $table->foreignId('appointment_id')->constrained()->onDelete('cascade');
+            $table->foreignId('counseling_session_id')->constrained()->onDelete('cascade');
             $table->tinyInteger('rating')->unsigned()->comment('1–5 overall rating');
             $table->text('comments')->nullable();
 

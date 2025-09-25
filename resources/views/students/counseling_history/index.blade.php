@@ -44,6 +44,17 @@
                                                class="px-4 py-2 bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/50 transition-colors duration-200">
                                                 View Details
                                             </a>
+
+                                            @if($session->status === 'completed' && !$session->feedback)
+                                                <a href="{{ route('student.feedback.create', $session->id) }}" 
+                                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
+                                                    Give Feedback
+                                                </a>
+                                            @elseif($session->feedback)
+                                                <span class="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                                                    Feedback Submitted
+                                                </span>
+                                            @endif
                                         </div>
                                         <div class="mt-4">
                                             <p class="text-gray-600 dark:text-gray-300">

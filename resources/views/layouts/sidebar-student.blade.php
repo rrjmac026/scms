@@ -90,15 +90,15 @@
             </div>
 
             <div class="space-y-1">
-                <x-nav-link :href="route('student.counseling.history')" 
-                            :active="request()->routeIs('student.counseling.history')"
-                            class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('student.counseling.history') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
-                            style="{{ request()->routeIs('student.counseling.history') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
-                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('student.counseling.history') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
-                        <i class="fas fa-history text-lg {{ request()->routeIs('student.counseling.history') ? 'text-white' : 'text-pink-500' }}" style="{{ request()->routeIs('student.counseling.history') ? '' : 'color: #FF92C2;' }}"></i>
+                <x-nav-link :href="route('student.counseling-history.index')" 
+                            :active="request()->routeIs('student.counseling-history.index')"
+                            class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('student.counseling-history') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                            style="{{ request()->routeIs('student.counseling-history') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('student.counseling-history') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
+                        <i class="fas fa-history text-lg {{ request()->routeIs('student.counseling-history') ? 'text-white' : 'text-pink-500' }}" style="{{ request()->routeIs('student.counseling-history') ? '' : 'color: #FF92C2;' }}"></i>
                     </div>
                     <span class="flex-1">{{ __('Counseling History') }}</span>
-                    @if(request()->routeIs('student.counseling.history'))
+                    @if(request()->routeIs('student.counseling-history'))
                         <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
                     @else
                         <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>

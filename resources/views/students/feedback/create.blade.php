@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Submit Feedback') }}
+                {{ __('Submit Session Feedback') }}
             </h2>
             <x-secondary-button onclick="history.back()">
                 <i class="fas fa-arrow-left mr-2"></i>{{ __('Back') }}
@@ -14,8 +14,17 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <form action="{{ route('student.feedback.store', $appointment) }}" method="POST">
+                    <form action="{{ route('student.feedback.store', $session) }}" method="POST">
                         @csrf
+                        
+                        <!-- Session Info -->
+                        <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Session Information</h4>
+                            <div class="text-gray-900 dark:text-gray-100">
+                                <p>Date: {{ $session->started_at->format('F j, Y') }}</p>
+                                <p>Counselor: {{ $session->counselor->user->name }}</p>
+                            </div>
+                        </div>
                         
                         <!-- Questions -->
                         <div class="space-y-6 mb-8">

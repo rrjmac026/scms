@@ -12,7 +12,7 @@ class Feedback extends Model
     protected $fillable = [
         'student_id',
         'counselor_id',
-        'appointment_id',
+        'counseling_session_id',
         'rating',
         'comments',
         'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10',
@@ -31,5 +31,10 @@ class Feedback extends Model
     public function appointment()
     {
         return $this->belongsTo(Appointment::class);
+    }
+
+    public function counselingSession()
+    {
+        return $this->belongsTo(CounselingSession::class);
     }
 }

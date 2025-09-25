@@ -59,4 +59,10 @@ class CounselingSession extends Model
     {
         return $this->belongsTo(Appointment::class);
     }
+
+    public function feedback()
+    {
+        return $this->hasOne(Feedback::class, 'counseling_session_id');
+    }
+
 }

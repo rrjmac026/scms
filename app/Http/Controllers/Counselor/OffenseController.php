@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Counselor;
 
+use App\Http\Controllers\Controller;
 use App\Models\Offense;
 use App\Models\Student;
+use App\Models\CounselingSession;
 use Illuminate\Http\Request;
 
 class OffenseController extends Controller
@@ -13,20 +15,20 @@ class OffenseController extends Controller
      */
     public function index()
     {
-        $offenses = Offense::with(['student.user', 'counselor.user'])
+        $offenses = Offense::with(['student.user', 'counselor.user', 'counselingSession'])
                            ->latest()
                            ->paginate(10);
 
-        return view('counselor.offenses.index', compact('offenses'));
+        return view('counselors.offenses.index', compact('offenses'));
     }
 
     /**
      * Show the form for creating a new offense.
      */
-    public function create()
+    public function create(CounselingSession $session = null)
     {
         $students = Student::with('user')->get();
-        return view('counselor.offenses.create', compact('students'));
+        return view('counselors.offenses.create', compact('students', 'session'));
     }
 
     /**
@@ -36,6 +38,7 @@ class OffenseController extends Controller
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
+            'counseling_session_id' => 'nullable|exists:counseling_sessions,id',
             'offense'    => 'required|string|max:255',
             'remarks'    => 'nullable|string|max:500',
             'date'       => 'required|date',
@@ -45,6 +48,7 @@ class OffenseController extends Controller
         ]);
 
         $validated['counselor_id'] = auth()->user()->counselor->id;
+        $validated['resolved'] = $validated['resolved'] ?? false;
 
         Offense::create($validated);
 
@@ -57,8 +61,8 @@ class OffenseController extends Controller
      */
     public function show(Offense $offense)
     {
-        $offense->load(['student.user', 'counselor.user']);
-        return view('counselor.offenses.show', compact('offense'));
+        $offense->load(['student.user', 'counselor.user', 'counselingSession']);
+        return view('counselors.offenses.show', compact('offense'));
     }
 
     /**
@@ -67,7 +71,7 @@ class OffenseController extends Controller
     public function edit(Offense $offense)
     {
         $students = Student::with('user')->get();
-        return view('counselor.offenses.edit', compact('offense', 'students'));
+        return view('counselors.offenses.edit', compact('offense', 'students'));
     }
 
     /**
@@ -77,6 +81,7 @@ class OffenseController extends Controller
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
+            'counseling_session_id' => 'nullable|exists:counseling_sessions,id',
             'offense'    => 'required|string|max:255',
             'remarks'    => 'nullable|string|max:500',
             'date'       => 'required|date',

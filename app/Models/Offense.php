@@ -12,6 +12,7 @@ class Offense extends Model
     protected $fillable = [
         'student_id',
         'counselor_id',
+        'counseling_session_id',
         'offense',
         'remarks',
         'date',
@@ -39,5 +40,10 @@ class Offense extends Model
     public function counselor()
     {
         return $this->belongsTo(Counselor::class);
+    }
+
+    public function counselingSession()
+    {
+        return $this->belongsTo(CounselingSession::class);
     }
 }

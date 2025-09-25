@@ -14,6 +14,7 @@ use App\Http\Controllers\Counselor\CounselorAppointmentController;
 use App\Http\Controllers\Counselor\CounselorFeedbackController;
 use App\Http\Controllers\Counselor\CounselorController;
 use App\Http\Controllers\Counselor\CounselingSessionController;
+use App\Http\Controllers\Counselor\OffenseController;
 //Student ni siya na ROutes
 use App\Http\Controllers\Student\StudentFeedbackController;
 use App\Http\Controllers\Student\StudentAppointmentController;
@@ -116,15 +117,16 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
 
     // Listahan nis counseling sessions
     Route::get('/counseling-history', [CounselingHistoryController::class, 'index'])
-              ->name('counseling.history');
+              ->name('counseling-history.index');
     Route::get('/counseling-history/{id}', [CounselingHistoryController::class, 'show'])
-              ->name('counseling.history.show');
+              ->name('counseling-history.show');
 
 
-    Route::get('appointments/{appointment}/feedback/create', [StudentFeedbackController::class, 'create'])
-         ->name('feedback.create');
-    Route::post('appointments/{appointment}/feedback', [StudentFeedbackController::class, 'store'])
-         ->name('feedback.store');
+    Route::get('counseling-history/{session}/feedback/create', [StudentFeedbackController::class, 'createFeedbackForSession'])
+     ->name('feedback.create');
+
+    Route::post('counseling-history/{session}/feedback', [StudentFeedbackController::class, 'storeFeedbackForSession'])
+     ->name('feedback.store');
     Route::get('feedback', [StudentFeedbackController::class, 'index'])
          ->name('feedback.index');
          

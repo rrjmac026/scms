@@ -35,10 +35,7 @@ class CounselorSeeder extends Seeder
             [
                 'employee_number' => 'EMP001',
                 'specialization' => 'Academic & Career Counseling',
-                'availability_schedule' => [
-                    'days' => ['monday', 'tuesday'], // Make sure days are lowercase
-                    'times' => ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00']
-                ]
+                'availability_schedule' => null,
             ]
         );
     }
