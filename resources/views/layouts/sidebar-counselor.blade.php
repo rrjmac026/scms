@@ -4,11 +4,20 @@
     <div class="px-6 py-8">
         <div class="flex items-center space-x-4">
             <div class="relative">
-                <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);">
-                    <i class="fas fa-user-tie text-white text-lg"></i>
+                    <img 
+                        src="{{ auth()->user()->profile_photo_url }}" 
+                        alt="{{ auth()->user()->name }}" 
+                        class="w-12 h-12 rounded-2xl object-cover shadow-lg cursor-pointer"
+                        onclick="document.getElementById('profilePhotoInput').click();"
+                    />
+
+                    <form id="profilePhotoForm" action="{{ route('profile.update-photo') }}" method="POST" enctype="multipart/form-data" class="hidden">
+                        @csrf
+                        <input type="file" name="profile_photo" id="profilePhotoInput" accept="image/*"
+                            onchange="document.getElementById('profilePhotoForm').submit();">
+                    </form>
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
                 </div>
-                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
-            </div>
             <div class="flex-1 min-w-0">
                 <h1 class="text-xl font-bold text-gray-900 dark:text-white truncate">Counselor Portal</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Your Counseling Hub</p>

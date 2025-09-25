@@ -92,7 +92,7 @@ class AdminSessionController extends Controller
     // Show a specific session
     public function show(CounselingSession $counselingSession)
     {
-        $counselingSession->load(['student.user', 'counselor.user']);
+        $counselingSession->load(['student.user', 'counselor.user', 'category']);
         return view('admin.counseling-sessions.show', compact('counselingSession'));
     }
 

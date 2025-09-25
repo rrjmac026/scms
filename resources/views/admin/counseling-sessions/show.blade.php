@@ -73,6 +73,13 @@
                                         </dd>
                                     </div>
 
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Category</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                                            {{ $counselingSession->category ? $counselingSession->category->name : 'N/A' }}
+                                        </dd>
+                                    </div>
+
                                     <div class="md:col-span-2">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Session Notes</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">

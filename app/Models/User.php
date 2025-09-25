@@ -10,7 +10,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use PragmaRX\Google2FA\Google2FA;
-
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -74,12 +74,57 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(AuditLog::class);
     }
 
-    
-
+    /**
+     * Get the user's full name
+     */
     public function getNameAttribute(): string
     {
         $middle = $this->middle_name ? " {$this->middle_name}" : '';
         return "{$this->first_name}{$middle} {$this->last_name}";
+    }
+
+    /**
+     * Get the user's profile photo URL
+     */
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        return $this->profile_photo_path 
+            ? Storage::url($this->profile_photo_path)
+            : $this->defaultProfilePhotoUrl();
+    }
+
+    /**
+     * Get the default profile photo URL
+     */
+    public function defaultProfilePhotoUrl(): string
+    {
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=7F9CF5&background=EBF4FF';
+    }
+
+    /**
+     * Delete the user's profile photo
+     */
+    public function deleteProfilePhoto(): void
+    {
+        if ($this->profile_photo_path) {
+            Storage::disk('public')->delete($this->profile_photo_path);
+            $this->update(['profile_photo_path' => null]);
+        }
+    }
+
+    /**
+     * Update the user's profile photo
+     */
+    public function updateProfilePhoto($photo): void
+    {
+        // Delete old photo if exists
+        $this->deleteProfilePhoto();
+        
+        // Store new photo
+        $path = $photo->store('profile-photos', 'public');
+        
+        // Update user record
+        $this->update(['profile_photo_path' => $path]);
     }
 
     public function verifyTwoFactorCode(string $code): bool
@@ -107,7 +152,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $codes = json_decode(decrypt($this->two_factor_recovery_codes), true);
 
-        if (in_array($code, $codes)) {
+        if (in_array($code, [$code])) {
             // Remove the used code
             $codes = array_diff($codes, [$code]);
             $this->two_factor_recovery_codes = encrypt(json_encode(array_values($codes)));

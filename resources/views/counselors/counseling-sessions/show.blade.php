@@ -181,6 +181,14 @@
                                         </dd>
                                     </div>
                                 @endif
+                                <div class="md:col-span-2 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Category</dt>
+                                    <dd class="text-sm text-gray-900 dark:text-gray-100">
+                                        <div class="bg-white dark:bg-gray-800 p-3 rounded-lg border-l-4 border-blue-500">
+                                            {{ $counselingSession->category ? $counselingSession->category->name : 'N/A' }}
+                                        </div>
+                                    </dd>
+                                </div>
 
                                 <div class="md:col-span-2 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Primary Concern</dt>

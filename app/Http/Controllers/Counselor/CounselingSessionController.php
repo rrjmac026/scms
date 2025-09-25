@@ -43,7 +43,7 @@ class CounselingSessionController extends Controller
 
     public function show(CounselingSession $counselingSession)
     {
-        $counselingSession->load(['student.user', 'counselor.user']);
+        $counselingSession->load(['student.user', 'counselor.user', 'category']);
 
         return view('counselors.counseling-sessions.show', compact('counselingSession'));
     }

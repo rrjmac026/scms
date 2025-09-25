@@ -11,6 +11,7 @@ use Illuminate\View\View;
 use Laravel\Fortify\TwoFactorAuthenticationProvider;
 use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -106,5 +107,29 @@ class ProfileController extends Controller
         ])->save();
 
         return back()->with('status', 'Two-factor authentication has been disabled.');
+    }
+
+    public function updatePhoto(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        // Store kaag pic diri anga ka
+        $path = $request->file('profile_photo')->store('profile-photos', 'public');
+
+        // delete existing pics nimo
+        if ($user->profile_photo_path) {
+            Storage::disk('public')->delete($user->profile_photo_path);
+        }
+
+        // Save ang bag.o na photo
+        $user->update([
+            'profile_photo_path' => $path,
+        ]);
+
+        return back()->with('status', 'profile-photo-updated');
     }
 }

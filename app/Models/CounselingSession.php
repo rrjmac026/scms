@@ -14,7 +14,7 @@ class CounselingSession extends Model
         'student_id',
         'counselor_id',
         'appointment_id',
-        'category_id',
+        'counseling_category_id',
         'concern',
         'notes',
         'started_at',
@@ -65,6 +65,11 @@ class CounselingSession extends Model
     {
         return $this->hasOne(Feedback::class, 'counseling_session_id', 'id');
     }
+
+    // public function category()
+    // {
+    //     return $this->appointment->category();
+    // }
 
     public function category()
     {
