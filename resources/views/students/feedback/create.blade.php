@@ -30,7 +30,7 @@
                         <div class="space-y-6 mb-8">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Counseling Session Evaluation</h3>
                             
-                            @for($i = 1; $i <= 10; $i++)
+                            @for($i = 1; $i <= 12; $i++)
                                 <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
                                     <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Question {{ $i }}: {{ config('counseling.feedback_questions')[$i-1] ?? "Rate your experience" }}
@@ -50,31 +50,35 @@
                                 </div>
                             @endfor
 
-                            <!-- Overall Rating -->
-                            <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                            <!-- What did you like about this counseling session? -->
+                            <div class="mb-6">
                                 <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Overall Rating
+                                    What did you like about this counseling session?
                                 </label>
-                                <div class="flex space-x-4">
-                                    @for($rating = 1; $rating <= 5; $rating++)
-                                        <label class="flex items-center">
-                                            <input type="radio" name="rating" value="{{ $rating }}" 
-                                                   class="text-pink-500 focus:ring-pink-500">
-                                            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ $rating }}</span>
-                                        </label>
-                                    @endfor
-                                </div>
+                                <textarea name="likes" rows="3"
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-pink-500 focus:ring-pink-500"
+                                    placeholder="Share what you liked..."></textarea>
+                                @error('likes')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
-                            <!-- Comments -->
-                            <div>
+                    
+
+                            <!-- Comments / Suggestions to improve session -->
+                            <div class="mb-6">
                                 <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Additional Comments
+                                    Comments / Suggestions to improve session
                                 </label>
-                                <textarea name="comments" rows="4" 
-                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-pink-500 focus:ring-pink-500"></textarea>
+                                <textarea name="comments" rows="3"
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-pink-500 focus:ring-pink-500"
+                                    placeholder="Any suggestions..."></textarea>
+                                @error('comments')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
-                        </div>
+
+
 
                         <div class="flex justify-end">
                             <x-primary-button type="submit">

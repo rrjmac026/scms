@@ -18,7 +18,7 @@
                 <div class="flex items-center gap-4">
                     <div class="h-12 w-12 bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300" 
                          style="background: linear-gradient(135deg, #ffffffff 0%, #ffffffff 100%);">
-                        <img src="assets/app_logo.PNG" 
+                        <img src="{{ asset('assets/app_logo.PNG') }}" 
                             alt="Logo" 
                             class="h-8 w-8 object-contain" />
                     </div>

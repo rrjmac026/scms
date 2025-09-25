@@ -14,9 +14,9 @@ return new class extends Migration
             $table->foreignId('counselor_id')->constrained()->onDelete('cascade');
             $table->foreignId('counseling_session_id')->constrained()->onDelete('cascade');
             $table->tinyInteger('rating')->unsigned()->comment('1–5 overall rating');
-            $table->text('comments')->nullable();
             $table->text('likes')->nullable();
-
+            $table->text('comments')->nullable();
+            
             // 1 to 12 questions
             for ($i = 1; $i <= 12; $i++) {
                 $table->tinyInteger("q$i")->unsigned()->nullable()->comment("Question $i rating");

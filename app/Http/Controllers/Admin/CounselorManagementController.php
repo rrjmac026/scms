@@ -76,6 +76,7 @@ class CounselorManagementController extends Controller
      */
     public function edit(Counselor $counselor)
     {
+        $counselor->availability_schedule = json_decode($counselor->availability_schedule, true) ?? [];
         return view('admin.counselors.edit', compact('counselor'));
     }
 

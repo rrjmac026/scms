@@ -13,6 +13,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
                 <!-- Feedback Overview -->
                 <div class="md:col-span-2 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
@@ -21,50 +22,76 @@
                         </h3>
 
                         <!-- Overall Rating -->
-                        <div class="mb-6">
-                            <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Overall Rating</div>
-                            <div class="flex items-center">
-                                <span class="text-3xl font-bold text-gray-900 dark:text-gray-100 mr-3">
-                                    {{ number_format($feedback->rating, 1) }}/5
-                                </span>
-                                <div class="flex text-2xl text-yellow-400">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <i class="fas fa-star {{ $i <= $feedback->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                    @endfor
+                        @if($feedback->rating)
+                            <div class="mb-6">
+                                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Overall Rating</div>
+                                <div class="flex items-center">
+                                    <span class="text-3xl font-bold text-gray-900 dark:text-gray-100 mr-3">
+                                        {{ number_format($feedback->rating, 1) }}/5
+                                    </span>
+                                    <div class="flex text-2xl text-yellow-400">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <i class="fas fa-star {{ $i <= $feedback->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                                        @endfor
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
 
-                        <!-- Detailed Ratings -->
+                        <!-- Detailed Ratings (q1-q10) -->
                         <div class="space-y-4 mb-6">
-                            @for ($i = 1; $i <= 10; $i++)
-                                @php $question = "q$i"; @endphp
-                                @if($feedback->$question)
+                            @php $questions = config('counseling.feedback_questions'); @endphp
+
+                            @for($i = 1; $i <= 12; $i++)
+                                @php
+                                    $key = "q$i";
+                                    $questionText = $questions[$i-1] ?? "Question $i";
+                                @endphp
+
+                                @if(!empty($feedback->$key))
                                     <div>
                                         <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Question {{ $i }}
+                                            {{ $questionText }}
                                         </div>
-                                        <div class="flex items-center">
-                                            <div class="flex text-yellow-400">
-                                                @for ($j = 1; $j <= 5; $j++)
-                                                    <i class="fas fa-star {{ $j <= $feedback->$question ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                                @endfor
+
+                                        @if($i <= 10)
+                                            <div class="flex items-center">
+                                                <div class="flex text-yellow-400">
+                                                    @for($j = 1; $j <= 5; $j++)
+                                                        <i class="fas fa-star {{ $j <= $feedback->$key ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                                                    @endfor
+                                                </div>
+                                                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                                    ({{ $feedback->$key }}/5)
+                                                </span>
                                             </div>
-                                            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                                                ({{ $feedback->$question }}/5)
-                                            </span>
-                                        </div>
+                                        @else
+                                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-gray-700 dark:text-gray-300">
+                                                {{ $feedback->$key }}
+                                            </div>
+                                        @endif
                                     </div>
                                 @endif
                             @endfor
                         </div>
 
+                        <!-- Likes -->
+                        @if($feedback->likes)
+                            <div class="mt-4">
+                                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-2">What did you like about this counseling session?</h4>
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300">
+                                    {{ $feedback->likes }}
+                                </div>
+                            </div>
+                        @endif
+
+
                         <!-- Comments -->
                         @if($feedback->comments)
-                            <div>
-                                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-2">Comments</h4>
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                                    <p class="text-gray-700 dark:text-gray-300">{{ $feedback->comments }}</p>
+                            <div class="mt-4">
+                                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-2">Comments / Suggestions to improve session.</h4>
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300">
+                                    {{ $feedback->comments }}
                                 </div>
                             </div>
                         @endif
@@ -115,6 +142,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

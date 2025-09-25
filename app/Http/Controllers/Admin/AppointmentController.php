@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Counselor;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class AppointmentController extends Controller
 {
@@ -137,6 +138,53 @@ class AppointmentController extends Controller
             \Log::error('Error getting available counselors: ' . $e->getMessage());
             return collect([]);
         }
+    }
+
+    public function calendar()
+    {
+        $appointments = Appointment::with(['student.user', 'counselor.user', 'category'])
+            ->whereIn('status', ['pending', 'approved', 'completed'])
+            ->get()
+            ->map(function ($appointment) {
+                $counselorName = $appointment->counselor 
+                    ? $appointment->counselor->user->name 
+                    : 'Unassigned';
+                
+                // ✅ Fix: Combine date and time properly
+                $startDateTime = $appointment->preferred_date;
+                if ($appointment->preferred_time) {
+                    // Ensure we have both date and time
+                    $date = $appointment->preferred_date instanceof \Carbon\Carbon
+                        ? $appointment->preferred_date->format('Y-m-d')
+                        : $appointment->preferred_date;
+                    
+                    $time = substr($appointment->preferred_time, 0, 5); // Get HH:MM only
+                    $startDateTime = $date . 'T' . $time . ':00'; // ISO format for calendar
+                }
+                
+                return [
+                    'id'          => $appointment->id,
+                    'title'       => $appointment->student->user->name . ' (' . ucfirst($appointment->status) . ')',
+                    'start'       => $startDateTime, // ✅ Now includes both date and time
+                    'color'       => match ($appointment->status) {
+                        'pending'   => '#fbbf24', // yellow
+                        'approved'  => '#3b82f6', // blue
+                        'completed' => '#10b981', // green
+                        default     => '#6b7280', // gray
+                    },
+                    'extendedProps' => [
+                        'student'     => $appointment->student->user->name,
+                        'counselor'   => $counselorName,
+                        'category'    => $appointment->category->name ?? 'General', // ✅ Safe fallback
+                        'status'      => $appointment->status,
+                        'description' => Str::limit($appointment->concern ?? '', 50) // ✅ Use 'concern' field
+                    ]
+                ];
+            });
+
+        return view('admin.calendar.index', [
+            'appointments' => $appointments,
+        ]);
     }
 }
 

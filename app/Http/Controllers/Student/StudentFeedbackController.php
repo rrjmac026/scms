@@ -52,16 +52,16 @@ class StudentFeedbackController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-
+        // Validate q1–q12, likes, comments
         $validated = $request->validate(array_merge(
             [
-                'rating'   => 'nullable|integer|min:1|max:5', 
                 'comments' => 'nullable|string|max:1000',
-                'likes'    => 'nullable|string|max:1000'  
+                'likes' => 'nullable|string|max:1000',
+                'rating' => 'nullable|integer|min:1|max:5'
             ],
             array_combine(
                 array_map(fn($i) => "q$i", range(1, 12)),
-                array_fill(0, 10, 'required|integer|min:1|max:5')
+                array_fill(0, 12, 'required|integer|min:1|max:5')
             )
         ));
 
@@ -69,10 +69,16 @@ class StudentFeedbackController extends Controller
         $validated['counselor_id'] = $session->counselor_id;
         $validated['counseling_session_id'] = $session->id;
 
+        // Automatically calculate overall rating if not provided
+        if (empty($validated['rating'])) {
+            $qValues = array_map(fn($i) => $validated["q$i"], range(1, 12));
+            $validated['rating'] = round(array_sum($qValues) / count($qValues));
+        }
+
         Feedback::create($validated);
 
         return redirect()->route('student.counseling-history.index')
-                         ->with('success', 'Feedback submitted successfully.');
+                        ->with('success', 'Feedback submitted successfully.');
     }
 
     public function createFeedbackForSession(CounselingSession $session)
@@ -101,8 +107,13 @@ class StudentFeedbackController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        // FIXED: Added 'likes' validation here!
         $validated = $request->validate(array_merge(
-            ['rating' => 'nullable|integer|min:1|max:5', 'comments' => 'nullable|string|max:1000'],
+            [
+                'rating' => 'nullable|integer|min:1|max:5', 
+                'comments' => 'nullable|string|max:1000',
+                'likes' => 'nullable|string|max:1000'  // This was missing!
+            ],
             array_combine(
                 array_map(fn($i) => "q$i", range(1, 10)), // q1..q10
                 array_fill(0, 10, 'required|integer|min:1|max:5')
@@ -112,6 +123,12 @@ class StudentFeedbackController extends Controller
         $validated['student_id'] = $student->id;
         $validated['counselor_id'] = $session->counselor_id;
         $validated['counseling_session_id'] = $session->id;
+
+        // Calculate rating if not provided
+        if (empty($validated['rating'])) {
+            $qValues = array_map(fn($i) => $validated["q$i"], range(1, 10));
+            $validated['rating'] = round(array_sum($qValues) / count($qValues));
+        }
 
         Feedback::create($validated);
 
