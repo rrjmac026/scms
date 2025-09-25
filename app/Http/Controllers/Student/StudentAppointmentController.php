@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\CounselingCategory;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -29,8 +30,8 @@ class StudentAppointmentController extends Controller
      */
     public function create()
     {
-
-        return view('students.appointments.create');
+        $categories = CounselingCategory::where('status', 'active')->get();
+        return view('students.appointments.create', compact('categories'));
     }
 
     /**
@@ -39,21 +40,23 @@ class StudentAppointmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'preferred_date' => 'required|date|after_or_equal:today',
-            'preferred_time' => 'required|date_format:H:i',
-            'concern'        => 'required|string|max:500',
+            'preferred_date'          => 'required|date|after_or_equal:today',
+            'preferred_time'          => 'required|date_format:H:i',
+            'concern'                 => 'required|string|max:500',
+            'counseling_category_id'  => 'required|exists:counseling_categories,id',
         ]);
 
         $student = auth()->user()->student;
 
         Appointment::create([
-            'student_id'     => $student->id,
-            'counselor_id'   => null, // assigned later by admin
-            'preferred_date' => $validated['preferred_date'],
-            'preferred_time' => $validated['preferred_time'],
-            'concern'        => $validated['concern'],
-            'status'         => 'pending',
-        ]);
+        'student_id'              => $student->id,
+        'counselor_id'            => null, 
+        'preferred_date'          => $validated['preferred_date'],
+        'preferred_time'          => $validated['preferred_time'],
+        'concern'                 => $validated['concern'],
+        'counseling_category_id'  => $validated['counseling_category_id'],
+        'status'                  => 'pending',
+    ]);
 
         return redirect()->route('student.appointments.index')
                          ->with('success', 'Appointment request submitted.');
@@ -70,7 +73,7 @@ class StudentAppointmentController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $appointment->load(['counselor.user', 'student.user', 'counselingSession', 'feedback']);
+        $appointment->load(['counselor.user', 'student.user', 'counselingSession.feedback']);
 
         return view('students.appointments.show', compact('appointment'));
     }

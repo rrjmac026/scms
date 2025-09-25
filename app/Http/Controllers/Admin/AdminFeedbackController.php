@@ -15,7 +15,7 @@ class AdminFeedbackController extends Controller
     {
         $feedbacks = Feedback::with('student', 'counselor', 'appointment')
                              ->latest()
-                             ->paginate(20); // optional pagination
+                             ->paginate(20);
 
         return view('admin.feedbacks.index', compact('feedbacks'));
     }

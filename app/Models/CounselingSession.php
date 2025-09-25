@@ -14,6 +14,7 @@ class CounselingSession extends Model
         'student_id',
         'counselor_id',
         'appointment_id',
+        'category_id',
         'concern',
         'notes',
         'started_at',
@@ -62,7 +63,19 @@ class CounselingSession extends Model
 
     public function feedback()
     {
-        return $this->hasOne(Feedback::class, 'counseling_session_id');
+        return $this->hasOne(Feedback::class, 'counseling_session_id', 'id');
     }
 
+    public function category()
+    {
+        return $this->hasOneThrough(
+            CounselingCategory::class,
+            Appointment::class,
+            'id',                // Foreign key para sa appointments table
+            'id',                // Foreign key para sa categories table
+            'appointment_id',    // Local key para sa sessions table
+            'counseling_category_id' // Local key para sa appointments table
+        );                             //For consistency nimal dungag nasad sa logic waahahahha
+    }
+    
 }

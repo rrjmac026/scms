@@ -12,6 +12,8 @@ class Appointment extends Model
     protected $fillable = [
         'student_id',
         'counselor_id',
+        'counseling_category_id',
+        'counseling_session_id',
         'preferred_date',
         'preferred_time',
         'status',
@@ -54,5 +56,9 @@ class Appointment extends Model
     public function feedback()
     {
         return $this->hasOne(Feedback::class);
+    }
+    
+    public function category() {
+        return $this->belongsTo(CounselingCategory::class, 'counseling_category_id');
     }
 }

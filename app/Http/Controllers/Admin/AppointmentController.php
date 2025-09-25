@@ -15,11 +15,10 @@ class AppointmentController extends Controller
      */
     public function index(Request $request)
     {
-        $appointments = Appointment::with(['student.user', 'counselor.user'])
+        $appointments = Appointment::with(['student.user', 'counselor.user', 'category'])
             ->latest()
             ->paginate(10);
 
-        // Attach available counselors for each pending appointment
         $appointments->getCollection()->transform(function ($appointment) {
             if ($appointment->status === 'pending') {
                 $appointment->availableCounselors = $this->getAvailableCounselors(
@@ -28,7 +27,6 @@ class AppointmentController extends Controller
             } else {
                 $appointment->availableCounselors = collect();
             }
-
             return $appointment;
         });
 
@@ -40,7 +38,7 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        $appointment->load(['student.user', 'counselor.user', 'counselingSession']);
+        $appointment->load(['student.user', 'counselor.user', 'counselingSession', 'category']);
 
         $availableCounselors = $this->getAvailableCounselors(
             $appointment->preferred_date

@@ -19,6 +19,18 @@
                                 class="mt-1 block w-full" required min="{{ date('Y-m-d') }}" />
                             <x-input-error :messages="$errors->get('preferred_date')" class="mt-2" />
                         </div>
+                        <div class="mb-4">
+                            <label for="counseling_category_id" class="block text-sm font-medium text-gray-700">
+                                Counseling Category
+                            </label>
+                            <select name="counseling_category_id" id="counseling_category_id" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                <option value="">-- Select Category --</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
                         <!-- Preferred Time -->
                         <div>

@@ -10,12 +10,14 @@ use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Admin\AdminSessionController;
 use App\Http\Controllers\Admin\AdminOffenseController;
+use App\Http\Controllers\Admin\AdminCounselingCategoryController;
 //Counselor ni siya na Routes
 use App\Http\Controllers\Counselor\CounselorAppointmentController;
 use App\Http\Controllers\Counselor\CounselorFeedbackController;
 use App\Http\Controllers\Counselor\CounselorController;
 use App\Http\Controllers\Counselor\CounselingSessionController;
 use App\Http\Controllers\Counselor\OffenseController;
+use App\Http\Controllers\Counselor\CounselorCounselingCategoryController;
 //Student ni siya na ROutes
 use App\Http\Controllers\Student\StudentFeedbackController;
 use App\Http\Controllers\Student\StudentAppointmentController;
@@ -81,7 +83,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::resource('offenses', AdminOffenseController::class);
     Route::post('offenses/{offense}/resolve', [AdminOffenseController::class, 'resolve'])->name('offenses.resolve');
-    
+
+    Route::resource('counseling-categories', AdminCounselingCategoryController::class);
+    Route::patch('counseling-categories/{counseling_category}/approve', [AdminCounselingCategoryController::class, 'approve'])->name('counseling-categories.approve');
+    Route::patch('counseling-categories/{counseling_category}/reject', [AdminCounselingCategoryController::class, 'reject'])->name('counseling-categories.reject');
+
     Route::get('feedback', [AdminFeedbackController::class, 'index'])
          ->name('feedback.index');
     Route::get('feedback/{feedback}', [AdminFeedbackController::class, 'show'])
@@ -105,6 +111,9 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
     Route::resource('offenses', OffenseController::class);
     Route::patch('offenses/{offense}/resolve', [OffenseController::class, 'resolve'])
         ->name('offenses.resolve');
+
+    Route::resource('counseling-categories', CounselorCounselingCategoryController::class)
+        ->except(['destroy']);
 
     Route::get('feedback', [CounselorFeedbackController::class, 'index'])
          ->name('feedback.index'); 

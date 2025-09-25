@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             StudentSeeder::class,
             CounselorSeeder::class,
+            CounselingCategorySeeder::class,
         ]);
         
     }

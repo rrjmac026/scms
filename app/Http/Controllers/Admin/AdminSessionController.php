@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class AdminSessionController extends Controller
 {
-    // Show all sessions
+    
     public function index()
     {
         $sessions = CounselingSession::with(['student.user', 'counselor.user'])

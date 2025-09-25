@@ -13,10 +13,11 @@ class CounselorAppointmentController extends Controller
     public function index()
     {
         $counselor = auth()->user()->counselor;
-        $appointments = Appointment::with('student.user')
-                            ->where('counselor_id', $counselor->id)
-                            ->orderBy('preferred_date')
-                            ->get();
+
+        $appointments = Appointment::with(['student.user', 'category'])
+            ->where('counselor_id', $counselor->id)
+            ->orderBy('preferred_date')
+            ->get();
 
         return view('counselors.appointments.index', compact('appointments'));
     }
@@ -42,7 +43,7 @@ class CounselorAppointmentController extends Controller
     
     public function show(Appointment $appointment)
     {
-        $appointment->load('student.user');
+        $appointment->load(['student.user', 'category']); // 👈 add category
         return view('counselors.appointments.show', compact('appointment'));
     }
 }
