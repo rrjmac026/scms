@@ -52,14 +52,15 @@ class StudentFeedbackController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Validate the 10 question ratings (1-5) and optional overall rating/comments
+
         $validated = $request->validate(array_merge(
             [
-                'rating'   => 'nullable|integer|min:1|max:5',   // optional overall rating
-                'comments' => 'nullable|string|max:1000',       // optional free-text comments
+                'rating'   => 'nullable|integer|min:1|max:5', 
+                'comments' => 'nullable|string|max:1000',
+                'likes'    => 'nullable|string|max:1000'  
             ],
             array_combine(
-                array_map(fn($i) => "q$i", range(1, 10)),      // q1..q10 for each question
+                array_map(fn($i) => "q$i", range(1, 12)),
                 array_fill(0, 10, 'required|integer|min:1|max:5')
             )
         ));

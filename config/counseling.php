@@ -13,5 +13,6 @@ return [
         'The counselor encouraged me to ask questions and examine alternatives.',
         'The counseling time was used efficiently.',
         'The counselor showed respect for individuality and sensitivity to diversity.',
+        'I was made aware of the confidentiality clause as a freed on the informed'
     ]
 ];

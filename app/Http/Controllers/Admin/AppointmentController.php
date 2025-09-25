@@ -40,7 +40,7 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        $appointment->load(['student.user', 'counselor.user', 'counselingSession', 'feedback']);
+        $appointment->load(['student.user', 'counselor.user', 'counselingSession']);
 
         $availableCounselors = $this->getAvailableCounselors(
             $appointment->preferred_date

@@ -8,16 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('feedback', function (Blueprint $table) {
+        Schema::create('feedbacks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->foreignId('counselor_id')->constrained()->onDelete('cascade');
             $table->foreignId('counseling_session_id')->constrained()->onDelete('cascade');
             $table->tinyInteger('rating')->unsigned()->comment('1–5 overall rating');
             $table->text('comments')->nullable();
+            $table->text('likes')->nullable();
 
-            // 1 to 10 nani na question aron di na mag isa2 og code sa table
-            for ($i = 1; $i <= 10; $i++) {
+            // 1 to 12 questions
+            for ($i = 1; $i <= 12; $i++) {
                 $table->tinyInteger("q$i")->unsigned()->nullable()->comment("Question $i rating");
             }
 
@@ -27,6 +28,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('feedback');
+        Schema::dropIfExists('feedbacks');
     }
 };

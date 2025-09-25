@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Admin\AdminSessionController;
+use App\Http\Controllers\Admin\AdminOffenseController;
 //Counselor ni siya na Routes
 use App\Http\Controllers\Counselor\CounselorAppointmentController;
 use App\Http\Controllers\Counselor\CounselorFeedbackController;
@@ -77,6 +78,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
          ->name('appointments.assign');
 
     Route::resource('counseling-sessions', AdminSessionController::class);
+
+    Route::resource('offenses', AdminOffenseController::class);
+    Route::post('offenses/{offense}/resolve', [AdminOffenseController::class, 'resolve'])->name('offenses.resolve');
     
     Route::get('feedback', [AdminFeedbackController::class, 'index'])
          ->name('feedback.index');

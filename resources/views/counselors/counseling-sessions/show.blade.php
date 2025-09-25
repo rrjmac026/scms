@@ -171,7 +171,7 @@
                                             <i class="fas fa-hourglass-half text-blue-600 mr-2"></i>
                                             @if($counselingSession->duration !== null)
                                                 @if($counselingSession->duration > 0)
-                                                    {{ $counselingSession->duration }} minutes
+                                                    {{ $counselingSession->duration }} minute/s
                                                 @else
                                                     {{ $counselingSession->started_at ? $counselingSession->started_at->diffInSeconds($counselingSession->ended_at) : 0 }} seconds
                                                 @endif

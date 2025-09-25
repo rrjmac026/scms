@@ -122,6 +122,20 @@
                     @endif
                 </x-nav-link>
 
+                <x-nav-link :href="route('admin.offenses.index')" :active="request()->routeIs('admin.offenses.*')"
+                    class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('admin.offenses.*') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                    style="{{ request()->routeIs('admin.offenses.*') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('admin.offenses.*') ? 'bg-white/20' : 'bg-red-50 dark:bg-red-900/20 group-hover:bg-red-100 dark:group-hover:bg-red-900/30' }}">
+                        <i class="fas fa-exclamation-triangle text-lg {{ request()->routeIs('admin.offenses.*') ? 'text-white' : 'text-red-500' }}"></i>
+                    </div>
+                    <span class="flex-1">{{ __('Offenses') }}</span>
+                    @if(request()->routeIs('admin.offenses.*'))
+                        <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
+                    @else
+                        <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>
+                    @endif
+                </x-nav-link>
+
                 <x-nav-link :href="route('admin.counseling-sessions.index')" 
                         :active="request()->routeIs('admin.counseling-sessions.*')"
                         class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('admin.counseling-sessions.*') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
