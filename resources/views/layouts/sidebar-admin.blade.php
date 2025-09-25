@@ -22,7 +22,7 @@
             </div>
             <div class="flex-1 min-w-0">
                 <h1 class="text-xl font-bold text-gray-900 dark:text-white truncate">Admin Panel</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">System Administration</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ auth()->user()->name }}</p>
             </div>
         </div>
     </div>

@@ -85,8 +85,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
          ->name('appointments.assign');
          
 
-    
-
     Route::resource('counseling-sessions', AdminSessionController::class);
 
     Route::resource('offenses', AdminOffenseController::class);
@@ -113,6 +111,8 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
     Route::get('/appointments/{appointment}', [CounselorAppointmentController::class, 'show'])->name('appointments.show');
     Route::patch('/appointments/{appointment}/status', [CounselorAppointmentController::class, 'updateStatus'])
         ->name('appointments.update-status');
+    Route::get('/calendar', [CounselorAppointmentController::class, 'counselorCalendar'])
+            ->name('calendar');
     
     Route::resource('counseling-sessions', CounselingSessionController::class);
 
@@ -129,12 +129,15 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
          ->name('feedback.show');
     });
 
-// 🔵 Student routes
+
+    // 🔵 Student routes
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('dashboard');
     Route::get('/feedback', [StudentController::class, 'feedback'])->name('feedback');
 
     Route::resource('appointments', StudentAppointmentController::class);
+    Route::get('/student/calendar', [StudentAppointmentController::class, 'studentCalendar'])
+        ->name('calendar');
 
     // Listahan nis counseling sessions
     Route::get('/counseling-history', [CounselingHistoryController::class, 'index'])

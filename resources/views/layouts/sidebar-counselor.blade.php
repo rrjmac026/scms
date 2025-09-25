@@ -20,7 +20,7 @@
                 </div>
             <div class="flex-1 min-w-0">
                 <h1 class="text-xl font-bold text-gray-900 dark:text-white truncate">Counselor Portal</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your Counseling Hub</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ auth()->user()->counselor->user->name ?? auth()->user()->name }}</p>
             </div>
         </div>
     </div>
@@ -78,6 +78,33 @@
                 </x-nav-link>
             </div>
         </div>
+
+        <!-- Counselor Calendar Section -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-2 px-3 mb-4">
+                <div class="w-1 h-4 bg-gradient-to-b from-pink-400 to-pink-500 rounded-full" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);"></div>
+                <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {{ __('Calendar') }}
+                </h2>
+            </div>
+
+            <div class="space-y-1">
+                <x-nav-link :href="route('counselor.calendar')" :active="request()->routeIs('counselor.calendar')"
+                    class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('counselor.calendar') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                    style="{{ request()->routeIs('counselor.calendar') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('counselor.calendar') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
+                        <i class="fas fa-calendar-alt text-lg {{ request()->routeIs('counselor.calendar') ? 'text-white' : 'text-pink-500' }}" style="{{ request()->routeIs('counselor.calendar') ? '' : 'color: #FF92C2;' }}"></i>
+                    </div>
+                    <span class="flex-1">{{ __('Calendar') }}</span>
+                    @if(request()->routeIs('counselor.calendar'))
+                        <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
+                    @else
+                        <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>
+                    @endif
+                </x-nav-link>
+            </div>
+        </div>
+
 
         <!-- Offenses Section -->
         <div class="mb-8">

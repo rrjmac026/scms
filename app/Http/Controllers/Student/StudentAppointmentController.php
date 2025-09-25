@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\CounselingCategory;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class StudentAppointmentController extends Controller
 {
@@ -113,6 +114,54 @@ class StudentAppointmentController extends Controller
         return redirect()->route('student.appointments.index')
                         ->with('success', 'Appointment request cancelled.');
     }
+
+    public function studentCalendar()
+    {
+        $student = auth()->user()->student;
+
+        $appointments = Appointment::with(['counselor.user', 'category'])
+            ->where('student_id', $student->id) 
+            ->whereIn('status', ['pending', 'approved', 'completed'])
+            ->get()
+            ->map(function ($appointment) {
+                $counselorName = $appointment->counselor 
+                    ? $appointment->counselor->user->name 
+                    : 'Unassigned';
+                
+                $startDateTime = $appointment->preferred_date;
+                if ($appointment->preferred_time) {
+                    $date = $appointment->preferred_date instanceof \Carbon\Carbon
+                        ? $appointment->preferred_date->format('Y-m-d')
+                        : $appointment->preferred_date;
+                    
+                    $time = substr($appointment->preferred_time, 0, 5);
+                    $startDateTime = $date . 'T' . $time . ':00';
+                }
+                
+                return [
+                    'id'    => $appointment->id,
+                    'title' => 'Session with ' . $counselorName . ' (' . ucfirst($appointment->status) . ')',
+                    'start' => $startDateTime,
+                    'color' => match ($appointment->status) {
+                        'pending'   => '#fbbf24',
+                        'approved'  => '#3b82f6',
+                        'completed' => '#10b981',
+                        default     => '#6b7280',
+                    },
+                    'extendedProps' => [
+                        'counselor'   => $counselorName,
+                        'category'    => $appointment->category->name ?? 'General',
+                        'status'      => $appointment->status,
+                        'description' => Str::limit($appointment->concern ?? '', 50),
+                    ],
+                ];
+            });
+
+        return view('students.calendar.index', [
+            'appointments' => $appointments,
+        ]);
+    }
+
 
 
 }

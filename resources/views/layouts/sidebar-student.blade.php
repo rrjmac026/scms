@@ -20,7 +20,7 @@
                 </div>
             <div class="flex-1 min-w-0">
                 <h1 class="text-xl font-bold text-gray-900 dark:text-white truncate">Student Portal</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your Counseling Hub</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ auth()->user()->student->user->name ?? auth()->user()->name }}</p>
             </div>
         </div>
     </div>
@@ -86,6 +86,23 @@
                     @endif
                 </x-nav-link>
             </div>
+
+            <x-nav-link :href="route('student.calendar')" :active="request()->routeIs('student.calendar')"
+                class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('student.calendar') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                style="{{ request()->routeIs('student.calendar') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                
+                <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('student.calendar') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
+                    <i class="fas fa-calendar text-lg {{ request()->routeIs('student.calendar') ? 'text-white' : 'text-pink-500' }}" style="{{ request()->routeIs('student.calendar') ? '' : 'color: #FF92C2;' }}"></i>
+                </div>
+                
+                <span class="flex-1">{{ __('My Calendar') }}</span>
+                
+                @if(request()->routeIs('student.calendar'))
+                    <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
+                @else
+                    <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>
+                @endif
+            </x-nav-link>
         </div>
 
         <!-- Counseling History Section -->
