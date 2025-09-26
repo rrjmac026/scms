@@ -16,20 +16,31 @@
 
                 <!-- Brand -->
                 <div class="flex items-center gap-4">
-                    <div class="h-12 w-12 bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300" 
-                         style="background: linear-gradient(135deg, #ffffffff 0%, #ffffffff 100%);">
-                        <img src="{{ asset('assets/app_logo.PNG') }}" 
-                            alt="Logo" 
-                            class="h-8 w-8 object-contain" />
-                    </div>
-                    <div>
-                        <span class="text-2xl font-black tracking-tight text-gray-800 dark:text-gray-200">
-                            SCMS
-                        </span>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Student Counseling Management</p>
-                    </div>
+                    <a href="@if(auth()->user()->role === 'admin')
+                            {{ route('admin.dashboard') }}
+                        @elseif(auth()->user()->role === 'counselor')
+                            {{ route('counselor.dashboard') }}
+                        @elseif(auth()->user()->role === 'student')
+                            {{ route('student.dashboard') }}
+                        @endif" 
+                        class="flex items-center gap-4">
+                        <div class="h-12 w-12 bg-gradient-to-br from-pink-400 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        style="background: linear-gradient(135deg, #ffffffff 0%, #ffffffff 100%);">
+                            <img src="{{ asset('assets/app_logo.PNG') }}" 
+                                alt="Logo" 
+                                class="h-8 w-8 object-contain" />
+                        </div>
+                        <div>
+                            <span class="text-2xl font-black tracking-tight text-gray-800 dark:text-gray-200">
+                                SCMS
+                            </span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Student Counseling Management</p>
+                        </div>
+                    </a>
                 </div>
             </div>
+
+                
 
             <!-- Right Side - Profile Menu -->
             <div class="relative" x-data="{ open: false }">

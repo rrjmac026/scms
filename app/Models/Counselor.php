@@ -40,5 +40,10 @@ class Counselor extends Model
     {
         return $this->hasMany(Feedback::class);
     }
+
+    public function counselingCategories()
+    {
+        return $this->hasMany(CounselingCategory::class);
+    }
 }
 
