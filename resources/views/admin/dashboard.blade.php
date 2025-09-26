@@ -13,11 +13,11 @@
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Welcome Banner -->
-            <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg mb-8 p-6 text-white">
+            <div class="rounded-2xl shadow-lg mb-8 p-6 text-white" style="background: linear-gradient(to right, #FF92C2, #FF6BAD);">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-2xl font-bold mb-2">Welcome back, Admin!</h3>
-                        <p class="text-blue-100">Here's what's happening in your counseling center today.</p>
+                        <p class="text-pink-100">Here's what's happening in your counseling center today.</p>
                     </div>
                     <div class="hidden md:block">
                         <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm">
