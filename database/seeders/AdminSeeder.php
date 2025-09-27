@@ -17,25 +17,10 @@ class AdminSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@admin.com'], 
             [
-                'first_name' => 'System',
-                'middle_name' => 'Main',
-                'last_name' => 'Administrator',
+                'first_name' => 'Erven',
+                'middle_name' => 'Capili',
+                'last_name' => 'Granada',
                 'role' => 'admin',
-                'contact_number' => '09123456789',
-                'address' => 'University Campus',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        // Student
-        User::updateOrCreate(
-            ['email' => 'jam@student.com'],
-            [
-                'first_name' => 'Rey',
-                'middle_name' => 'Main',
-                'last_name' => 'Sanchez',
-                'role' => 'student',
                 'contact_number' => '09123456789',
                 'address' => 'University Campus',
                 'password' => Hash::make('password'),

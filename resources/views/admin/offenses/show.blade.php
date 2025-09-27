@@ -79,19 +79,27 @@
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
                             Counselor Information
                         </h3>
-                        <div class="flex items-center mb-4">
-                            <div class="h-12 w-12 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                                <i class="fas fa-user-graduate text-pink-500"></i>
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    {{ $offense->counselor->user->name }}
+
+                        @if($offense->counselor)
+                            <div class="flex items-center mb-4">
+                                <div class="h-12 w-12 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                                    <i class="fas fa-user-tie text-pink-500"></i>
                                 </div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $offense->counselor->employee_number }}
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $offense->counselor->user->name }}
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $offense->counselor->employee_number }}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @else
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                No counselor assigned.
+                            </p>
+                        @endif
+                    </div>
                 </div>
                 
             </div>

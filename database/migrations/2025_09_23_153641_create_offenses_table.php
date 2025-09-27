@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
-            $table->foreignId('counselor_id')->constrained()->onDelete('cascade');
+            $table->foreignId('counselor_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('counseling_session_id')->nullable()->constrained()->onDelete('set null');
             $table->string('offense');
             $table->string('remarks')->nullable();

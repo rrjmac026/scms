@@ -24,7 +24,7 @@ class CounselorCounselingCategoryController extends Controller
             abort(403, 'Unauthorized access to this category.');
         }
 
-        return view('counselor.counseling-categories.show', [
+        return view('counselors.counseling-categories.show', [
             'category' => $counseling_category
         ]);
     }

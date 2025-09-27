@@ -17,11 +17,11 @@ class CounselorSeeder extends Seeder
     {
         // Create a specific counselor
         $counselorUser = User::updateOrCreate(
-            ['email' => 'jane.counselor@university.com'],
+            ['email' => 'angelagrachetteestenzo@university.com'],
             [
-                'first_name' => 'Jane',
-                'middle_name' => 'A.',
-                'last_name' => 'Doe',
+                'first_name' => 'Angela',
+                'middle_name' => 'Cena',
+                'last_name' => 'Estenzo',
                 'role' => 'counselor',
                 'contact_number' => '09123456789',
                 'address' => 'University Campus',

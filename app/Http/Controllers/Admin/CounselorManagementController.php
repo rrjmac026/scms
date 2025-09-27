@@ -64,8 +64,7 @@ class CounselorManagementController extends Controller
             'user_id' => $user->id,
             'employee_number' => $validated['employee_number'],
             'specialization' => $validated['specialization'] ?? null,
-            'availability_schedule' => json_encode($validated['availability_schedule'] ?? []),
-        ]);
+            'availability_schedule' => $validated['availability_schedule'] ?? [],        ]);
 
         return redirect()->route('admin.counselors.index')
                          ->with('success', 'Counselor created successfully.');
@@ -76,7 +75,6 @@ class CounselorManagementController extends Controller
      */
     public function edit(Counselor $counselor)
     {
-        $counselor->availability_schedule = json_decode($counselor->availability_schedule, true) ?? [];
         return view('admin.counselors.edit', compact('counselor'));
     }
 
@@ -117,8 +115,7 @@ class CounselorManagementController extends Controller
         $counselor->update([
             'employee_number' => $validated['employee_number'],
             'specialization' => $validated['specialization'] ?? null,
-            'availability_schedule' => json_encode($validated['availability_schedule'] ?? []),
-        ]);
+            'availability_schedule' => $validated['availability_schedule'] ?? [],        ]);
 
         return redirect()->route('admin.counselors.index')
                          ->with('success', 'Counselor updated successfully.');

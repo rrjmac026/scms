@@ -49,17 +49,12 @@
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Availability</dt>
                                     <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                    @if(is_array($counselor->availability_schedule))
-                                        @foreach($counselor->availability_schedule as $day => $times)
-                                            <li>
-                                                <strong>{{ ucfirst($day) }}:</strong>
-                                                <ul>
-                                                    @foreach($times as $time)
-                                                        <li>{{ $time }}</li>
-                                                    @endforeach
-                                                </ul>
-                                            </li>
-                                        @endforeach
+                                    @if(is_array($counselor->availability_schedule) && count($counselor->availability_schedule) > 0)
+                                        <ul class="list-disc list-inside">
+                                            @foreach($counselor->availability_schedule as $day)
+                                                <li>{{ ucfirst($day) }}</li>
+                                            @endforeach
+                                        </ul>
                                     @else
                                         <p>No schedule available</p>
                                     @endif
@@ -90,16 +85,35 @@
                             <div class="space-y-4">
                                 @forelse($counselor->counselingSessions ? $counselor->counselingSessions->take(5) : collect() as $session)
                                     <div class="border-l-4 border-red-500 pl-4">
-                                        <div class="text-sm text-gray-600 dark:text-gray-400">
-                                            {{ $session->date->format('M d, Y') }}
+                                        <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                                            <div>
+                                                {{ $session->started_at 
+                                                    ? $session->started_at->format('M d, Y') 
+                                                    : ($session->created_at->format('M d, Y') ?? 'N/A') }}
+                                            </div>
+
+                                            {{-- Status Badge --}}
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                                @if($session->status === 'completed')
+                                                    bg-green-100 text-green-800
+                                                @elseif($session->status === 'ongoing')
+                                                    bg-blue-100 text-blue-800
+                                                @else
+                                                    bg-yellow-100 text-yellow-800
+                                                @endif">
+                                                {{ ucfirst($session->status ?? 'pending') }}
+                                            </span>
                                         </div>
-                                        <div class="text-sm text-gray-900 dark:text-gray-100">
-                                            {{ Str::limit($session->notes, 100) }}
+
+                                        {{-- Session Notes --}}
+                                        <div class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                                            {{ Str::limit($session->notes ?? 'No notes available', 100) }}
                                         </div>
                                     </div>
                                 @empty
                                     <p class="text-gray-500 dark:text-gray-400">No sessions recorded yet.</p>
                                 @endforelse
+
                             </div>
                         </div>
                     </div>

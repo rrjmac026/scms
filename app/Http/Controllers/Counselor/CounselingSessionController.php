@@ -78,11 +78,11 @@ class CounselingSessionController extends Controller
             
             // Calculate duration from started_at if it exists
             if ($counselingSession->started_at) {
-                $data['duration'] = $counselingSession->started_at->diffInMinutes(now());
+                $data['duration'] = $counselingSession->started_at->diffInSeconds(now()); // store seconds
             } else {
-                // Fallback if somehow started_at is missing
                 $data['duration'] = 0;
             }
+
         }
         
         elseif ($data['status'] === 'pending') {

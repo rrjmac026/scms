@@ -16,11 +16,11 @@ class StudentSeeder extends Seeder
     {
         // Create a user for the student
         $studentUser = User::updateOrCreate(
-            ['email' => 'jam@student.com'],
+            ['email' => 'seanrodelserrera@student.com'],
             [
-                'first_name' => 'Rey',
+                'first_name' => 'Sean Rodel',
                 'middle_name' => 'Main',
-                'last_name' => 'Sanchez',
+                'last_name' => 'Serrera',
                 'role' => 'student',
                 'contact_number' => '09123456789',
                 'address' => 'University Campus',

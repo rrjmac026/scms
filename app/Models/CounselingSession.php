@@ -41,16 +41,23 @@ class CounselingSession extends Model
 
     public function getFormattedDurationAttribute()
     {
+        // If duration is stored as total seconds (recommended)
         if ($this->duration) {
-            $hours = floor($this->duration / 60);
-            $minutes = $this->duration % 60;
+            $hours = floor($this->duration / 3600);
+            $minutes = floor(($this->duration % 3600) / 60);
+            $seconds = $this->duration % 60;
 
-            return sprintf('%02dh %02dm', $hours, $minutes);
+            return sprintf('%02dh %02dm %02ds', $hours, $minutes, $seconds);
         }
 
+        // If started and ended timestamps exist, calculate duration dynamically
         if ($this->started_at && $this->ended_at) {
             $diffInSeconds = $this->ended_at->diffInSeconds($this->started_at);
-            return gmdate('H:i:s', $diffInSeconds);
+            $hours = floor($diffInSeconds / 3600);
+            $minutes = floor(($diffInSeconds % 3600) / 60);
+            $seconds = $diffInSeconds % 60;
+
+            return sprintf('%02dh %02dm %02ds', $hours, $minutes, $seconds);
         }
 
         return 'N/A';

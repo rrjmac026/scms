@@ -119,7 +119,9 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
     Route::resource('offenses', OffenseController::class);
     Route::patch('offenses/{offense}/resolve', [OffenseController::class, 'resolve'])
         ->name('offenses.resolve');
-
+        
+    Route::get('counseling-categories/{counseling_category}', [CounselingCategoryController::class, 'show'])
+        ->name('counseling-categories.show');
     Route::resource('counseling-categories', CounselorCounselingCategoryController::class)
         ->except(['destroy']);
 
