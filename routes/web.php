@@ -27,6 +27,7 @@ use App\Http\Controllers\Student\CounselingHistoryController;
 use Illuminate\Support\Facades\Route;
 //Auth
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,9 +46,18 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])
     ->middleware(['auth', 'verified'])
     ->name('profile.update-photo');
+    //Google OAuth ni siya
+    Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('google.connect');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
+    Route::post('/auth/google/disconnect', [GoogleAuthController::class, 'disconnect'])
+        ->name('google.disconnect');
+
+    Route::get('/auth/google/status', [GoogleAuthController::class, 'status'])
+        ->name('google.status');
+        
     
     //2FA shit
-Route::post('/profile/2fa/enable', [ProfileController::class, 'enableTwoFactor'])->name('profile.enableTwoFactor');
+    Route::post('/profile/2fa/enable', [ProfileController::class, 'enableTwoFactor'])->name('profile.enableTwoFactor');
     Route::post('/profile/2fa/verify', [ProfileController::class, 'verifyTwoFactor'])->name('profile.verifyTwoFactor');
     Route::delete('/profile/2fa/disable', [ProfileController::class, 'disableTwoFactor'])->name('profile.disableTwoFactor');
 });
@@ -83,6 +93,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
     Route::post('appointments/{appointment}/assign', [AppointmentController::class, 'assignCounselor'])
          ->name('appointments.assign');
+    Route::get('appointments/{appointment}/debug-calendar', [AppointmentController::class, 'debugCalendarEvent'])
+    ->name('appointments.debug-calendar');
          
 
     Route::resource('counseling-sessions', AdminSessionController::class);
@@ -158,5 +170,15 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
          
 
     });
+
+Route::get('/debug/google-config', function() {
+    return response()->json([
+        'client_id_exists' => !empty(config('services.google.client_id')),
+        'client_secret_exists' => !empty(config('services.google.client_secret')),
+        'redirect_uri' => config('services.google.redirect'),
+        'user_logged_in' => auth()->check(),
+        'user_id' => auth()->id(),
+    ]);
+});
 
 require __DIR__.'/auth.php';

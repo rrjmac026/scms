@@ -1,14 +1,39 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-2xl shadow-lg" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);">
-                <i class="fas fa-calendar-check text-white text-xl"></i>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center justify-center w-12 h-12 rounded-2xl shadow-lg" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);">
+                    <i class="fas fa-calendar-check text-white text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-2xl text-gray-900 dark:text-white">
+                        {{ __('My Appointments Calendar') }}
+                    </h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">View your appointment schedules and availability</p>
+                </div>
             </div>
-            <div>
-                <h2 class="font-bold text-2xl text-gray-900 dark:text-white">
-                    {{ __('Appointments Calendar') }}
-                </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Manage and view all appointment schedules</p>
+
+            <div class="flex items-center space-x-3">
+                @if (!auth()->user()->google_token)
+                    <div class="flex items-center space-x-2 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
+                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                        <span class="text-sm text-yellow-700 dark:text-yellow-300">Calendar Not Connected</span>
+                    </div>
+                    <a href="{{ route('google.connect') }}"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">
+                        <i class="fab fa-google mr-2"></i> Connect Google Calendar
+                    </a>
+                @else
+                    <div class="flex items-center space-x-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
+                        <i class="fas fa-check-circle text-green-600"></i>
+                        <span class="text-sm text-green-700 dark:text-green-300 font-medium">Google Calendar Connected</span>
+                    </div>
+                @endif
+                
+                <a href="{{ route('counselor.appointments.index') }}" 
+                   class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors">
+                    <i class="fas fa-list mr-2"></i>View All Appointments
+                </a>
             </div>
         </div>
     </x-slot>
@@ -17,6 +42,31 @@
     
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {{-- Google Calendar Connection Warning --}}
+            @if (!auth()->user()->google_token)
+                <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-xl mb-6" role="alert">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <div>
+                            <span class="font-medium">Google Calendar not connected.</span> 
+                            Your appointments won't sync to your personal calendar. 
+                            <a href="{{ route('google.connect') }}" class="underline hover:no-underline ml-1">Connect now</a>
+                        </div>
+                    </div>
+                </div>
+            @elseif(auth()->user()->google_token_expires_at && auth()->user()->google_token_expires_at->isPast())
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6" role="alert">
+                    <div class="flex items-center">
+                        <i class="fas fa-times-circle mr-2"></i>
+                        <div>
+                            <span class="font-medium">Google Calendar connection expired.</span> 
+                            Please reconnect to continue syncing appointments. 
+                            <a href="{{ route('google.connect') }}" class="underline hover:no-underline ml-1">Reconnect now</a>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Calendar Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="relative overflow-hidden rounded-2xl p-6 shadow-lg" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);">
@@ -85,7 +135,7 @@
                 <div class="mb-4 flex items-center justify-between">
                     <div class="flex items-center space-x-2">
                         <div class="w-1 h-6 rounded-full" style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);"></div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Schedule Overview</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">My Schedule</h3>
                     </div>
                     <div class="flex items-center space-x-4">
                         <div class="flex items-center space-x-2 text-sm">
@@ -100,6 +150,12 @@
                             <div class="w-3 h-3 rounded-full bg-green-500"></div>
                             <span class="text-gray-600 dark:text-gray-400">Completed</span>
                         </div>
+                        @if(!auth()->user()->google_token)
+                            <div class="flex items-center space-x-2 text-sm">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <span class="text-gray-600 dark:text-gray-400">No Sync</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 <div id="calendar" class="rounded-xl overflow-hidden"></div>
@@ -151,9 +207,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
+            var userHasGoogleCalendar = @json(auth()->user()->google_token ? true : false);
 
             var appointments = @json($appointments);
             console.log('Appointments data:', appointments);
+            console.log('User has Google Calendar:', userHasGoogleCalendar);
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
@@ -180,6 +238,33 @@
                     info.el.style.cursor = 'pointer';
                     info.el.style.transition = 'all 0.2s ease';
 
+                    // Add visual indicator if Google Calendar is not connected
+                    if (!userHasGoogleCalendar) {
+                        info.el.style.position = 'relative';
+                        
+                        // Add a small icon to indicate no sync
+                        const iconEl = document.createElement('span');
+                        iconEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i>';
+                        iconEl.style.position = 'absolute';
+                        iconEl.style.top = '2px';
+                        iconEl.style.right = '2px';
+                        iconEl.style.fontSize = '8px';
+                        iconEl.style.opacity = '0.8';
+                        iconEl.title = 'Not synced to Google Calendar';
+                        info.el.appendChild(iconEl);
+                    } else if (info.event.extendedProps.google_event_id) {
+                        // Add checkmark for synced events
+                        const iconEl = document.createElement('span');
+                        iconEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+                        iconEl.style.position = 'absolute';
+                        iconEl.style.top = '2px';
+                        iconEl.style.right = '2px';
+                        iconEl.style.fontSize = '8px';
+                        iconEl.style.opacity = '0.8';
+                        iconEl.title = 'Synced to Google Calendar';
+                        info.el.appendChild(iconEl);
+                    }
+
                     info.el.addEventListener('mouseenter', function() {
                         this.style.transform = 'scale(1.05)';
                         this.style.zIndex = '10';
@@ -203,6 +288,7 @@
         function showAppointmentDetails(event) {
             const props = event.extendedProps;
             const modalContent = document.getElementById('modalContent');
+            const userHasGoogleCalendar = @json(auth()->user()->google_token ? true : false);
 
             modalContent.innerHTML = `
                 <div class="grid grid-cols-1 gap-4">
@@ -239,6 +325,38 @@
                         </div>
                     </div>
 
+                    ${!userHasGoogleCalendar ? `
+                        <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                                <span class="text-yellow-800 dark:text-yellow-200 font-medium">Not Synced to Google Calendar</span>
+                            </div>
+                            <p class="text-sm text-yellow-600 dark:text-yellow-400 mt-1">
+                                Connect your Google Calendar to automatically sync appointments.
+                            </p>
+                        </div>
+                    ` : props.google_event_id ? `
+                        <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar-check text-green-600 mr-2"></i>
+                                <span class="text-green-800 dark:text-green-200 font-medium">Synced to Google Calendar</span>
+                            </div>
+                            <p class="text-sm text-green-600 dark:text-green-400 mt-1">
+                                This appointment appears in your Google Calendar.
+                            </p>
+                        </div>
+                    ` : `
+                        <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                            <div class="flex items-center">
+                                <i class="fas fa-times-circle text-red-600 mr-2"></i>
+                                <span class="text-red-800 dark:text-red-200 font-medium">Calendar Sync Failed</span>
+                            </div>
+                            <p class="text-sm text-red-600 dark:text-red-400 mt-1">
+                                This appointment couldn't be synced to your Google Calendar.
+                            </p>
+                        </div>
+                    `}
+
                     ${props.description ? `
                         <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Description</p>
@@ -248,7 +366,7 @@
                 </div>
             `;
 
-            // Set up view details button for counselor
+            // Set up view details button
             document.getElementById('viewDetailsBtn').onclick = function() {
                 window.location.href = `/counselor/appointments/${event.id}`;
             };
@@ -285,7 +403,6 @@
         });
         </script>
 
-
     <!-- Custom Calendar Styles -->
     <style>
         .fc-theme-standard .fc-scrollgrid {
@@ -315,6 +432,7 @@
             font-weight: 500 !important;
             padding: 2px 6px !important;
             margin: 1px !important;
+            position: relative !important;
         }
         
         .fc-button-primary {

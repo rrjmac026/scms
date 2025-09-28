@@ -55,8 +55,8 @@
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Appointments</p>
-                                <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ auth()->user()->counselor->appointments()->count() ?? 0 }}
+                                <p class="text-2xl font-semibold">
+                                    {{ optional(auth()->user()->counselor)->appointments()->count() ?? 0 }}
                                 </p>
                             </div>
                         </div>

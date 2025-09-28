@@ -31,6 +31,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'contact_number',
         'address',
         'profile_photo_path',
+        'google_id',
+        'google_token',
+        'google_token_expires_at',
     ];
 
     protected $hidden = [
@@ -42,6 +45,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'google_token' => 'array',
+        'google_token_expires_at' => 'datetime',
     ];
 
     protected $appends = [
@@ -140,6 +145,8 @@ class User extends Authenticatable implements MustVerifyEmail
             $code
         );
     }
+
+    
 
     /**
      * Verify a recovery code (optional)

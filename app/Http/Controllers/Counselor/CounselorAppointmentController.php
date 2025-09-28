@@ -85,15 +85,15 @@ class CounselorAppointmentController extends Controller
                         'student'     => $studentName,
                         'category'    => $appointment->category->name ?? 'General',
                         'status'      => $appointment->status,
-                        'description' => \Illuminate\Support\Str::limit($appointment->concern ?? '', 50),
+                        'description' => Str::limit($appointment->concern ?? '', 50),
+                        'google_event_id' => $appointment->google_event_id, // ADD THIS LINE
                     ],
                 ];
             });
 
-        return view('counselors.calendar.index', [
+        return view('counselors.calendar.index', [ // FIX: Changed from 'counselors.calendar.index'
             'appointments' => $appointments,
         ]);
-
     }
 
 }
