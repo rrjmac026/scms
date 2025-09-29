@@ -21,8 +21,7 @@ class Appointment extends Model
     ];
 
     protected $casts = [
-        'preferred_date' => 'date',
-        'preferred_time' => 'string',
+        'preferred_date' => 'date:Y-m-d'
     ];
 
     public function getFormattedTimeAttribute()

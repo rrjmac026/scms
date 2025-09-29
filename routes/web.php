@@ -87,9 +87,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('students', StudentManagementController::class);
     Route::resource('counselors', CounselorManagementController::class);
 
+    Route::resource('appointments', AppointmentController::class);
     Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('appointments/calendar', [AppointmentController::class, 'calendar'])
         ->name('appointments.calendar');
+        Route::get('/appointments/{appointment}/debug-timezone', [AppointmentController::class, 'debugTimezone'])
+    ->name('admin.appointments.debug-timezone');
     Route::get('appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
     Route::post('appointments/{appointment}/assign', [AppointmentController::class, 'assignCounselor'])
          ->name('appointments.assign');

@@ -4,17 +4,23 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Appointment Management') }}
             </h2>
-            <div class="flex items-center gap-3">
-                <div class="relative">
-                    <div class="h-10 w-10 rounded-xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                        <i class="fas fa-calendar-alt text-pink-500"></i>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="h-10 w-10 rounded-xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-pink-500"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
                     </div>
-                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Appointments</p>
+                        <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $appointments->total() }}</p>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Appointments</p>
-                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $appointments->total() }}</p>
-                </div>
+                <a href="{{ route('admin.appointments.create') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-400 to-pink-500 text-white rounded-xl hover:from-pink-500 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg">
+                    <i class="fas fa-plus mr-2"></i>{{ __('New Appointment') }}
+                </a>
             </div>
         </div>
     </x-slot>
