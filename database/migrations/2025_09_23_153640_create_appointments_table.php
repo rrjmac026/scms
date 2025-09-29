@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('counseling_category_id')
                 ->constrained('counseling_categories')
                 ->onDelete('cascade');
-             $table->dateTime('preferred_date');
+            $table->date('preferred_date');
             $table->time('preferred_time');
             $table->enum('status', ['pending', 'approved', 'declined', 'completed', 'rejected'])->default('pending');
             $table->text('concern')->nullable();

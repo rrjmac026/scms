@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Admin\AdminSessionController;
 use App\Http\Controllers\Admin\AdminOffenseController;
 use App\Http\Controllers\Admin\AdminCounselingCategoryController;
+use App\Http\Controllers\Admin\ReportController;
 //Counselor ni siya na Routes
 use App\Http\Controllers\Counselor\CounselorAppointmentController;
 use App\Http\Controllers\Counselor\CounselorFeedbackController;
@@ -87,17 +88,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('students', StudentManagementController::class);
     Route::resource('counselors', CounselorManagementController::class);
 
-    Route::resource('appointments', AppointmentController::class);
+    
     Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('appointments/calendar', [AppointmentController::class, 'calendar'])
         ->name('appointments.calendar');
-        Route::get('/appointments/{appointment}/debug-timezone', [AppointmentController::class, 'debugTimezone'])
-    ->name('admin.appointments.debug-timezone');
+    Route::resource('appointments', AppointmentController::class);
+    Route::get('/appointments/{appointment}/debug-timezone', [AppointmentController::class, 'debugTimezone'])
+        ->name('admin.appointments.debug-timezone');
     Route::get('appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
     Route::post('appointments/{appointment}/assign', [AppointmentController::class, 'assignCounselor'])
          ->name('appointments.assign');
-    Route::get('appointments/{appointment}/debug-calendar', [AppointmentController::class, 'debugCalendarEvent'])
-    ->name('appointments.debug-calendar');
+    
+    // Route::get('appointments/{appointment}/debug-calendar', [AppointmentController::class, 'debugCalendarEvent'])
+    // ->name('appointments.debug-calendar');
          
 
     Route::resource('counseling-sessions', AdminSessionController::class);
@@ -114,6 +117,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('feedback/{feedback}', [AdminFeedbackController::class, 'show'])
          ->name('feedback.show'); 
 
+    // Reports Routes
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/generate', [ReportController::class, 'generateReport'])->name('generate'); 
+        Route::get('/export/pdf', [ReportController::class, 'exportPDF'])->name('export.pdf');
+        Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/analytics', [ReportController::class, 'analytics'])->name('analytics');
+    });
 });
 
 // 🟡 Counselor routes
@@ -135,10 +146,11 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
     Route::patch('offenses/{offense}/resolve', [OffenseController::class, 'resolve'])
         ->name('offenses.resolve');
         
-    Route::get('counseling-categories/{counseling_category}', [CounselingCategoryController::class, 'show'])
-        ->name('counseling-categories.show');
-    Route::resource('counseling-categories', CounselorCounselingCategoryController::class)
-        ->except(['destroy']);
+    Route::resource('counseling-categories', CounselorCounselingCategoryController::class);
+    // Route::get('counseling-categories/{counseling_category}', [CounselingCategoryController::class, 'show'])
+    //     ->name('counseling-categories.show');
+    // Route::resource('counseling-categories', CounselorCounselingCategoryController::class)
+    //     ->except(['destroy']);
 
     Route::get('feedback', [CounselorFeedbackController::class, 'index'])
          ->name('feedback.index'); 
@@ -185,3 +197,4 @@ Route::get('/debug/google-config', function() {
 });
 
 require __DIR__.'/auth.php';
+

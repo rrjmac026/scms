@@ -47,7 +47,7 @@ class CounselorCounselingCategoryController extends Controller
 
         CounselingCategory::create($validated);
 
-        return redirect()->route('counselors.counseling-categories.index')
+        return redirect()->route('counselor.counseling-categories.index')
             ->with('success', 'Category submitted for approval.');
     }
 

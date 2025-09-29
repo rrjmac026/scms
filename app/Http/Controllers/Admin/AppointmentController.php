@@ -264,17 +264,18 @@ class AppointmentController extends Controller
             Log::info("Start DateTime (RFC3339): {$startDateTime->toRfc3339String()}");
             Log::info("End DateTime (Manila): {$endDateTime->toDateTimeString()}");
 
-            // Create event with correct timezone handling
+            // Create event as all-day event (no time displayed)
+            // Format time as 12-hour format
+            $formattedTime = \Carbon\Carbon::createFromFormat('H:i', $timeString)->format('g:i A');
+            
             $event = new Google_Service_Calendar_Event([
-                'summary' => 'Counseling Session - ' . $appointment->student->user->name,
+                'summary' => 'Counseling Session - ' . $appointment->student->user->name . ' at ' . $formattedTime,
                 'description' => $this->formatEventDescription($appointment),
                 'start' => [
-                    'dateTime' => $startDateTime->toRfc3339String(),
-                    'timeZone' => 'Asia/Manila',
+                    'date' => $dateString, // Use 'date' instead of 'dateTime' for all-day events
                 ],
                 'end' => [
-                    'dateTime' => $endDateTime->toRfc3339String(),
-                    'timeZone' => 'Asia/Manila',
+                    'date' => Carbon::parse($dateString)->addDay()->format('Y-m-d'), // Next day for all-day event
                 ],
                 'attendees' => [
                     ['email' => $appointment->student->user->email, 'displayName' => $appointment->student->user->name],
@@ -320,6 +321,12 @@ class AppointmentController extends Controller
     protected function formatEventDescription(Appointment $appointment)
     {
         $description = "Counseling Session Details:\n\n";
+        
+        // Add the appointment time prominently since it's an all-day event
+        $timeString = substr($appointment->getOriginal('preferred_time'), 0, 5);
+        $formattedTime = \Carbon\Carbon::createFromFormat('H:i', $timeString)->format('h:i A');
+        $description .= "⏰ Scheduled Time: " . $formattedTime . "\n\n";
+        
         $description .= "Student: " . $appointment->student->user->name . "\n";
         $description .= "Email: " . $appointment->student->user->email . "\n";
         
