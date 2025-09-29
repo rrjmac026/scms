@@ -56,7 +56,17 @@
                             <span class="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-pink-600 transition-colors duration-300">
                                 {{ Auth::user()->first_name }}
                             </span>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                @if(auth()->user()->role === 'admin')
+                                        System Administrator
+                                    @elseif(auth()->user()->role === 'counselor')
+                                        Counselor
+                                    @elseif(auth()->user()->role === 'student')
+                                        Student
+                                    @else
+                                        User
+                                    @endif
+                            </p>
                         </div>
                         <i class="fas fa-chevron-down text-sm opacity-75 group-hover:text-pink-500 transform group-hover:rotate-180 transition-all duration-300" style="color: #FF92C2;"></i>
                     </div>
@@ -84,7 +94,17 @@
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</p>
-                                <p class="text-xs text-pink-500">System Administrator</p>
+                                <p class="text-xs text-pink-500">
+                                    @if(auth()->user()->role === 'admin')
+                                        System Administrator
+                                    @elseif(auth()->user()->role === 'counselor')
+                                        Counselor
+                                    @elseif(auth()->user()->role === 'student')
+                                        Student
+                                    @else
+                                        User
+                                    @endif
+                                </p>
                             </div>
                         </div>
                     </div>

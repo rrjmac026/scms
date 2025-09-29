@@ -63,70 +63,50 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Activity & Stats -->
-                <div class="md:col-span-2 space-y-6">
-                    <!-- Quick Stats -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-xl p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                                    <i class="fas fa-calendar text-blue-600 dark:text-blue-400"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Sessions</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">25</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-xl p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
-                                    <i class="fas fa-check text-green-600 dark:text-green-400"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">18</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-xl p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
-                                    <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">7</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
+                <!-- Role-Specific Information -->
                     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-xl">
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Activity</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                                {{ ucfirst($user->role) }} Information
+                            </h3>
                         </div>
-                        <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach(range(1, 5) as $index)
-                                <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <div class="flex items-center">
-                                        <div class="p-3 rounded-full bg-pink-100 dark:bg-pink-900/30">
-                                            <i class="fas fa-user-edit text-pink-600 dark:text-pink-400"></i>
-                                        </div>
-                                        <div class="ml-4">
-                                            <p class="text-sm font-medium text-gray-900 dark:text-white">Profile updated</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ now()->subDays($index)->diffForHumans() }}</p>
-                                        </div>
+
+                        <div class="p-6 space-y-4">
+                            @if($user->role === 'counselor' && $user->counselor)
+                                <dl class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <div class="py-3 flex justify-between">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Employee Number</dt>
+                                        <dd class="text-sm text-gray-900 dark:text-white">{{ $user->counselor->employee_number }}</dd>
                                     </div>
-                                </div>
-                            @endforeach
+                                    <div class="py-3 flex justify-between">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Specialization</dt>
+                                        <dd class="text-sm text-gray-900 dark:text-white">{{ $user->counselor->specialization ?? 'N/A' }}</dd>
+                                    </div>
+                                    <div class="py-3 flex justify-between">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</dt>
+                                        <dd class="text-sm text-gray-900 dark:text-white">{{ ucfirst($user->counselor->gender ?? 'N/A') }}</dd>
+                                    </div>
+                                </dl>
+                            @elseif($user->role === 'student' && $user->student)
+                                <dl class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <div class="py-3 flex justify-between">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Student Number</dt>
+                                        <dd class="text-sm text-gray-900 dark:text-white">{{ $user->student->student_number }}</dd>
+                                    </div>
+                                    <div class="py-3 flex justify-between">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Course</dt>
+                                        <dd class="text-sm text-gray-900 dark:text-white">{{ $user->student->course ?? 'N/A' }}</dd>
+                                    </div>
+                                    <div class="py-3 flex justify-between">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Year Level</dt>
+                                        <dd class="text-sm text-gray-900 dark:text-white">{{ $user->student->year_level ?? 'N/A' }}</dd>
+                                    </div>
+                                </dl>
+                            @else
+                                <p class="text-sm text-gray-500 dark:text-gray-400">No additional information available.</p>
+                            @endif
                         </div>
                     </div>
-                </div>
             </div>
         </div>
     </div>

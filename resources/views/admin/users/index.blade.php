@@ -87,21 +87,34 @@
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                             <div class="flex items-center gap-3">
+                                                <!-- View Button -->
+                                                <a href="{{ route('admin.users.show', $user) }}" 
+                                                class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                                                title="View User">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+
+                                                <!-- Edit Button -->
                                                 <a href="{{ route('admin.users.edit', $user) }}" 
-                                                   class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
+                                                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                                                title="Edit User">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+
+                                                <!-- Delete Button -->
                                                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                                                            onclick="return confirm('Are you sure you want to delete this user?')">
+                                                    <button type="submit" 
+                                                            class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                                                            onclick="return confirm('Are you sure you want to delete this user?')"
+                                                            title="Delete User">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
-
                                             </div>
                                         </td>
+
                                     </tr>
                                 @endforeach
                             </tbody>

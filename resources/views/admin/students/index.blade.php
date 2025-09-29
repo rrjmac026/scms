@@ -1,3 +1,4 @@
+<!-- INDEX BLADE (resources/views/admin/students/index.blade.php) -->
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -15,18 +16,24 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Search & Filter -->
             <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-                <form class="flex gap-4">
-                    <div class="flex-1">
+                <form class="flex flex-wrap gap-4">
+                    <div class="flex-1 min-w-[200px]">
                         <input type="text" name="search" 
-                               class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+                               class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                                placeholder="Search by name or student number...">
                     </div>
-                    <select name="year_level" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                        <option value="">All Year Levels</option>
-                        <option value="1">First Year</option>
-                        <option value="2">Second Year</option>
-                        <option value="3">Third Year</option>
-                        <option value="4">Fourth Year</option>
+                    <select name="grade_level" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                        <option value="">All Grade Levels</option>
+                        <option value="Grade 11">Grade 11</option>
+                        <option value="Grade 12">Grade 12</option>
+                    </select>
+                    <select name="strand" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                        <option value="">All Strands</option>
+                        <option value="STEM">STEM</option>
+                        <option value="ABM">ABM</option>
+                        <option value="HUMSS">HUMSS</option>
+                        <option value="GAS">GAS</option>
+                        <option value="TVL">TVL</option>
                     </select>
                     <x-primary-button type="submit">
                         <i class="fas fa-search mr-2"></i>Search
@@ -48,10 +55,10 @@
                                         Student Number
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Course
+                                        Strand
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Year Level
+                                        Grade Level
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Actions
@@ -84,10 +91,19 @@
                                             {{ $student->student_number }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $student->course }}
+                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                @if($student->strand === 'STEM') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                                @elseif($student->strand === 'ABM') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                                @elseif($student->strand === 'HUMSS') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                                @elseif($student->strand === 'GAS') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                                @elseif($student->strand === 'TVL') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                                @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300
+                                                @endif">
+                                                {{ $student->strand ?? 'N/A' }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $student->year_level }}
+                                            {{ $student->grade_level ?? 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center gap-3">

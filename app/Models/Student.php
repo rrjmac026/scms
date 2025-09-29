@@ -12,9 +12,30 @@ class Student extends Model
     protected $fillable = [
         'user_id',
         'student_number',
-        'course',
-        'year_level',
+        'lrn',
+        'strand',
+        'grade_level',
         'special_needs',
+
+        // Personal Info
+        'birthdate',
+        'gender',
+        'address',
+        'contact_number',
+        'civil_status',
+        'nationality',
+        'religion',
+
+        // Parent/Guardian Info
+        'father_name',
+        'father_contact',
+        'father_occupation',
+        'mother_name',
+        'mother_contact',
+        'mother_occupation',
+        'guardian_name',
+        'guardian_contact',
+        'guardian_relationship',
     ];
 
     public function user()

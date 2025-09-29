@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\CounselingSession;
 
 class Counselor extends Model
 {
@@ -14,13 +13,20 @@ class Counselor extends Model
         'user_id',
         'employee_number',
         'specialization',
+        'gender',
+        'birth_date',
+        'bio',
         'availability_schedule',
     ];
 
     protected $casts = [
         'availability_schedule' => 'array',
+        'birth_date' => 'date',
     ];
 
+    /**
+     * Relationships
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -46,4 +52,3 @@ class Counselor extends Model
         return $this->hasMany(CounselingCategory::class);
     }
 }
-

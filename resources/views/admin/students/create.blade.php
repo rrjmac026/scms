@@ -11,14 +11,13 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <form action="{{ route('admin.students.store') }}" method="POST" class="space-y-6">
+                    <form action="{{ route('admin.students.store') }}" method="POST" class="space-y-8">
                         @csrf
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- User Information -->
-                            <div class="space-y-6">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Personal Information</h3>
-                                
+                        <!-- User Account Information -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">User Account Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- First Name -->
                                 <div>
                                     <x-input-label for="first_name" :value="__('First Name')" />
@@ -65,11 +64,12 @@
                                         class="mt-1 block w-full" required />
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Student Information -->
-                            <div class="space-y-6">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Academic Information</h3>
-                                
+                        <!-- Academic Information -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Academic Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Student Number -->
                                 <div>
                                     <x-input-label for="student_number" :value="__('Student Number')" />
@@ -78,40 +78,216 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('student_number')" />
                                 </div>
 
-                                <!-- Course -->
+                                <!-- LRN -->
                                 <div>
-                                    <x-input-label for="course" :value="__('Course')" />
-                                    <x-text-input id="course" name="course" type="text" 
-                                        class="mt-1 block w-full" :value="old('course')" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('course')" />
+                                    <x-input-label for="lrn" :value="__('LRN (Learner Reference Number)')" />
+                                    <x-text-input id="lrn" name="lrn" type="text" 
+                                        class="mt-1 block w-full" :value="old('lrn')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('lrn')" />
                                 </div>
 
-                                <!-- Year Level -->
+                                <!-- Strand -->
                                 <div>
-                                    <x-input-label for="year_level" :value="__('Year Level')" />
-                                    <select id="year_level" name="year_level" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                                        <option value="">Select Year Level</option>
-                                        <option value="1st Year">1st Year</option>
-                                        <option value="2nd Year">2nd Year</option>
-                                        <option value="3rd Year">3rd Year</option>
-                                        <option value="4th Year">4th Year</option>
+                                    <x-input-label for="strand" :value="__('Strand')" />
+                                    <select id="strand" name="strand" 
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                        <option value="">Select Strand</option>
+                                        <option value="STEM" {{ old('strand') === 'STEM' ? 'selected' : '' }}>STEM</option>
+                                        <option value="ABM" {{ old('strand') === 'ABM' ? 'selected' : '' }}>ABM</option>
+                                        <option value="HUMSS" {{ old('strand') === 'HUMSS' ? 'selected' : '' }}>HUMSS</option>
+                                        <option value="GAS" {{ old('strand') === 'GAS' ? 'selected' : '' }}>GAS</option>
+                                        <option value="TVL" {{ old('strand') === 'TVL' ? 'selected' : '' }}>TVL</option>
                                     </select>
-                                    <x-input-error class="mt-2" :messages="$errors->get('year_level')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('strand')" />
+                                </div>
+
+                                <!-- Grade Level -->
+                                <div>
+                                    <x-input-label for="grade_level" :value="__('Grade Level')" />
+                                    <select id="grade_level" name="grade_level" 
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                        <option value="">Select Grade Level</option>
+                                        <option value="Grade 11" {{ old('grade_level') === 'Grade 11' ? 'selected' : '' }}>Grade 11</option>
+                                        <option value="Grade 12" {{ old('grade_level') === 'Grade 12' ? 'selected' : '' }}>Grade 12</option>
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('grade_level')" />
                                 </div>
 
                                 <!-- Special Needs -->
-                                <div>
+                                <div class="md:col-span-2">
                                     <x-input-label for="special_needs" :value="__('Special Needs/Considerations')" />
                                     <textarea id="special_needs" name="special_needs" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                                         rows="3">{{ old('special_needs') }}</textarea>
                                     <x-input-error class="mt-2" :messages="$errors->get('special_needs')" />
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end gap-4">
+                        <!-- Personal Information -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Personal Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Birthdate -->
+                                <div>
+                                    <x-input-label for="birthdate" :value="__('Birthdate')" />
+                                    <x-text-input id="birthdate" name="birthdate" type="date" 
+                                        class="mt-1 block w-full" :value="old('birthdate')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('birthdate')" />
+                                </div>
+
+                                <!-- Gender -->
+                                <div>
+                                    <x-input-label for="gender" :value="__('Gender')" />
+                                    <select id="gender" name="gender" 
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male" {{ old('gender') === 'Male' ? 'selected' : '' }}>Male</option>
+                                        <option value="Female" {{ old('gender') === 'Female' ? 'selected' : '' }}>Female</option>
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('gender')" />
+                                </div>
+
+                                <!-- Address -->
+                                <div class="md:col-span-2">
+                                    <x-input-label for="address" :value="__('Address')" />
+                                    <textarea id="address" name="address" 
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                        rows="2">{{ old('address') }}</textarea>
+                                    <x-input-error class="mt-2" :messages="$errors->get('address')" />
+                                </div>
+
+                                <!-- Contact Number -->
+                                <div>
+                                    <x-input-label for="contact_number" :value="__('Contact Number')" />
+                                    <x-text-input id="contact_number" name="contact_number" type="text" 
+                                        class="mt-1 block w-full" :value="old('contact_number')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('contact_number')" />
+                                </div>
+
+                                <!-- Civil Status -->
+                                <div>
+                                    <x-input-label for="civil_status" :value="__('Civil Status')" />
+                                    <select id="civil_status" name="civil_status" 
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                        <option value="">Select Civil Status</option>
+                                        <option value="Single" {{ old('civil_status') === 'Single' ? 'selected' : '' }}>Single</option>
+                                        <option value="Married" {{ old('civil_status') === 'Married' ? 'selected' : '' }}>Married</option>
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('civil_status')" />
+                                </div>
+
+                                <!-- Nationality -->
+                                <div>
+                                    <x-input-label for="nationality" :value="__('Nationality')" />
+                                    <x-text-input id="nationality" name="nationality" type="text" 
+                                        class="mt-1 block w-full" :value="old('nationality')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('nationality')" />
+                                </div>
+
+                                <!-- Religion -->
+                                <div>
+                                    <x-input-label for="religion" :value="__('Religion')" />
+                                    <x-text-input id="religion" name="religion" type="text" 
+                                        class="mt-1 block w-full" :value="old('religion')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('religion')" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Father's Information -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Father's Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Father Name -->
+                                <div>
+                                    <x-input-label for="father_name" :value="__('Full Name')" />
+                                    <x-text-input id="father_name" name="father_name" type="text" 
+                                        class="mt-1 block w-full" :value="old('father_name')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('father_name')" />
+                                </div>
+
+                                <!-- Father Contact -->
+                                <div>
+                                    <x-input-label for="father_contact" :value="__('Contact Number')" />
+                                    <x-text-input id="father_contact" name="father_contact" type="text" 
+                                        class="mt-1 block w-full" :value="old('father_contact')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('father_contact')" />
+                                </div>
+
+                                <!-- Father Occupation -->
+                                <div>
+                                    <x-input-label for="father_occupation" :value="__('Occupation')" />
+                                    <x-text-input id="father_occupation" name="father_occupation" type="text" 
+                                        class="mt-1 block w-full" :value="old('father_occupation')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('father_occupation')" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mother's Information -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Mother's Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Mother Name -->
+                                <div>
+                                    <x-input-label for="mother_name" :value="__('Full Name')" />
+                                    <x-text-input id="mother_name" name="mother_name" type="text" 
+                                        class="mt-1 block w-full" :value="old('mother_name')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('mother_name')" />
+                                </div>
+
+                                <!-- Mother Contact -->
+                                <div>
+                                    <x-input-label for="mother_contact" :value="__('Contact Number')" />
+                                    <x-text-input id="mother_contact" name="mother_contact" type="text" 
+                                        class="mt-1 block w-full" :value="old('mother_contact')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('mother_contact')" />
+                                </div>
+
+                                <!-- Mother Occupation -->
+                                <div>
+                                    <x-input-label for="mother_occupation" :value="__('Occupation')" />
+                                    <x-text-input id="mother_occupation" name="mother_occupation" type="text" 
+                                        class="mt-1 block w-full" :value="old('mother_occupation')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('mother_occupation')" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Guardian's Information -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Guardian's Information (if applicable)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Guardian Name -->
+                                <div>
+                                    <x-input-label for="guardian_name" :value="__('Full Name')" />
+                                    <x-text-input id="guardian_name" name="guardian_name" type="text" 
+                                        class="mt-1 block w-full" :value="old('guardian_name')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('guardian_name')" />
+                                </div>
+
+                                <!-- Guardian Contact -->
+                                <div>
+                                    <x-input-label for="guardian_contact" :value="__('Contact Number')" />
+                                    <x-text-input id="guardian_contact" name="guardian_contact" type="text" 
+                                        class="mt-1 block w-full" :value="old('guardian_contact')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('guardian_contact')" />
+                                </div>
+
+                                <!-- Guardian Relationship -->
+                                <div>
+                                    <x-input-label for="guardian_relationship" :value="__('Relationship')" />
+                                    <x-text-input id="guardian_relationship" name="guardian_relationship" type="text" 
+                                        class="mt-1 block w-full" :value="old('guardian_relationship')" 
+                                        placeholder="e.g., Aunt, Uncle, Grandparent" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('guardian_relationship')" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="flex items-center justify-end gap-4 pt-6">
                             <x-secondary-button onclick="history.back()">
                                 {{ __('Cancel') }}
                             </x-secondary-button>

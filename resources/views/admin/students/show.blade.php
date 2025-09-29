@@ -18,7 +18,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Profile Section -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
@@ -29,7 +29,7 @@
                                 </span>
                             </div>
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                {{ $student->user->first_name }} {{ $student->user->last_name }}
+                                {{ $student->user->first_name }} {{ $student->user->middle_name }} {{ $student->user->last_name }}
                             </h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
                                 {{ $student->student_number }}
@@ -43,26 +43,149 @@
                                     <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->user->email }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Course</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->course ?? 'Not specified' }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">LRN</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->lrn ?? 'N/A' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Year Level</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->year_level ?? 'Not specified' }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Strand</dt>
+                                    <dd class="mt-1">
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            @if($student->strand === 'STEM') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                            @elseif($student->strand === 'ABM') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                            @elseif($student->strand === 'HUMSS') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                            @elseif($student->strand === 'GAS') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                            @elseif($student->strand === 'TVL') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                            @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300
+                                            @endif">
+                                            {{ $student->strand ?? 'Not specified' }}
+                                        </span>
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Grade Level</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->grade_level ?? 'Not specified' }}</dd>
                                 </div>
                             </dl>
                         </div>
                     </div>
                 </div>
 
-                <!-- Academic History -->
-                <div class="md:col-span-2">
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <!-- Details Section -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Personal Information -->
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                        <div class="p-6">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Personal Information</h3>
+                            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Birthdate</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $student->birthdate ? \Carbon\Carbon::parse($student->birthdate)->format('F d, Y') : 'N/A' }}
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->gender ?? 'N/A' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Contact Number</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->contact_number ?? 'N/A' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Civil Status</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->civil_status ?? 'N/A' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->nationality ?? 'N/A' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Religion</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->religion ?? 'N/A' }}</dd>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Address</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->address ?? 'N/A' }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <!-- Parent/Guardian Information -->
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                        <div class="p-6">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Parent/Guardian Information</h3>
+                            
+                            <div class="space-y-6">
+                                <!-- Father's Info -->
+                                <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Father's Information</h4>
+                                    <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Name</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->father_name ?? 'N/A' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Contact</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->father_contact ?? 'N/A' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Occupation</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->father_occupation ?? 'N/A' }}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+
+                                <!-- Mother's Info -->
+                                <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Mother's Information</h4>
+                                    <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Name</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->mother_name ?? 'N/A' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Contact</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->mother_contact ?? 'N/A' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Occupation</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->mother_occupation ?? 'N/A' }}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+
+                                <!-- Guardian's Info -->
+                                @if($student->guardian_name)
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Guardian's Information</h4>
+                                    <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Name</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->guardian_name }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Contact</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->guardian_contact ?? 'N/A' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Relationship</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $student->guardian_relationship ?? 'N/A' }}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Counseling History -->
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Counseling History</h3>
                             <div class="space-y-4">
                                 @forelse($student->counselingSessions as $session)
-                                    <div class="border-l-4 border-blue-500 pl-4">
+                                    <div class="border-l-4 border-blue-500 pl-4 py-2">
                                         <div class="text-sm text-gray-600 dark:text-gray-400">
                                             {{ $session->date->format('M d, Y') }}
                                         </div>
