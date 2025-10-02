@@ -4,10 +4,10 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Counseling Categories') }}
             </h2>
-            <!-- <a href="{{ route('admin.counseling-categories.create') }}" 
+            <a href="{{ route('admin.counseling-categories.create') }}" 
                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
                 <i class="fas fa-plus mr-2"></i>{{ __('Add Category') }}
-            </a> -->
+            </a>
         </div>
     </x-slot>
 

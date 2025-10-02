@@ -43,11 +43,11 @@ class AdminCounselingCategoryController extends Controller
         ]);
     }
 
-    // public function create()
-    // {
-    //     $counselors = Counselor::with('user')->get();
-    //     return view('admin.counseling-categories.create', compact('counselors'));
-    // }
+    public function create()
+    {
+        $counselors = Counselor::with('user')->get();
+        return view('admin.counseling-categories.create', compact('counselors'));
+    }
 
     public function store(Request $request)
     {
