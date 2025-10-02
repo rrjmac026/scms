@@ -12,7 +12,7 @@ class Counselor extends Model
     protected $fillable = [
         'user_id',
         'employee_number',
-        'specialization',
+        'counseling_category_id',
         'gender',
         'birth_date',
         'bio',
@@ -50,5 +50,9 @@ class Counselor extends Model
     public function counselingCategories()
     {
         return $this->hasMany(CounselingCategory::class);
+    }
+    public function category()
+    {
+        return $this->belongsTo(CounselingCategory::class, 'counseling_category_id');
     }
 }

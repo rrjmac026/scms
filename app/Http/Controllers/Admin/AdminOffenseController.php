@@ -13,13 +13,29 @@ class AdminOffenseController extends Controller
     /**
      * Display a listing of offenses.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $offenses = Offense::with([
-            'student.user', 
-            'counselor.user', 
-            'counselingSession',
-        ])->latest()->paginate(15);
+        $query = Offense::with(['student.user', 'counselor.user', 'counselingSession']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('offense', 'like', "%{$search}%")
+                  ->orWhere('remarks', 'like', "%{$search}%")
+                  ->orWhereHas('student.user', function($sq) use ($search) {
+                      $sq->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('resolved', $request->status === 'resolved');
+        }
+
+        $offenses = $query->latest()->paginate(15)->appends($request->all());
 
         return view('admin.offenses.index', compact('offenses'));
     }

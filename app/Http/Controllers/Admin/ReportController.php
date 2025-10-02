@@ -19,20 +19,19 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        // Get filter parameters
+        
         $filters = $this->getFilterParameters($request);
         
-        // Get analytics data with caching
+
         $analytics = Cache::remember(
             'analytics_' . md5(json_encode($filters)), 
             now()->addMinutes(30),
             fn() => $this->generateAnalytics($filters)
         );
 
-        // Get counselors for filter dropdown
+
         $counselors = Counselor::with('user')->get();
         
-        // Get categories for filter dropdown
         $categories = CounselingSession::join('appointments', 'counseling_sessions.appointment_id', '=', 'appointments.id')
             ->join('counseling_categories', 'appointments.counseling_category_id', '=', 'counseling_categories.id')
             ->distinct()

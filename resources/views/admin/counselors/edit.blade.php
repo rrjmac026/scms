@@ -72,12 +72,21 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('employee_number')" />
                                 </div>
 
-                                <!-- Specialization -->
+                                <!-- Counseling Category -->
                                 <div>
-                                    <x-input-label for="specialization" :value="__('Specialization')" />
-                                    <x-text-input id="specialization" name="specialization" type="text" 
-                                        class="mt-1 block w-full" :value="old('specialization', $counselor->specialization)" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('specialization')" />
+                                    <x-input-label for="counseling_category_id" :value="__('Counseling Category')" />
+                                    <select id="counseling_category_id" name="counseling_category_id"
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 
+                                        dark:bg-gray-900 dark:text-gray-100 focus:ring-pink-500 focus:border-pink-500" required>
+                                        <option value="">-- Select Category --</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" 
+                                                {{ old('counseling_category_id', $counselor->counseling_category_id) == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('counseling_category_id')" />
                                 </div>
 
                                 <!-- Availability Schedule -->

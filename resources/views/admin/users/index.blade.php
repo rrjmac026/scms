@@ -26,19 +26,24 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <!-- Search and Filter -->
-                    <div class="mb-6 flex gap-4">
+                    <form method="GET" class="mb-6 flex gap-4">
                         <div class="flex-1">
                             <input type="text" 
+                                   name="search"
+                                   value="{{ request('search') }}"
                                    class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900"
                                    placeholder="Search users...">
                         </div>
-                        <select class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                            <option value="all">All Roles</option>
-                            <option value="admin">Admin</option>
-                            <option value="counselor">Counselor</option>
-                            <option value="student">Student</option>
+                        <select name="role" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900">
+                            <option value="all" {{ request('role') == 'all' ? 'selected' : '' }}>All Roles</option>
+                            <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="counselor" {{ request('role') == 'counselor' ? 'selected' : '' }}>Counselor</option>
+                            <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>Student</option>
                         </select>
-                    </div>
+                        <x-primary-button type="submit">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </x-primary-button>
+                    </form>
 
                     <!-- Users Table -->
                     <div class="overflow-x-auto">

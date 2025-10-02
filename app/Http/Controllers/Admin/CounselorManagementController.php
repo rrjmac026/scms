@@ -15,9 +15,26 @@ class CounselorManagementController extends Controller
     /**
      * Display a listing of counselors.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $counselors = Counselor::with('user')->latest()->paginate(10);
+        $query = Counselor::with('user');
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            })->orWhere('employee_number', 'like', "%{$search}%");
+        }
+
+        // Filter by specialization
+        if ($request->filled('specialization')) {
+            $query->where('specialization', $request->specialization);
+        }
+
+        $counselors = $query->latest()->paginate(10)->appends($request->all());
         return view('admin.counselors.index', compact('counselors'));
     }
 
@@ -26,8 +43,8 @@ class CounselorManagementController extends Controller
      */
     public function create()
     {
-        // No need to select existing users anymore
-        return view('admin.counselors.create');
+        $categories = \App\Models\CounselingCategory::all();
+        return view('admin.counselors.create', compact('categories'));
     }
 
     /**
@@ -45,7 +62,7 @@ class CounselorManagementController extends Controller
 
             
             'employee_number' => 'required|string|max:50|unique:counselors',
-            'specialization' => 'nullable|string|max:255',
+            'counseling_category_id' => 'required|exists:counseling_categories,id',
             'availability_schedule' => 'nullable|array',
         ]);
 
@@ -63,7 +80,7 @@ class CounselorManagementController extends Controller
         Counselor::create([
             'user_id' => $user->id,
             'employee_number' => $validated['employee_number'],
-            'specialization' => $validated['specialization'] ?? null,
+            'counseling_category_id' => $validated['counseling_category_id'],
             'availability_schedule' => $validated['availability_schedule'] ?? [],        ]);
 
         return redirect()->route('admin.counselors.index')
@@ -75,7 +92,8 @@ class CounselorManagementController extends Controller
      */
     public function edit(Counselor $counselor)
     {
-        return view('admin.counselors.edit', compact('counselor'));
+        $categories = \App\Models\CounselingCategory::all();
+        return view('admin.counselors.edit', compact('counselor', 'categories'));
     }
 
     /**

@@ -77,6 +77,15 @@
                 <div class="p-4">
                     <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Search</label>
+                            <input type="text" 
+                                   name="search"
+                                   value="{{ request('search') }}"
+                                   class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500"
+                                   placeholder="Search appointments...">
+                        </div>
+                        
+                        <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
                             <input type="date" name="date" 
                                    class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500"

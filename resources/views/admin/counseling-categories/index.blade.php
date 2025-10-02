@@ -15,6 +15,25 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
+                    <!-- Search and Filter Form -->
+                    <form method="GET" class="mb-6 flex gap-4">
+                        <div class="flex-1">
+                            <input type="text" 
+                                   name="search"
+                                   value="{{ request('search') }}"
+                                   class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+                                   placeholder="Search categories...">
+                        </div>
+                        <select name="status" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900">
+                            <option value="">All Status</option>
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                        <x-primary-button type="submit">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </x-primary-button>
+                    </form>
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead>

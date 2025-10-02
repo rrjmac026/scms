@@ -217,16 +217,31 @@
                         
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ url('/dashboard') }}" 
-                                   class="btn-gradient group relative px-6 py-2.5 bg-gradient-to-r from-pink-400 via-pink-500 to-orange-400 text-white rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-pink-200 dark:hover:shadow-pink-900/50 transform hover:scale-105">
+                                @php
+                                    $role = auth()->user()->role ?? null;
+                                @endphp
+
+                                @if ($role === 'admin')
+                                    @php $dashboardUrl = url('/admin/dashboard'); @endphp
+                                @elseif ($role === 'counselor')
+                                    @php $dashboardUrl = url('/counselor/dashboard'); @endphp
+                                @elseif ($role === 'student')
+                                    @php $dashboardUrl = url('/student/dashboard'); @endphp
+                                @else
+                                    @php $dashboardUrl = url('/dashboard'); @endphp
+                                @endif
+
+                                <a href="{{ $dashboardUrl }}" 
+                                class="btn-gradient group relative px-6 py-2.5 bg-gradient-to-r from-pink-400 via-pink-500 to-orange-400 text-white rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-pink-200 dark:hover:shadow-pink-900/50 transform hover:scale-105">
                                     <span class="relative z-10 flex items-center">
                                         <i class="fas fa-tachometer-alt mr-2"></i>
                                         Dashboard
                                     </span>
                                 </a>
+
                             @else
                                 <a href="{{ route('login') }}" 
-                                   class="btn-gradient group relative px-6 py-2.5 bg-gradient-to-r from-pink-400 via-pink-500 to-orange-400 text-white rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-pink-200 dark:hover:shadow-pink-900/50 transform hover:scale-105">
+                                class="btn-gradient group relative px-6 py-2.5 bg-gradient-to-r from-pink-400 via-pink-500 to-orange-400 text-white rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-pink-200 dark:hover:shadow-pink-900/50 transform hover:scale-105">
                                     <span class="relative z-10 flex items-center">
                                         <i class="fas fa-sign-in-alt mr-2"></i>
                                         Login
@@ -234,6 +249,7 @@
                                 </a>
                             @endauth
                         @endif
+
                     </div>
                 </div>
             </div>

@@ -34,7 +34,7 @@ class CounselorSeeder extends Seeder
             ['user_id' => $counselorUser->id],
             [
                 'employee_number' => 'EMP001',
-                'specialization' => 'Academic & Career Counseling',
+                'counseling_category_id' => null,
                 'availability_schedule' => null,
             ]
         );

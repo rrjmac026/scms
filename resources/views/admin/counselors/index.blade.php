@@ -15,6 +15,28 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
+                    <!-- Search and Filter Form -->
+                    <form method="GET" class="mb-6 flex gap-4">
+                        <div class="flex-1">
+                            <input type="text" 
+                                   name="search"
+                                   value="{{ request('search') }}"
+                                   class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+                                   placeholder="Search counselors...">
+                        </div>
+                        <select name="specialization" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900">
+                            <option value="">All Specializations</option>
+                            @foreach($specializations ?? [] as $spec)
+                                <option value="{{ $spec }}" {{ request('specialization') == $spec ? 'selected' : '' }}>
+                                    {{ $spec }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <x-primary-button type="submit">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </x-primary-button>
+                    </form>
+
                     <!-- Counselors Table -->
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -22,7 +44,9 @@
                                 <tr class="bg-gray-50 dark:bg-gray-700">
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Name</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Employee ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Specialization</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                        Counseling Category
+                                    </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
                                 </tr>
@@ -53,7 +77,7 @@
                                             {{ $counselor->employee_number }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $counselor->specialization ?? 'General Counseling' }}
+                                            {{ $counselor->category->name ?? 'Unassigned' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
