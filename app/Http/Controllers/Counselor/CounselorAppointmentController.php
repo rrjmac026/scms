@@ -96,7 +96,10 @@ class CounselorAppointmentController extends Controller
             'rejection_reason' => $validated['rejection_reason'],
         ]);
 
-        return back()->with('success', 'Appointment rejected. Student will be notified.');
+        // Send rejection notification to student
+        $appointment->student->user->notify(new \App\Notifications\AppointmentRejected($appointment));
+
+        return back()->with('success', 'Appointment rejected. Student has been notified via email.');
     }
 
         public function complete(Appointment $appointment)

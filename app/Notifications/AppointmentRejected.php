@@ -25,9 +25,20 @@ class AppointmentRejected extends Notification
 
     public function toMail($notifiable)
     {
+        $date = $this->appointment->preferred_date->format('F d, Y');
+        $time = \Carbon\Carbon::parse($this->appointment->preferred_time)->format('h:i A');
+        $counselorName = $this->appointment->counselor->user->name;
+
         return (new MailMessage)
-                    ->subject('Your Appointment was Rejected')
-                    ->line('Unfortunately, your appointment on ' . $this->appointment->preferred_date->format('M d, Y') . ' at ' . $this->appointment->preferred_time . ' was rejected.')
-                    ->line('Please try to book another available slot.');
+            ->subject('Your Counseling Appointment was Rejected')
+            ->greeting('Hello ' . $this->appointment->student->user->first_name . ',')
+            ->line('Unfortunately, your counseling appointment has been rejected by ' . $counselorName . '.')
+            ->line('Appointment Details:')
+            ->line("Date: {$date}")
+            ->line("Time: {$time}")
+            ->line('Reason for Rejection:')
+            ->line($this->appointment->rejection_reason)
+            ->line('Please book another appointment at your convenience.')
+            ->action('Book New Appointment', route('student.appointments.create'));
     }
 }
