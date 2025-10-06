@@ -199,14 +199,65 @@
                                     </dd>
                                 </div>
 
-                                <div class="md:col-span-2 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Session Notes</dt>
+                                <div 
+                                    x-data="{ editing: false, note: @js($counselingSession->notes ?? '') }"
+                                    class="md:col-span-2 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl"
+                                >
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 flex justify-between items-center">
+                                        <span>Session Notes</span>
+
+                                        <!-- Edit Button -->
+                                        <button 
+                                            @click="editing = true" 
+                                            x-show="!editing"
+                                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm font-medium"
+                                        >
+                                            <i class="fas fa-edit mr-1"></i> Edit
+                                        </button>
+                                    </dt>
+
                                     <dd class="text-sm text-gray-900 dark:text-gray-100">
-                                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg min-h-[100px] border-l-4 border-purple-500">
-                                            <div class="whitespace-pre-wrap">{{ $counselingSession->notes ?? 'No notes recorded yet.' }}</div>
+                                        <!-- View Mode -->
+                                        <div 
+                                            x-show="!editing" 
+                                            @click="editing = true"
+                                            class="bg-white dark:bg-gray-800 p-4 rounded-lg min-h-[100px] border-l-4 border-purple-500 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                        >
+                                            <div class="whitespace-pre-wrap" x-text="note || 'Click here to add notes...'"></div>
                                         </div>
+
+                                        <!-- Edit Mode -->
+                                        <form 
+                                            x-show="editing" 
+                                            method="POST" 
+                                            action="{{ route('counselor.counseling-sessions.update', $counselingSession) }}"
+                                            class="bg-white dark:bg-gray-800 p-4 rounded-lg border-l-4 border-purple-500"
+                                        >
+                                            @csrf
+                                            @method('PATCH')
+
+                                            <textarea 
+                                                name="notes"
+                                                x-model="note"
+                                                class="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring focus:ring-purple-400 dark:bg-gray-900 dark:text-gray-100"
+                                                rows="5"
+                                            ></textarea>
+
+                                            <input type="hidden" name="status" value="{{ $counselingSession->status }}">
+
+                                            <div class="mt-3 flex gap-2">
+                                                <x-primary-button>
+                                                    <i class="fas fa-save mr-2"></i> Save
+                                                </x-primary-button>
+
+                                                <x-secondary-button type="button" @click="editing = false">
+                                                    Cancel
+                                                </x-secondary-button>
+                                            </div>
+                                        </form>
                                     </dd>
                                 </div>
+
                             </dl>
                         </div>
                     </div>

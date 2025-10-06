@@ -264,7 +264,10 @@ class AppointmentController extends Controller
             'status' => 'approved',
         ]);
 
-        return back()->with('success', "Appointment approved and counselor {$counselor->user->name} assigned automatically.");
+        // Send notification to counselor
+        $counselor->user->notify(new \App\Notifications\CounselorAppointmentAssigned($appointment));
+
+        return back()->with('success', "Appointment approved and counselor {$counselor->user->name} assigned and notified automatically.");
     }
 
 
