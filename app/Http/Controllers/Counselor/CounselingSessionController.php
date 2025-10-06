@@ -24,10 +24,11 @@ class CounselingSessionController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'student_id'   => 'required|exists:students,id',
-            'counselor_id' => 'required|exists:counselors,id',
-            'concern'      => 'required|string|max:500',
-            'notes'        => 'nullable|string',
+            'appointment_id' => 'required|exists:appointments,id',
+            'student_id'     => 'required|exists:students,id',
+            'counselor_id'   => 'required|exists:counselors,id',
+            'concern'        => 'required|string|max:500',
+            'notes'          => 'nullable|string',
         ]);
 
         $data['status'] = 'pending';
@@ -37,9 +38,10 @@ class CounselingSessionController extends Controller
 
         CounselingSession::create($data);
 
-        return redirect()->route('counselors.counseling-sessions.index')
-                         ->with('success', 'Counseling session created successfully.');
+        return redirect()->route('counselor.counseling-sessions.index')
+                        ->with('success', 'Counseling session created successfully.');
     }
+
 
     public function show(CounselingSession $counselingSession)
     {

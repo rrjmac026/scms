@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Counselor;
 use App\Models\User;
 use App\Models\CounselingSession;
@@ -22,10 +21,10 @@ class CounselorManagementController extends Controller
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             })->orWhere('employee_number', 'like', "%{$search}%");
         }
 
@@ -53,20 +52,20 @@ class CounselorManagementController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            
+            // User fields
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
 
-            
+            // Counselor fields
             'employee_number' => 'required|string|max:50|unique:counselors',
-            'counseling_category_id' => 'required|exists:counseling_categories,id',
+            'assigned_grade_level' => 'nullable|string|max:50',
             'availability_schedule' => 'nullable|array',
         ]);
 
-        
+        // Create user
         $user = User::create([
             'first_name' => $validated['first_name'],
             'middle_name' => $validated['middle_name'] ?? null,
@@ -76,15 +75,16 @@ class CounselorManagementController extends Controller
             'role' => 'counselor',
         ]);
 
-        
+        // Create counselor linked to user
         Counselor::create([
             'user_id' => $user->id,
             'employee_number' => $validated['employee_number'],
-            'counseling_category_id' => $validated['counseling_category_id'],
-            'availability_schedule' => $validated['availability_schedule'] ?? [],        ]);
+            'assigned_grade_level' => $validated['assigned_grade_level'] ?? null,
+            'availability_schedule' => $validated['availability_schedule'] ?? [],
+        ]);
 
         return redirect()->route('admin.counselors.index')
-                         ->with('success', 'Counselor created successfully.');
+            ->with('success', 'Counselor created successfully.');
     }
 
     /**
@@ -102,20 +102,20 @@ class CounselorManagementController extends Controller
     public function update(Request $request, Counselor $counselor)
     {
         $validated = $request->validate([
-            
+            // User fields
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $counselor->user_id,
             'password' => 'nullable|string|min:8|confirmed',
 
-            
+            // Counselor fields
             'employee_number' => 'required|string|max:50|unique:counselors,employee_number,' . $counselor->id,
-            'specialization' => 'nullable|string|max:255',
+            'assigned_grade_level' => 'nullable|string|max:50',
             'availability_schedule' => 'nullable|array',
         ]);
 
-        
+        // Update user
         $userData = [
             'first_name' => $validated['first_name'],
             'middle_name' => $validated['middle_name'] ?? null,
@@ -129,14 +129,15 @@ class CounselorManagementController extends Controller
 
         $counselor->user->update($userData);
 
-        
+        // Update counselor
         $counselor->update([
             'employee_number' => $validated['employee_number'],
-            'specialization' => $validated['specialization'] ?? null,
-            'availability_schedule' => $validated['availability_schedule'] ?? [],        ]);
+            'assigned_grade_level' => $validated['assigned_grade_level'] ?? null,
+            'availability_schedule' => $validated['availability_schedule'] ?? [],
+        ]);
 
         return redirect()->route('admin.counselors.index')
-                         ->with('success', 'Counselor updated successfully.');
+            ->with('success', 'Counselor updated successfully.');
     }
 
     /**
@@ -144,11 +145,11 @@ class CounselorManagementController extends Controller
      */
     public function destroy(Counselor $counselor)
     {
-        
+        // Delete linked user too
         $counselor->user->delete();
 
         return redirect()->route('admin.counselors.index')
-                         ->with('success', 'Counselor deleted successfully.');
+            ->with('success', 'Counselor deleted successfully.');
     }
 
     /**

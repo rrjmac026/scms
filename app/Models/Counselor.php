@@ -12,11 +12,11 @@ class Counselor extends Model
     protected $fillable = [
         'user_id',
         'employee_number',
-        'counseling_category_id',
         'gender',
         'birth_date',
         'bio',
         'availability_schedule',
+        'assigned_grade_level',
     ];
 
     protected $casts = [

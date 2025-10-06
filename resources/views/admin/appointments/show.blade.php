@@ -125,30 +125,6 @@
                             </div>
                         </div>
                     </div>
-
-                    @if(!$appointment->counselor && $appointment->status === 'pending')
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                        <form action="{{ route('admin.appointments.assign', $appointment) }}" method="POST" class="space-y-4">
-                            @csrf
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Assign Counselor
-                                </label>
-                                <select name="counselor_id" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500">
-                                    <option value="">-- Auto Assign --</option>
-                                    @foreach($availableCounselors as $counselor)
-                                        <option value="{{ $counselor->id }}">
-                                            {{ $counselor->user->first_name }} {{ $counselor->user->last_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <button type="submit" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-150">
-                                <i class="fas fa-user-plus mr-2"></i>Assign Counselor
-                            </button>
-                        </form>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>

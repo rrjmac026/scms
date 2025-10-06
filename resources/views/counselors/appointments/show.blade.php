@@ -12,6 +12,18 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Appointment Info -->
                 <div class="col-span-2 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
@@ -64,25 +76,19 @@
 
                         @if($appointment->status === 'pending')
                             <div class="mt-6 flex gap-4">
-                                <form action="{{ route('counselor.appointments.update-status', $appointment) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="status" value="approved">
-                                    <x-primary-button>
-                                        <i class="fas fa-check mr-2"></i>
-                                        {{ __('Approve Appointment') }}
-                                    </x-primary-button>
-                                </form>
+                                <button type="button" 
+                                        onclick="openApproveModal()"
+                                        class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    <i class="fas fa-check mr-2"></i>
+                                    {{ __('Approve Appointment') }}
+                                </button>
 
-                                <form action="{{ route('counselor.appointments.update-status', $appointment) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="status" value="rejected">
-                                    <x-danger-button>
-                                        <i class="fas fa-times mr-2"></i>
-                                        {{ __('Reject Appointment') }}
-                                    </x-danger-button>
-                                </form>
+                                <button type="button"
+                                        onclick="openRejectModal()"
+                                        class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    <i class="fas fa-times mr-2"></i>
+                                    {{ __('Reject Appointment') }}
+                                </button>
                             </div>
                         @endif
                     </div>
@@ -126,4 +132,96 @@
             </div>
         </div>
     </div>
+
+    <!-- Approve Modal -->
+    <div id="approveModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Approve Appointment</h3>
+            <p class="text-sm text-gray-600 mb-4">Are you sure you want to approve this appointment?</p>
+            <form action="{{ route('counselor.appointments.update-status', $appointment) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="approved">
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeApproveModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        Approve
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Reject Appointment</h3>
+            <form action="{{ route('counselor.appointments.update-status', $appointment) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="rejected">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Rejection</label>
+                    <textarea name="rejection_reason" rows="3" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Please provide a reason..."></textarea>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeRejectModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                        Reject
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+    function openApproveModal() {
+        document.getElementById('approveModal').classList.remove('hidden');
+    }
+
+    function closeApproveModal() {
+        document.getElementById('approveModal').classList.add('hidden');
+    }
+
+    function openRejectModal() {
+        document.getElementById('rejectModal').classList.remove('hidden');
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').classList.add('hidden');
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const approveModal = document.getElementById('approveModal');
+        const rejectModal = document.getElementById('rejectModal');
+        
+        if (event.target === approveModal) {
+            closeApproveModal();
+        }
+        if (event.target === rejectModal) {
+            closeRejectModal();
+        }
+    }
+
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeApproveModal();
+            closeRejectModal();
+        }
+    });
+    </script>
+    @endpush
 </x-app-layout>

@@ -15,6 +15,9 @@
                         @csrf
                         @method('PUT')
                         
+                        <!-- User ID (Hidden) -->
+                        <input type="hidden" name="user_id" value="{{ $student->user_id }}">
+
                         <!-- Academic Information -->
                         <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Academic Information</h3>
@@ -56,8 +59,8 @@
                                     <select id="grade_level" name="grade_level" 
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                                         <option value="">Select Grade Level</option>
-                                        <option value="Grade 11" {{ old('grade_level', $student->grade_level) === 'Grade 11' ? 'selected' : '' }}>Grade 11</option>
-                                        <option value="Grade 12" {{ old('grade_level', $student->grade_level) === 'Grade 12' ? 'selected' : '' }}>Grade 12</option>
+                                        <option value="11" {{ old('grade_level', $student->grade_level) === 'Grade 11' ? 'selected' : '' }}>Grade 11</option>
+                                        <option value="12" {{ old('grade_level', $student->grade_level) === 'Grade 12' ? 'selected' : '' }}>Grade 12</option>
                                     </select>
                                     <x-input-error class="mt-2" :messages="$errors->get('grade_level')" />
                                 </div>
@@ -237,7 +240,7 @@
 
                         <!-- Form Actions -->
                         <div class="flex items-center justify-end gap-4 pt-6">
-                            <x-secondary-button onclick="history.back()">
+                            <x-secondary-button type="button" onclick="history.back()">
                                 {{ __('Cancel') }}
                             </x-secondary-button>
                             <x-primary-button>

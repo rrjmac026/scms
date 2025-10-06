@@ -25,29 +25,6 @@
         </div>
     </x-slot>
 
-    <style>
-        /* Ensure content doesn't overlap with sidebar */
-        @media (min-width: 1024px) {
-            .main-content {
-                margin-left: 0;
-                transition: margin-left 0.3s ease-in-out;
-            }
-            
-            /* When sidebar is open */
-            .sidebar-open .main-content {
-                margin-left: 16rem; /* Adjust based on your sidebar width */
-            }
-        }
-        
-        /* Mobile sidebar overlay fix */
-        @media (max-width: 1023px) {
-            .main-content {
-                position: relative;
-                z-index: 1;
-            }
-        }
-    </style>
-
     <!-- Flash Messages -->
     @if(session('error'))
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
@@ -66,7 +43,7 @@
     @endif
 
     <div class="py-6 sm:py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Filter Section -->
             <div class="mb-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -75,56 +52,41 @@
                     </h3>
                 </div>
                 <div class="p-4">
-                    <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <form method="GET" action="{{ route('admin.appointments.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Search</label>
                             <input type="text" 
                                    name="search"
                                    value="{{ request('search') }}"
                                    class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500"
-                                   placeholder="Search appointments...">
-                        </div>
-                        
-                        <div class="space-y-1">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
-                            <input type="date" name="date" 
-                                   class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500"
-                                   value="{{ request('date') }}">
+                                   placeholder="Search by name or email...">
                         </div>
                         
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
                             <select name="status" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500">
-                                <option value="">All Status</option>
                                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="declined" {{ request('status') == 'declined' ? 'selected' : '' }}>Declined</option>
                             </select>
                         </div>
 
-                        <div class="space-y-1">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                            <select name="category" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500">
-                                <option value="">All Categories</option>
-                                @foreach($categories ?? [] as $category)
-                                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="space-y-1 flex flex-col justify-end">
-                            <x-primary-button type="submit" class="bg-pink-600 hover:bg-pink-700 w-full sm:w-auto">
+                        <div class="space-y-1 flex flex-col justify-end sm:col-span-2 lg:col-span-1">
+                            <button type="submit" class="w-full px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition-colors">
                                 <i class="fas fa-filter mr-2"></i>{{ __('Apply Filters') }}
-                            </x-primary-button>
+                            </button>
+                        </div>
+
+                        <div class="space-y-1 flex flex-col justify-end sm:col-span-2 lg:col-span-1">
+                            <a href="{{ route('admin.appointments.index') }}" class="w-full px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-center">
+                                <i class="fas fa-redo mr-2"></i>{{ __('Reset') }}
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Mobile Card View (hidden on desktop) -->
+            <!-- Mobile Card View -->
             <div class="block lg:hidden space-y-4 mb-6">
                 @forelse($appointments as $appointment)
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
@@ -139,11 +101,12 @@
                                 </div>
                             </div>
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' :
-                                   ($appointment->status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
-                                   ($appointment->status === 'completed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' :
-                                   'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300')) }}">
-                                {{ ucfirst($appointment->status) }}
+                                {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-800 ...' :
+                                    ($appointment->status === 'approved' ? 'bg-blue-100 text-blue-800 ...' :
+                                    ($appointment->status === 'declined' ? 'bg-red-100 text-red-800 ...' :
+                                    ($appointment->status === 'completed' ? 'bg-emerald-100 text-emerald-800 ...' :
+                                    'bg-gray-100 text-gray-800 ...'))) }}">
+                                {{ str_replace('_', ' ', ucfirst($appointment->status)) }}
                             </span>
                         </div>
 
@@ -164,7 +127,7 @@
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">Counselor:</span>
                                 <div class="font-medium text-gray-900 dark:text-gray-100">
-                                    {{ $appointment->counselor?->user?->first_name ?? 'N/A' }}
+                                    {{ $appointment->counselor?->user?->first_name ?? 'Unassigned' }}
                                     {{ $appointment->counselor?->user?->last_name ?? '' }}
                                 </div>
                             </div>
@@ -178,32 +141,23 @@
 
                         <!-- Actions -->
                         <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
-                            <div class="flex items-center justify-between">
+                            <div class="flex flex-col gap-2">
                                 <a href="{{ route('admin.appointments.show', $appointment) }}" 
-                                   class="inline-flex items-center px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors">
-                                    <i class="fas fa-eye mr-1"></i> View Details
+                                   class="inline-flex items-center justify-center px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors">
+                                    <i class="fas fa-eye mr-2"></i> View Details
                                 </a>
 
                                 @if($appointment->status === 'pending')
-                                    <form action="{{ route('admin.appointments.assign', $appointment) }}" method="POST" class="flex items-center gap-2">
+                                    <form action="{{ route('admin.appointments.approve', $appointment) }}" method="POST">
                                         @csrf
-                                        <select name="counselor_id" class="text-sm rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500">
-                                            <option value="">-- Auto Assign --</option>
-                                            @forelse($appointment->availableCounselors ?? [] as $counselor)
-                                                <option value="{{ $counselor->id }}">
-                                                    {{ $counselor->user->first_name }} {{ $counselor->user->last_name }}
-                                                </option>
-                                            @empty
-                                                <option disabled>No available counselors</option>
-                                            @endforelse
-                                        </select>
                                         <button type="submit" 
-                                                class="px-3 py-1 bg-pink-500 hover:bg-pink-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
-                                                {{ ($appointment->availableCounselors ?? collect())->isEmpty() ? 'disabled' : '' }}>
-                                            <i class="fas fa-user-plus mr-1"></i> Assign
+                                                class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                                title="Approve and auto-assign counselor">
+                                            <i class="fas fa-check mr-1"></i> Approve
                                         </button>
                                     </form>
                                 @endif
+
                             </div>
                         </div>
                     </div>
@@ -215,7 +169,7 @@
                 @endforelse
             </div>
 
-            <!-- Desktop Table View (hidden on mobile) -->
+            <!-- Desktop Table View -->
             <div class="hidden lg:block bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 dark:border-gray-700">
                 <div class="p-6">
                     <div class="overflow-x-auto">
@@ -251,7 +205,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                {{ $appointment->counselor?->user?->first_name ?? 'N/A' }}
+                                                {{ $appointment->counselor?->user?->first_name ?? 'Unassigned' }}
                                                 {{ $appointment->counselor?->user?->last_name ?? '' }}
                                             </div>
                                             <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -266,45 +220,53 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                                 {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' :
+                                                   ($appointment->status === 'approved' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' :
                                                    ($appointment->status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
-                                                   ($appointment->status === 'completed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' :
-                                                   'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300')) }}">
-                                                {{ ucfirst($appointment->status) }}
+                                                   ($appointment->status === 'completed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' :
+                                                   'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'))) }}">
+                                                {{ str_replace('_', ' ', ucfirst($appointment->status)) }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center gap-3">
+                                                @if($appointment->status === 'pending')
+                                                    <!-- Approve Form -->
+                                                    <form action="{{ route('admin.appointments.approve', $appointment) }}" method="POST">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" 
+                                                                class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                                                title="Approve and auto-assign counselor">
+                                                            <i class="fas fa-check mr-1"></i> Approve
+                                                        </button>
+                                                    </form>
+                                                @endif
                                                 <!-- View Details -->
                                                 <a href="{{ route('admin.appointments.show', $appointment) }}" 
-                                                class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
-                                                title="View Details">
+                                                   class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+                                                   title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
 
-                                                @if($appointment->status === 'pending')
-                                                    <!-- Assign Form -->
-                                                    <form action="{{ route('admin.appointments.assign', $appointment) }}" method="POST" class="flex gap-2">
-                                                        @csrf
-                                                        <select name="counselor_id" class="w-48 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500 @error('counselor_id') border-red-500 @enderror">
-                                                            <option value="">-- Auto Assign --</option>
-                                                            @forelse($appointment->availableCounselors ?? [] as $counselor)
-                                                                <option value="{{ $counselor->id }}">
-                                                                    {{ $counselor->user->first_name }} {{ $counselor->user->last_name }}
-                                                                </option>
-                                                            @empty
-                                                                <option disabled>No available counselors</option>
-                                                            @endforelse
-                                                        </select>
-                                                        <button type="submit" 
-                                                                class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors"
-                                                                {{ ($appointment->availableCounselors ?? collect())->isEmpty() ? 'disabled' : '' }}>
-                                                            <i class="fas fa-user-plus mr-1"></i> Assign
-                                                        </button>
-                                                    </form>
-                                                    @error('counselor_id')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                                    @enderror
-                                                @endif
+                                                <!-- Edit -->
+                                                <a href="{{ route('admin.appointments.edit', $appointment) }}" 
+                                                   class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 transition-colors"
+                                                   title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+
+                                                <!-- Delete -->
+                                                <form action="{{ route('admin.appointments.destroy', $appointment) }}" 
+                                                      method="POST" 
+                                                      onsubmit="return confirm('Are you sure you want to delete this appointment?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" 
+                                                            class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
+                                                            title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -322,7 +284,7 @@
                         </table>
                     </div>
                     
-                    <!-- Enhanced Pagination -->
+                    <!-- Pagination -->
                     <div class="mt-6">
                         {{ $appointments->links() }}
                     </div>

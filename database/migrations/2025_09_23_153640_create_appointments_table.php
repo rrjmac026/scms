@@ -18,10 +18,34 @@ return new class extends Migration
             $table->foreignId('counseling_category_id')
                 ->constrained('counseling_categories')
                 ->onDelete('cascade');
+            
+            // Original appointment date/time
             $table->date('preferred_date');
             $table->time('preferred_time');
-            $table->enum('status', ['pending', 'approved', 'declined', 'completed', 'rejected'])->default('pending');
+            
+            // Proposed reschedule date/time
+            $table->date('proposed_date')->nullable();
+            $table->time('proposed_time')->nullable();
+            
+            // Status with new values
+            $table->enum('status', [
+                'pending', 
+                'approved', 
+                'declined', 
+                'completed', 
+                'rejected',
+                'accepted'
+            ])->default('pending');
+            
+            // Concerns and reasons
             $table->text('concern')->nullable();
+            $table->text('reschedule_reason')->nullable();
+            $table->text('student_reschedule_response')->nullable();
+            $table->text('rejection_reason')->nullable();
+            
+            // Optional: Google Calendar integration
+            $table->string('google_event_id')->nullable();
+            
             $table->timestamps();
         });
     }

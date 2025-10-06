@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\CounselingCategory;
+use App\Models\Counselor;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -18,7 +19,7 @@ class StudentAppointmentController extends Controller
     {
         $student = auth()->user()->student;
 
-        $appointments = Appointment::with(['counselor.user'])
+        $appointments = Appointment::with(['counselor.user', 'category'])
             ->where('student_id', $student->id)
             ->latest()
             ->paginate(10);
@@ -32,7 +33,13 @@ class StudentAppointmentController extends Controller
     public function create()
     {
         $categories = CounselingCategory::where('status', 'active')->get();
-        return view('students.appointments.create', compact('categories'));
+        
+        // Get available counselors
+        $counselors = Counselor::with('user')
+            ->where('status', 'active')
+            ->get();
+        
+        return view('students.appointments.create', compact('categories', 'counselors'));
     }
 
     /**
@@ -50,18 +57,19 @@ class StudentAppointmentController extends Controller
         $student = auth()->user()->student;
 
         Appointment::create([
-        'student_id'              => $student->id,
-        'counselor_id'            => null, 
-        'preferred_date'          => $validated['preferred_date'],
-        'preferred_time'          => $validated['preferred_time'],
-        'concern'                 => $validated['concern'],
-        'counseling_category_id'  => $validated['counseling_category_id'],
-        'status'                  => 'pending',
-    ]);
+            'student_id'              => $student->id,
+            'counselor_id'            => null,
+            'preferred_date'          => $validated['preferred_date'],
+            'preferred_time'          => $validated['preferred_time'], 
+            'concern'                 => $validated['concern'],
+            'counseling_category_id'  => $validated['counseling_category_id'],
+            'status'                  => 'pending',
+        ]);
 
         return redirect()->route('student.appointments.index')
-                         ->with('success', 'Appointment request submitted.');
+                        ->with('success', 'Appointment request submitted and pending admin approval.');
     }
+
 
     /**
      * Show a specific appointment details.
@@ -74,13 +82,13 @@ class StudentAppointmentController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $appointment->load(['counselor.user', 'student.user', 'counselingSession.feedback']);
+        $appointment->load(['counselor.user', 'student.user', 'counselingSession.feedback', 'category']);
 
         return view('students.appointments.show', compact('appointment'));
     }
 
     /**
-     * Cancel an appointment (only if 1 day before and still pending).
+     * Cancel an appointment (only if 1 day before and still pending/approved).
      */
     public function destroy(Appointment $appointment)
     {
@@ -90,18 +98,16 @@ class StudentAppointmentController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        if ($appointment->status !== 'pending') {
+        if (!in_array($appointment->status, ['pending', 'approved'])) {
             return redirect()->route('student.appointments.index')
-                            ->with('error', 'Only pending appointments can be cancelled.');
+                            ->with('error', 'Only pending or approved appointments can be cancelled.');
         }
 
-        // ✅ Ensure both are strings in the right format
         $date = $appointment->preferred_date instanceof \Carbon\Carbon
             ? $appointment->preferred_date->format('Y-m-d')
             : $appointment->preferred_date;
 
-        $time = substr($appointment->preferred_time, 0, 5); // get HH:MM only
-
+        $time = substr($appointment->preferred_time, 0, 5);
         $appointmentDateTime = Carbon::createFromFormat('Y-m-d H:i', "$date $time");
 
         if ($appointmentDateTime->isBefore(now()->addDay())) {
@@ -109,10 +115,15 @@ class StudentAppointmentController extends Controller
                             ->with('error', 'You can only cancel at least 1 day before the appointment.');
         }
 
-        $appointment->delete();
+        $appointment->update(['status' => 'cancelled_by_student']);
+
+        // Notify counselor if assigned
+        if ($appointment->counselor_id) {
+            // Add notification logic here
+        }
 
         return redirect()->route('student.appointments.index')
-                        ->with('success', 'Appointment request cancelled.');
+                        ->with('success', 'Appointment cancelled successfully.');
     }
 
     public function studentCalendar()
@@ -121,7 +132,7 @@ class StudentAppointmentController extends Controller
 
         $appointments = Appointment::with(['counselor.user', 'category'])
             ->where('student_id', $student->id) 
-            ->whereIn('status', ['pending', 'approved', 'completed'])
+            ->whereIn('status', ['pending', 'approved', 'completed', 'reschedule_requested_by_counselor'])
             ->get()
             ->map(function ($appointment) {
                 $counselorName = $appointment->counselor 
@@ -146,6 +157,7 @@ class StudentAppointmentController extends Controller
                         'pending'   => '#fbbf24',
                         'approved'  => '#3b82f6',
                         'completed' => '#10b981',
+                        'reschedule_requested_by_counselor' => '#f97316',
                         default     => '#6b7280',
                     },
                     'extendedProps' => [
@@ -161,6 +173,7 @@ class StudentAppointmentController extends Controller
             'appointments' => $appointments,
         ]);
     }
+
 
 
 

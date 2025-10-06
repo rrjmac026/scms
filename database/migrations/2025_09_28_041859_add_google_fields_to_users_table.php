@@ -19,9 +19,6 @@ return new class extends Migration
         });
 
         // Add google_event_id to appointments table instead of users table
-        Schema::table('appointments', function (Blueprint $table) {
-            $table->string('google_event_id')->nullable()->index(); // For quick lookups
-        });
     }
 
     /**

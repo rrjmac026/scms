@@ -96,8 +96,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/appointments/{appointment}/debug-timezone', [AppointmentController::class, 'debugTimezone'])
         ->name('admin.appointments.debug-timezone');
     Route::get('appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
-    Route::post('appointments/{appointment}/assign', [AppointmentController::class, 'assignCounselor'])
-         ->name('appointments.assign');
+    // Route::post('appointments/{appointment}/assign', [AppointmentController::class, 'assignCounselor'])
+    //      ->name('appointments.assign');
+    Route::patch('appointments/{appointment}/approve', [AppointmentController::class, 'approve'])
+        ->name('appointments.approve');
+    Route::patch('appointments/{appointment}/reject', [AppointmentController::class, 'reject'])
+        ->name('appointments.reject');
     
     // Route::get('appointments/{appointment}/debug-calendar', [AppointmentController::class, 'debugCalendarEvent'])
     // ->name('appointments.debug-calendar');
@@ -135,10 +139,35 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
     // Appointment routes
     Route::get('/appointments', [CounselorAppointmentController::class, 'index'])->name('appointments.index');
     Route::get('/appointments/{appointment}', [CounselorAppointmentController::class, 'show'])->name('appointments.show');
+    
+    // Claim unassigned appointment
+    Route::post('/appointments/{appointment}/claim', [CounselorAppointmentController::class, 'claimAppointment'])
+        ->name('appointments.claim');
+
+    Route::patch('/appointments/{appointment}/reject', [CounselorAppointmentController::class, 'reject'])
+        ->name('appointments.reject');
+    Route::patch('/counselor/appointments/{appointment}/accept', [CounselorAppointmentController::class, 'accept'])->name('appointments.accept');
+    // Counselor requests reschedule
+    // Route::post('/appointments/{appointment}/request-reschedule', [CounselorAppointmentController::class, 'requestReschedule'])
+    //     ->name('appointments.request-reschedule');
+    
+    // Mark appointment as completed
+    Route::patch('/appointments/{appointment}/complete', [CounselorAppointmentController::class, 'complete'])
+    ->name('appointments.complete');
+    
+    // OPTIONAL: Keep the old routes for backward compatibility (can be removed later)
     Route::patch('/appointments/{appointment}/status', [CounselorAppointmentController::class, 'updateStatus'])
         ->name('appointments.update-status');
+    // Route::post('/appointments/{appointment}/respond-reschedule', [CounselorAppointmentController::class, 'respondToStudentReschedule'])
+    //     ->name('appointments.respond-reschedule');
+    
+    // Cancel appointment (if you still need this separate from reject)
+    Route::post('/appointments/{appointment}/cancel', [CounselorAppointmentController::class, 'cancelDueToUnavailability'])
+        ->name('appointments.cancel');
+    
+    // Calendar view
     Route::get('/calendar', [CounselorAppointmentController::class, 'counselorCalendar'])
-            ->name('calendar');
+        ->name('calendar');
     
     Route::resource('counseling-sessions', CounselingSessionController::class);
 
@@ -147,16 +176,12 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
         ->name('offenses.resolve');
         
     Route::resource('counseling-categories', CounselorCounselingCategoryController::class);
-    // Route::get('counseling-categories/{counseling_category}', [CounselingCategoryController::class, 'show'])
-    //     ->name('counseling-categories.show');
-    // Route::resource('counseling-categories', CounselorCounselingCategoryController::class)
-    //     ->except(['destroy']);
 
     Route::get('feedback', [CounselorFeedbackController::class, 'index'])
          ->name('feedback.index'); 
     Route::get('feedback/{feedback}', [CounselorFeedbackController::class, 'show'])
          ->name('feedback.show');
-    });
+});
 
 
     // 🔵 Student routes

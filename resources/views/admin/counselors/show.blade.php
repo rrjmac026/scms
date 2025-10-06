@@ -42,10 +42,22 @@
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
                                     <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $counselor->user->email }}</dd>
                                 </div>
+
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Specialization</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $counselor->specialization ?? 'General Counseling' }}</dd>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $counselor->specialization ?? 'General Counseling' }}
+                                    </dd>
                                 </div>
+
+                                <!-- ✅ Added Assigned Grade Level Section -->
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Assigned Grade Level</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $counselor->assigned_grade_level ? 'Grade ' . $counselor->assigned_grade_level : 'Unassigned' }}
+                                    </dd>
+                                </div>
+
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Availability</dt>
                                     <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
@@ -113,7 +125,6 @@
                                 @empty
                                     <p class="text-gray-500 dark:text-gray-400">No sessions recorded yet.</p>
                                 @endforelse
-
                             </div>
                         </div>
                     </div>

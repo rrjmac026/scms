@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Counselor;
@@ -49,9 +48,30 @@ class StudentManagementController extends Controller
 
             // student fields
             'student_number'  => 'required|string|max:50|unique:students,student_number',
-            'course'          => 'nullable|string|max:255',
-            'year_level'      => 'nullable|string|max:50',
+            'lrn'             => 'nullable|string|max:50',
+            'strand'          => 'nullable|string|max:255',
+            'grade_level'     => 'nullable|string|max:50',
             'special_needs'   => 'nullable|string|max:500',
+
+            // Personal Info
+            'birthdate'       => 'nullable|date',
+            'gender'          => 'nullable|string|max:50',
+            'address'         => 'nullable|string|max:500',
+            'contact_number'  => 'nullable|string|max:50',
+            'civil_status'    => 'nullable|string|max:50',
+            'nationality'     => 'nullable|string|max:100',
+            'religion'        => 'nullable|string|max:100',
+
+            // Parent/Guardian Info
+            'father_name'     => 'nullable|string|max:255',
+            'father_contact'  => 'nullable|string|max:50',
+            'father_occupation' => 'nullable|string|max:255',
+            'mother_name'     => 'nullable|string|max:255',
+            'mother_contact'  => 'nullable|string|max:50',
+            'mother_occupation' => 'nullable|string|max:255',
+            'guardian_name'   => 'nullable|string|max:255',
+            'guardian_contact' => 'nullable|string|max:50',
+            'guardian_relationship' => 'nullable|string|max:100',
         ]);
 
         // create user
@@ -68,9 +88,30 @@ class StudentManagementController extends Controller
         Student::create([
             'user_id'        => $user->id,
             'student_number' => $validated['student_number'],
-            'course'         => $validated['course'] ?? null,
-            'year_level'     => $validated['year_level'] ?? null,
+            'lrn'            => $validated['lrn'] ?? null,
+            'strand'         => $validated['strand'] ?? null,
+            'grade_level'    => $validated['grade_level'] ?? null,
             'special_needs'  => $validated['special_needs'] ?? null,
+
+            // Personal Info
+            'birthdate'      => $validated['birthdate'] ?? null,
+            'gender'         => $validated['gender'] ?? null,
+            'address'        => $validated['address'] ?? null,
+            'contact_number' => $validated['contact_number'] ?? null,
+            'civil_status'   => $validated['civil_status'] ?? null,
+            'nationality'    => $validated['nationality'] ?? null,
+            'religion'       => $validated['religion'] ?? null,
+
+            // Parent/Guardian Info
+            'father_name'    => $validated['father_name'] ?? null,
+            'father_contact' => $validated['father_contact'] ?? null,
+            'father_occupation' => $validated['father_occupation'] ?? null,
+            'mother_name'    => $validated['mother_name'] ?? null,
+            'mother_contact' => $validated['mother_contact'] ?? null,
+            'mother_occupation' => $validated['mother_occupation'] ?? null,
+            'guardian_name'  => $validated['guardian_name'] ?? null,
+            'guardian_contact' => $validated['guardian_contact'] ?? null,
+            'guardian_relationship' => $validated['guardian_relationship'] ?? null,
         ]);
 
         return redirect()->route('admin.students.index')
@@ -104,9 +145,30 @@ class StudentManagementController extends Controller
         $validated = $request->validate([
             'user_id'        => 'required|exists:users,id',
             'student_number' => 'required|string|max:50|unique:students,student_number,' . $student->id,
-            'course'         => 'nullable|string|max:255',
-            'year_level'     => 'nullable|string|max:50',
+            'lrn'            => 'nullable|string|max:50',
+            'strand'         => 'nullable|string|max:255',
+            'grade_level'    => 'nullable|string|max:50',
             'special_needs'  => 'nullable|string|max:500',
+
+            // Personal Info
+            'birthdate'      => 'nullable|date',
+            'gender'         => 'nullable|string|max:50',
+            'address'        => 'nullable|string|max:500',
+            'contact_number' => 'nullable|string|max:50',
+            'civil_status'   => 'nullable|string|max:50',
+            'nationality'    => 'nullable|string|max:100',
+            'religion'       => 'nullable|string|max:100',
+
+            // Parent/Guardian Info
+            'father_name'    => 'nullable|string|max:255',
+            'father_contact' => 'nullable|string|max:50',
+            'father_occupation' => 'nullable|string|max:255',
+            'mother_name'    => 'nullable|string|max:255',
+            'mother_contact' => 'nullable|string|max:50',
+            'mother_occupation' => 'nullable|string|max:255',
+            'guardian_name'  => 'nullable|string|max:255',
+            'guardian_contact' => 'nullable|string|max:50',
+            'guardian_relationship' => 'nullable|string|max:100',
         ]);
 
         $student->update($validated);
