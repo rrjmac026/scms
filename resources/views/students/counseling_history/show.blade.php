@@ -24,8 +24,8 @@
                                 <div class="space-y-4">
                                     <div>
                                         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Date & Time</h4>
-                                        <p class="mt-1 text-gray-900 dark:text-gray-100">
-                                            {{ $session->started_at->format('F j, Y g:i A') }}
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                        {{ $session->started_at ? $session->started_at->format('F j, Y') : 'Not started yet' }}
                                         </p>
                                     </div>
                                     <div>

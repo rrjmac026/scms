@@ -36,7 +36,7 @@
                                                         {{ $session->counselor->user->name }}
                                                     </h4>
                                                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                                                        {{ $session->started_at->format('F j, Y') }}
+                                                        {{ $session->started_at ? $session->started_at->format('F j, Y') : 'Not started yet' }}
                                                     </p>
                                                 </div>
                                             </div>
