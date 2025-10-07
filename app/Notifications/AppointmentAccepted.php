@@ -25,19 +25,9 @@ class AppointmentAccepted extends Notification
 
     public function toMail($notifiable)
     {
-        $date = $this->appointment->preferred_date->format('F d, Y');
-        $time = \Carbon\Carbon::parse($this->appointment->preferred_time)->format('h:i A');
-        $counselorName = $this->appointment->counselor->user->name;
-
-        return (new MailMessage)
+        return (new \Illuminate\Notifications\Messages\MailMessage)
             ->subject('Your Counseling Appointment has been Accepted')
-            ->greeting('Hello ' . $this->appointment->student->user->first_name . ',')
-            ->line('Your counseling appointment has been accepted by ' . $counselorName . '.')
-            ->line('Appointment Details:')
-            ->line("Date: {$date}")
-            ->line("Time: {$time}")
-            ->line('Location: Guidance Office')
-            ->action('View Appointment Details', route('student.appointments.show', $this->appointment))
-            ->line('Please arrive 5 minutes before your scheduled time.');
+            ->view('emails.appointments.accepted', ['appointment' => $this->appointment]);
     }
 }
+

@@ -25,9 +25,9 @@ class AppointmentApproved extends Notification
 
     public function toMail($notifiable)
     {
-        return (new MailMessage)
-                    ->line('Your appointment has been approved.')
-                    ->action('View Appointment', url('/appointments/'.$this->appointment->id))
-                    ->line('Thank you!');
+         return (new \Illuminate\Notifications\Messages\MailMessage)
+            ->subject('Your Counseling Appointment has been Approved')
+            ->view('emails.appointments.approved', ['appointment' => $this->appointment]);
     }
 }
+
