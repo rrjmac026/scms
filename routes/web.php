@@ -20,6 +20,7 @@ use App\Http\Controllers\Counselor\CounselorController;
 use App\Http\Controllers\Counselor\CounselingSessionController;
 use App\Http\Controllers\Counselor\OffenseController;
 use App\Http\Controllers\Counselor\CounselorCounselingCategoryController;
+use App\Http\Controllers\Counselor\CounselorGenerateReportController;
 //Student ni siya na ROutes
 use App\Http\Controllers\Student\StudentFeedbackController;
 use App\Http\Controllers\Student\StudentAppointmentController;
@@ -151,20 +152,16 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
 
     Route::patch('/appointments/{appointment}/reject', [CounselorAppointmentController::class, 'reject'])
         ->name('appointments.reject');
-    Route::patch('/counselor/appointments/{appointment}/accept', [CounselorAppointmentController::class, 'accept'])->name('appointments.accept');
-    // Counselor requests reschedule
-    // Route::post('/appointments/{appointment}/request-reschedule', [CounselorAppointmentController::class, 'requestReschedule'])
-    //     ->name('appointments.request-reschedule');
+    Route::patch('/appointments/{appointment}/accept', [CounselorAppointmentController::class, 'accept'])
+        ->name('appointments.accept');
     
     // Mark appointment as completed
     Route::patch('/appointments/{appointment}/complete', [CounselorAppointmentController::class, 'complete'])
-    ->name('appointments.complete');
+        ->name('appointments.complete');
     
     // OPTIONAL: Keep the old routes for backward compatibility (can be removed later)
     Route::patch('/appointments/{appointment}/status', [CounselorAppointmentController::class, 'updateStatus'])
         ->name('appointments.update-status');
-    // Route::post('/appointments/{appointment}/respond-reschedule', [CounselorAppointmentController::class, 'respondToStudentReschedule'])
-    //     ->name('appointments.respond-reschedule');
     
     // Cancel appointment (if you still need this separate from reject)
     Route::post('/appointments/{appointment}/cancel', [CounselorAppointmentController::class, 'cancelDueToUnavailability'])
@@ -182,6 +179,17 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
         
     Route::resource('counseling-categories', CounselorCounselingCategoryController::class);
 
+    // Report Generation Routes
+    Route::get('/reports', [CounselorGenerateReportController::class, 'index'])
+        ->name('reports.index');
+    Route::get('/reports/generate', [CounselorGenerateReportController::class, 'generateReport'])
+        ->name('reports.generate');
+    Route::get('/reports/export/pdf', [CounselorGenerateReportController::class, 'exportPDF'])
+        ->name('reports.export.pdf');
+    Route::get('/reports/export/excel', [CounselorGenerateReportController::class, 'exportExcel'])
+        ->name('reports.export.excel');
+
+    // Feedback routes
     Route::get('feedback', [CounselorFeedbackController::class, 'index'])
          ->name('feedback.index'); 
     Route::get('feedback/{feedback}', [CounselorFeedbackController::class, 'show'])

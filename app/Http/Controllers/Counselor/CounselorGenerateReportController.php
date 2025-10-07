@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Counselor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use FPDF;
 
-class GenerateReportController extends Controller
+class CounselorGenerateReportController extends Controller
 {
     // Display the report generation form
     public function index(Request $request)
@@ -24,7 +24,7 @@ class GenerateReportController extends Controller
 
         $counselors = Counselor::with('user')->get();
 
-        return view('admin.reports.generate', compact('filters', 'counselors'));
+        return view('counselors.reports.index', compact('filters', 'counselors'));
     }
 
     // Generate detailed report view
@@ -49,11 +49,6 @@ class GenerateReportController extends Controller
             ->with(['student.user', 'counselor.user', 'category'])
             ->get();
 
-        // FIXED: Changed 'session' to 'counselingSession'
-        $feedbacks = Feedback::whereBetween('created_at', [$startDate, $endDate])
-            ->when($counselorId, fn($q) => $q->whereHas('counselingSession', fn($s) => $s->where('counselor_id', $counselorId)))
-            ->with(['counselingSession.counselor.user', 'student.user'])
-            ->get();
 
         if ($appointments->isEmpty() && $sessions->isEmpty()) {
             return back()->with('error', 'No data found within the selected date range.');
@@ -66,14 +61,12 @@ class GenerateReportController extends Controller
             'cancelled_appointments' => $appointments->where('status', 'cancelled')->count(),
             'total_sessions' => $sessions->count(),
             'unique_students' => $sessions->pluck('student_id')->unique()->count(),
-            'average_rating' => $feedbacks->avg('rating') ?? 0,
-            'total_feedbacks' => $feedbacks->count(),
         ];
 
         $counselorName = $counselorId ? Counselor::find($counselorId)->user->name : 'All Counselors';
 
-        return view('admin.reports.detailed', compact(
-            'appointments', 'sessions', 'feedbacks', 
+        return view('counselors.reports.detailed', compact(
+            'appointments', 'sessions', 
             'statistics', 'startDate', 'endDate', 
             'counselorId', 'counselorName'
         ));
@@ -96,11 +89,6 @@ class GenerateReportController extends Controller
             ->with(['student.user', 'counselor.user', 'category'])
             ->get();
 
-        // FIXED: Changed 'session' to 'counselingSession'
-        $feedbacks = Feedback::whereBetween('created_at', [$startDate, $endDate])
-            ->when($counselorId, fn($q) => $q->whereHas('counselingSession', fn($s) => $s->where('counselor_id', $counselorId)))
-            ->with(['counselingSession.counselor.user', 'student.user'])
-            ->get();
 
         $statistics = [
             'Total Appointments' => $appointments->count(),
@@ -109,8 +97,6 @@ class GenerateReportController extends Controller
             'Cancelled Appointments' => $appointments->where('status','cancelled')->count(),
             'Total Sessions' => $sessions->count(),
             'Total Students' => $sessions->pluck('student_id')->unique()->count(),
-            'Total Feedbacks' => $feedbacks->count(),
-            'Average Rating' => number_format($feedbacks->avg('rating') ?? 0, 2),
         ];
 
         $counselorName = $counselorId ? Counselor::find($counselorId)->user->name : 'All Counselors';
@@ -180,27 +166,6 @@ class GenerateReportController extends Controller
             }
         }
 
-        // Add feedbacks table
-        if($feedbacks->isNotEmpty()) {
-            $pdf->AddPage();
-            $pdf->SetFont('Arial','B',14);
-            $pdf->Cell(0,10,'Feedback Summary',0,1);
-            $pdf->Ln(2);
-            $pdf->SetFont('Arial','B',10);
-            $pdf->Cell(40,8,'Date',1);
-            $pdf->Cell(60,8,'Student',1);
-            $pdf->Cell(30,8,'Rating',1);
-            $pdf->Cell(50,8,'Comments',1);
-            $pdf->Ln();
-            $pdf->SetFont('Arial','',9);
-            foreach($feedbacks as $feedback) {
-                $pdf->Cell(40,8,$feedback->created_at->format('Y-m-d'),1);
-                $pdf->Cell(60,8,substr($feedback->student->user->name ?? 'N/A', 0, 30),1);
-                $pdf->Cell(30,8,$feedback->rating . '/5',1);
-                $pdf->Cell(50,8,substr($feedback->comments ?? 'No comment', 0, 25),1);
-                $pdf->Ln();
-            }
-        }
 
         $filename = 'counseling_report_'.$startDate->format('Ymd').'_to_'.$endDate->format('Ymd').'.pdf';
         
@@ -234,11 +199,6 @@ class GenerateReportController extends Controller
             ->with(['student.user', 'counselor.user', 'category'])
             ->get();
 
-        // FIXED: Changed 'session' to 'counselingSession'
-        $feedbacks = Feedback::whereBetween('created_at', [$startDate, $endDate])
-            ->when($counselorId, fn($q) => $q->whereHas('counselingSession', fn($s) => $s->where('counselor_id', $counselorId)))
-            ->with(['counselingSession.counselor.user', 'student.user'])
-            ->get();
 
         $analytics = [
             'kpis' => [
@@ -248,8 +208,6 @@ class GenerateReportController extends Controller
                 'cancelled_appointments' => $appointments->where('status','cancelled')->count(),
                 'total_sessions' => $sessions->count(),
                 'unique_students' => $sessions->pluck('student_id')->unique()->count(),
-                'average_rating' => $feedbacks->avg('rating') ?? 0,
-                'total_feedbacks' => $feedbacks->count(),
             ],
             'charts' => [
                 'sessions_per_month' => [
