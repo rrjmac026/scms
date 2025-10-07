@@ -61,7 +61,7 @@
                                         <div>
                                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Duration</dt>
                                             <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $counselingSession->duration }} minutes
+                                                {{ $counselingSession->formatted_duration }} minutes
                                             </dd>
                                         </div>
                                     @endif

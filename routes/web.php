@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminSessionController;
 use App\Http\Controllers\Admin\AdminOffenseController;
 use App\Http\Controllers\Admin\AdminCounselingCategoryController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\GenerateReportController;
 //Counselor ni siya na Routes
 use App\Http\Controllers\Counselor\CounselorAppointmentController;
 use App\Http\Controllers\Counselor\CounselorFeedbackController;
@@ -109,8 +110,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::resource('counseling-sessions', AdminSessionController::class);
 
-    Route::resource('offenses', AdminOffenseController::class);
-    Route::post('offenses/{offense}/resolve', [AdminOffenseController::class, 'resolve'])->name('offenses.resolve');
+    // Route::resource('offenses', AdminOffenseController::class);
+    // Route::post('offenses/{offense}/resolve', [AdminOffenseController::class, 'resolve'])->name('offenses.resolve');
 
     Route::resource('counseling-categories', AdminCounselingCategoryController::class);
     Route::patch('counseling-categories/{counseling_category}/approve', [AdminCounselingCategoryController::class, 'approve'])->name('counseling-categories.approve');
@@ -124,11 +125,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Reports Routes
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
-        Route::get('/generate', [ReportController::class, 'generateReport'])->name('generate'); 
-        Route::get('/export/pdf', [ReportController::class, 'exportPDF'])->name('export.pdf');
-        Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/generate', [ReportController::class, 'generate'])->name('generate'); 
+
+        // Correct paths
+        Route::get('/export/pdf', [GenerateReportController::class, 'exportPDF'])->name('export.pdf');
+        Route::get('/export/excel', [GenerateReportController::class, 'exportExcel'])->name('export.excel');
+
         Route::get('/analytics', [ReportController::class, 'analytics'])->name('analytics');
     });
+
 });
 
 // 🟡 Counselor routes

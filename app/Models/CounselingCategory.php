@@ -23,5 +23,8 @@ class CounselingCategory extends Model
         return $this->belongsTo(Counselor::class);
     }
 
-    
+    public function appointments()
+    {
+        return $this->hasMany(\App\Models\Appointment::class);
+    }
 }

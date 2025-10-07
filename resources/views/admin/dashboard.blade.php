@@ -195,17 +195,6 @@
                                     <span class="text-xs text-gray-500 dark:text-gray-400">Monitor counseling progress</span>
                                 </div>
                             </a>
-                            
-                            <a href="{{ route('admin.offenses.index') }}" 
-                               class="group flex items-center p-4 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 rounded-xl border-2 border-transparent hover:border-red-200 dark:hover:border-red-800 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
-                                <div class="p-3 bg-red-600 rounded-lg mr-4 group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fas fa-exclamation-triangle text-white"></i>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-semibold text-gray-900 dark:text-white block">Manage Offenses</span>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">Handle disciplinary matters</span>
-                                </div>
-                            </a>
                         </div>
                     </div>
                 </div>

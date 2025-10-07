@@ -34,14 +34,6 @@ class Offense extends Model
         return $this->belongsTo(Student::class);
     }
 
-    /**
-     * The counselor who recorded or handled the offense.
-     */
-    public function counselor()
-    {
-        return $this->belongsTo(Counselor::class);
-    }
-
     public function counselingSession()
     {
         return $this->belongsTo(CounselingSession::class);

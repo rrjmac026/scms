@@ -31,7 +31,7 @@
                                     <div>
                                         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Duration</h4>
                                         <p class="mt-1 text-gray-900 dark:text-gray-100">
-                                            {{ $session->duration }} minutes
+                                            {{ $session->formatted_duration }}
                                         </p>
                                     </div>
                                     <div>

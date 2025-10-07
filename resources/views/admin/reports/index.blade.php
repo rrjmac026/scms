@@ -5,15 +5,10 @@
                 {{ __('Reports & Analytics') }}
             </h2>
             <div class="flex space-x-4">
-                <a href="{{ route('admin.reports.export.pdf', request()->all()) }}" 
-                   class="inline-flex items-center px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">
-                    <i class="fas fa-file-pdf mr-2"></i>
-                    Export PDF
-                </a>
-                <a href="{{ route('admin.reports.export.excel', request()->all()) }}" 
+                <a href="{{ route('admin.reports.generate', request()->all()) }}" 
                    class="inline-flex items-center px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">
                     <i class="fas fa-file-excel mr-2"></i>
-                    Export Excel
+                    Generate Report Page
                 </a>
             </div>
         </div>
@@ -39,17 +34,6 @@
                             @foreach($counselors as $counselor)
                                 <option value="{{ $counselor->id }}" @selected($filters['counselor_id'] == $counselor->id)>
                                     {{ $counselor->user->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <x-input-label for="category" value="{{ __('Category') }}"/>
-                        <select name="category" class="w-full border-gray-300 dark:border-gray-700 rounded-md shadow-sm">
-                            <option value="">All Categories</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category }}" @selected($filters['category'] == $category)>
-                                    {{ $category }}
                                 </option>
                             @endforeach
                         </select>
@@ -228,170 +212,226 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
         // Auto-submit form on filter change
-        document.querySelectorAll('#filterForm select, #filterForm input').forEach(el => {
-            el.addEventListener('change', () => document.getElementById('filterForm').submit());
-        });
-
-        // Chart.js initialization
-        document.addEventListener('DOMContentLoaded', function() {
-            const chartData = @json($analytics['charts']);
-
-            // Sessions Per Month Chart
-            if (chartData.sessionsPerMonth) {
-                new Chart(document.getElementById('sessionsPerMonthChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.sessionsPerMonth.labels,
-                        datasets: [{
-                            label: 'Sessions',
-                            data: chartData.sessionsPerMonth.data,
-                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { beginAtZero: true }
-                        }
-                    }
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            const inputs = filterForm.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    filterForm.submit();
                 });
-            }
+            });
+        }
 
-            // Appointments Status Chart
-            if (chartData.appointmentsByStatus) {
-                new Chart(document.getElementById('appointmentStatusChart'), {
-                    type: 'pie',
-                    data: {
-                        labels: chartData.appointmentsByStatus.labels,
-                        datasets: [{
-                            data: chartData.appointmentsByStatus.data,
-                            backgroundColor: [
-                                'rgba(34, 197, 94, 0.6)',
-                                'rgba(234, 179, 8, 0.6)',
-                                'rgba(239, 68, 68, 0.6)',
-                                'rgba(156, 163, 175, 0.6)'
-                            ],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
-            }
+        // Chart data from backend
+        const chartData = @json($analytics['charts']);
+        console.log('Chart Data:', chartData);
 
-            // Feedback Trends Chart
-            if (chartData.feedbackTrends) {
-                new Chart(document.getElementById('feedbackTrendsChart'), {
-                    type: 'line',
-                    data: {
-                        labels: chartData.feedbackTrends.labels,
-                        datasets: [{
-                            label: 'Average Rating',
-                            data: chartData.feedbackTrends.data,
-                            borderColor: 'rgba(234, 179, 8, 1)',
-                            backgroundColor: 'rgba(234, 179, 8, 0.2)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { 
-                                beginAtZero: true,
-                                max: 5
-                            }
-                        }
-                    }
-                });
-            }
+        // Verify all required elements exist
+        const requiredCharts = [
+            'sessionsPerMonthChart',
+            'appointmentStatusChart',
+            'feedbackTrendsChart',
+            'topOffensesChart',
+            'counselorWorkloadChart',
+            'categoryDistributionChart'
+        ];
 
-            // Top Offenses Chart
-            if (chartData.topOffenses) {
-                new Chart(document.getElementById('topOffensesChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: chartData.topOffenses.labels,
-                        datasets: [{
-                            data: chartData.topOffenses.data,
-                            backgroundColor: [
-                                'rgba(239, 68, 68, 0.6)',
-                                'rgba(59, 130, 246, 0.6)',
-                                'rgba(234, 179, 8, 0.6)',
-                                'rgba(34, 197, 94, 0.6)',
-                                'rgba(168, 85, 247, 0.6)',
-                                'rgba(251, 146, 60, 0.6)'
-                            ],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
-            }
-
-            // Counselor Workload Chart
-            if (chartData.counselorWorkload) {
-                new Chart(document.getElementById('counselorWorkloadChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.counselorWorkload.labels,
-                        datasets: [{
-                            label: 'Sessions Handled',
-                            data: chartData.counselorWorkload.data,
-                            backgroundColor: 'rgba(34, 197, 94, 0.6)',
-                            borderColor: 'rgba(34, 197, 94, 1)',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        indexAxis: 'y',
-                        scales: {
-                            x: { beginAtZero: true }
-                        }
-                    }
-                });
-            }
-
-            // Category Distribution Chart
-            if (chartData.categoryDistribution) {
-                new Chart(document.getElementById('categoryDistributionChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.categoryDistribution.labels,
-                        datasets: [{
-                            label: 'Sessions',
-                            data: chartData.categoryDistribution.data,
-                            backgroundColor: 'rgba(168, 85, 247, 0.6)',
-                            borderColor: 'rgba(168, 85, 247, 1)',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { beginAtZero: true }
-                        }
-                    }
-                });
+        requiredCharts.forEach(chartId => {
+            if (!document.getElementById(chartId)) {
+                console.error(`Canvas element ${chartId} not found!`);
             }
         });
-    </script>
-    @endpush
+
+        // Helper function to generate colors
+        const generateColors = (count) => {
+            const colors = [
+                'rgba(59, 130, 246, 0.8)',   // blue
+                'rgba(34, 197, 94, 0.8)',     // green
+                'rgba(239, 68, 68, 0.8)',     // red
+                'rgba(234, 179, 8, 0.8)',     // yellow
+                'rgba(168, 85, 247, 0.8)',    // purple
+                'rgba(251, 146, 60, 0.8)',    // orange
+                'rgba(6, 182, 212, 0.8)',     // cyan
+                'rgba(236, 72, 153, 0.8)',    // pink
+            ];
+            return colors.slice(0, count);
+        };
+
+        // Sessions Per Month Chart (Bar)
+        if (chartData.sessionsPerMonth && document.getElementById('sessionsPerMonthChart')) {
+            new Chart(document.getElementById('sessionsPerMonthChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.sessionsPerMonth.labels || [],
+                    datasets: [{
+                        label: 'Sessions',
+                        data: chartData.sessionsPerMonth.data || [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Appointments by Status Chart (Pie)
+        if (chartData.appointmentsByStatus && document.getElementById('appointmentStatusChart')) {
+            new Chart(document.getElementById('appointmentStatusChart'), {
+                type: 'pie',
+                data: {
+                    labels: chartData.appointmentsByStatus.labels || [],
+                    datasets: [{
+                        data: chartData.appointmentsByStatus.data || [],
+                        backgroundColor: generateColors(chartData.appointmentsByStatus.labels?.length || 3),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // Feedback Trends Chart (Line)
+        if (chartData.feedbackTrends && document.getElementById('feedbackTrendsChart')) {
+            new Chart(document.getElementById('feedbackTrendsChart'), {
+                type: 'line',
+                data: {
+                    labels: chartData.feedbackTrends.labels || [],
+                    datasets: [{
+                        label: 'Average Rating',
+                        data: chartData.feedbackTrends.data || [],
+                        backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                        borderColor: 'rgba(234, 179, 8, 1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Top Offenses Chart (Doughnut)
+        if (chartData.topOffenses && document.getElementById('topOffensesChart')) {
+            new Chart(document.getElementById('topOffensesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.topOffenses.labels || [],
+                    datasets: [{
+                        data: chartData.topOffenses.data || [],
+                        backgroundColor: generateColors(chartData.topOffenses.labels?.length || 5),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // Counselor Workload Chart (Horizontal Bar)
+        if (chartData.counselorWorkload && document.getElementById('counselorWorkloadChart')) {
+            new Chart(document.getElementById('counselorWorkloadChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.counselorWorkload.labels || [],
+                    datasets: [{
+                        label: 'Sessions',
+                        data: chartData.counselorWorkload.data || [],
+                        backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Category Distribution Chart (Bar)
+        if (chartData.categoryDistribution && document.getElementById('categoryDistributionChart')) {
+            new Chart(document.getElementById('categoryDistributionChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.categoryDistribution.labels || [],
+                    datasets: [{
+                        label: 'Sessions',
+                        data: chartData.categoryDistribution.data || [],
+                        backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                        borderColor: 'rgba(168, 85, 247, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+@endpush
 </x-app-layout>

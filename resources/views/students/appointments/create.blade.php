@@ -71,4 +71,19 @@
             </div>
         </div>
     </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const dateInput = document.getElementById('preferred_date');
+
+    dateInput.addEventListener('change', function () {
+        const selectedDate = new Date(this.value);
+        const day = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
+
+        if (day === 0 || day === 6) {
+            alert('Appointments can only be booked on weekdays (Monday to Friday).');
+            this.value = ''; // clear the invalid date
+        }
+    });
+});
+</script>
 </x-app-layout>
