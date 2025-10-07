@@ -15,7 +15,7 @@ class AdminSeeder extends Seeder
     {
         // Admin
         User::updateOrCreate(
-            ['email' => 'admin@admin.com'], 
+            ['email' => 'erven.granada@lccdo.edu.ph'], 
             [
                 'first_name' => 'Erven',
                 'middle_name' => 'Capili',

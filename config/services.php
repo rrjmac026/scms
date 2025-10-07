@@ -39,6 +39,17 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
+
+        // Add these for Socialite
+        'login_redirect' => env('GOOGLE_LOGIN_REDIRECT', '/auth/google/callback'),
+        'scopes' => [
+            'https://www.googleapis.com/auth/userinfo.email',
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/calendar',
+            'https://www.googleapis.com/auth/calendar.events',
+        ],
+        'approval_prompt' => 'consent',
+        'access_type' => 'offline',
     ],
 
 

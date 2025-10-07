@@ -10,56 +10,31 @@ use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class GoogleAuthController extends Controller
 {
     public function redirectToGoogle()
     {
         try {
-            $user = Auth::user();
-            if (!$user) {
-                Log::error('No authenticated user when redirecting to Google OAuth');
-                return redirect()->route('login')->with('error', 'Please login before connecting Google Calendar.');
-            }
-
+            // For login, we don't need calendar access, just basic profile info
             $client = new Google_Client();
             $client->setClientId(config('services.google.client_id'));
             $client->setClientSecret(config('services.google.client_secret'));
             $client->setRedirectUri(config('services.google.redirect'));
 
-            // Force offline access to get a refresh token
-            $client->setAccessType('offline');
-            $client->setPrompt('consent'); // Force consent every time
-            $client->setIncludeGrantedScopes(true);
-
-            // Scopes required for Calendar and basic user info
+            // Only request basic profile info for login
             $client->setScopes([
-                'https://www.googleapis.com/auth/calendar',
-                'https://www.googleapis.com/auth/calendar.events',
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile'
             ]);
 
-            // Optional: state for security
-            $state = base64_encode(json_encode([
-                'user_id' => $user->id,
-                'timestamp' => time(),
-                'csrf' => csrf_token()
-            ]));
-            $client->setState($state);
-
             $authUrl = $client->createAuthUrl();
-            Log::info('Redirecting user to Google OAuth', [
-                'user_id' => $user->id,
-                'auth_url' => $authUrl
-            ]);
-
             return redirect($authUrl);
 
         } catch (\Exception $e) {
             Log::error('Failed to initiate Google OAuth: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            return redirect()->back()->with('error', 'Failed to connect to Google Calendar. Please try again.');
+            return redirect()->route('login')->with('error', 'Failed to connect to Google. Please try again.');
         }
     }
 
@@ -67,68 +42,70 @@ class GoogleAuthController extends Controller
     public function handleGoogleCallback(Request $request)
     {
         try {
-            // Check if the user is authenticated
-            $user = Auth::user();
-            if (!$user) {
-                Log::error('No authenticated user during Google callback');
-                return redirect()->route('login')->with('error', 'Please login before connecting Google Calendar.');
-            }
-
-            // Handle errors from Google
             if ($request->has('error')) {
-                Log::error('Google OAuth error: ' . $request->get('error'));
-                return $this->redirectToDashboard()->with('error', 'Failed to connect to Google Calendar.');
+                return redirect()->route('login')->with('error', 'Google authentication failed.');
             }
 
-            // Create Google client
             $client = new Google_Client();
             $client->setClientId(config('services.google.client_id'));
             $client->setClientSecret(config('services.google.client_secret'));
             $client->setRedirectUri(config('services.google.redirect'));
-            $client->setAccessType('offline'); // Needed for refresh token
-            $client->setPrompt('consent');     // Force refresh token on reconnection
 
-            $code = $request->get('code');
-            if (!$code) {
-                Log::error('No code received from Google callback');
-                return $this->redirectToDashboard()->with('error', 'No authorization code received.');
-            }
-
-            // Exchange code for tokens
-            $token = $client->fetchAccessTokenWithAuthCode($code);
-
-            // Log token for debugging
-            Log::info('Google token received', ['token' => $token]);
-
+            $token = $client->fetchAccessTokenWithAuthCode($request->get('code'));
             if (isset($token['error'])) {
-                Log::error('Google token error', $token);
-                return $this->redirectToDashboard()->with('error', 'Failed to get access token: ' . $token['error']);
+                return redirect()->route('login')->with('error', 'Failed to get access token.');
             }
-            $client->setAccessToken($token['access_token']); // Set token for the request
 
-            $googleService = new \Google_Service_Oauth2($client);
+            $client->setAccessToken($token);
+            $googleService = new Google_Service_Oauth2($client);
             $googleUser = $googleService->userinfo->get();
 
-            // Store token and expiry
-            $user->update([
-                'google_id' => $googleUser->id,
-                'google_token' => $token, // Laravel handles JSON conversion
-                'google_token_expires_at' => isset($token['expires_in'])
-                    ? now()->addSeconds($token['expires_in'])
-                    : null,
-            ]);
+            // Find or create user
+            $user = User::where('email', $googleUser->email)->first();
 
-            Log::info("Google Calendar connected for user {$user->id}");
+            if (!$user) {
+                // Handle new user registration
+                $names = explode(' ', $googleUser->name);
+                $firstName = $names[0];
+                $lastName = end($names);
+                $middleName = count($names) > 2 ? implode(' ', array_slice($names, 1, -1)) : null;
 
-            return $this->redirectToDashboard()->with('success', 'Google Calendar connected successfully!');
+                $user = User::create([
+                    'first_name' => $firstName,
+                    'middle_name' => $middleName,
+                    'last_name' => $lastName,
+                    'email' => $googleUser->email,
+                    'google_id' => $googleUser->id,
+                    'email_verified_at' => now(),
+                    'password' => bcrypt(Str::random(24)),
+                ]);
+            }
+
+            // Update Google ID if not set
+            if (!$user->google_id) {
+                $user->update(['google_id' => $googleUser->id]);
+            }
+
+            // Log the user in
+            Auth::login($user, true);
+
+            return redirect()->intended($this->redirectBasedOnRole($user));
 
         } catch (\Exception $e) {
-            Log::error('Google Calendar connection failed: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            return $this->redirectToDashboard()->with('error', 'Failed to connect to Google Calendar. Please try again.');
+            Log::error('Google authentication failed: ' . $e->getMessage());
+            return redirect()->route('login')->with('error', 'Authentication failed. Please try again.');
         }
     }
 
+    private function redirectBasedOnRole($user)
+    {
+        return match($user->role) {
+            'admin' => '/admin/dashboard',
+            'counselor' => '/counselor/dashboard',
+            'student' => '/student/dashboard',
+            default => '/dashboard',
+        };
+    }
 
     /**
      * Disconnect Google Calendar integration

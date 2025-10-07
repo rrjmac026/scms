@@ -20,7 +20,7 @@ class CounselorSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
         $counselorUser1 = User::updateOrCreate(
-            ['email' => 'angelagrachetteestenzo@university.com'],
+            ['email' => 'angela.estenzo@lccdo.edu.ph'],
             [
                 'first_name'       => 'Angela',
                 'middle_name'      => 'Cena',
@@ -54,7 +54,7 @@ class CounselorSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
         $counselorUser2 = User::updateOrCreate(
-            ['email' => 'markanthony.delacruz@university.com'],
+            ['email' => 'markanthony.delacruz@lccdo.edu.ph'],
             [
                 'first_name'       => 'Mark Anthony',
                 'middle_name'      => 'Reyes',

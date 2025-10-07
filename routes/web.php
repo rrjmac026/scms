@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Route;
 //Auth
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Auth\GoogleLoginController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -70,6 +71,16 @@ Route::middleware(['guest'])->group(function () {
          ->name('two-factor.challenge');
     Route::post('/two-factor-challenge', [AuthenticatedSessionController::class, 'twoFactorChallenge'])
          ->name('two-factor.verify');
+    Route::get('/auth/google/login', [GoogleLoginController::class, 'redirectToGoogle'])
+        ->name('auth.google');
+    Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback'])
+        ->name('auth.google.callback');
+        
+    // Keep existing Google Calendar routes
+    Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
+        ->name('google.connect');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])
+        ->name('google.callback');
 });
 
 /*

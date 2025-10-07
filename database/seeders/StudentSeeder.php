@@ -20,16 +20,16 @@ class StudentSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
         $studentUser1 = User::updateOrCreate(
-            ['email' => 'seanrodelserrera@student.com'],
+            ['email' => 'sean.serrera@lccdo.edu.ph'],
             [
-                'first_name'       => 'Sean Rodel',
-                'middle_name'      => 'Main',
-                'last_name'        => 'Serrera',
-                'role'             => 'student',
-                'contact_number'   => '09123456789',
-                'address'          => 'Brgy. San Miguel, Cityville',
-                'password'         => Hash::make('password'),
-                'email_verified_at'=> now(),
+                'first_name'        => 'Sean Rodel',
+                'middle_name'       => 'Main',
+                'last_name'         => 'Serrera',
+                'role'              => 'student',
+                'contact_number'    => '09123456789',
+                'address'           => 'Brgy. San Miguel, Cityville',
+                'password'          => Hash::make('password'),
+                'email_verified_at' => now(),
             ]
         );
 
@@ -66,16 +66,16 @@ class StudentSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
         $studentUser2 = User::updateOrCreate(
-            ['email' => '1901102366@student.buksu.edu.ph'],
+            ['email' => '1901102366@lccdo.edu.ph'],
             [
-                'first_name'       => 'Rey Rameses Jude',
-                'middle_name'      => 'Sanchez',
-                'last_name'        => 'Macalutas III',
-                'role'             => 'student',
-                'contact_number'   => '09998887777',
-                'address'          => 'Brgy. Casisang, Malaybalay City',
-                'password'         => Hash::make('password'),
-                'email_verified_at'=> now(),
+                'first_name'        => 'Rey Rameses Jude',
+                'middle_name'       => 'Sanchez',
+                'last_name'         => 'Macalutas III',
+                'role'              => 'student',
+                'contact_number'    => '09998887777',
+                'address'           => 'Brgy. Casisang, Malaybalay City',
+                'password'          => Hash::make('password'),
+                'email_verified_at' => now(),
             ]
         );
 
@@ -105,5 +105,7 @@ class StudentSeeder extends Seeder
                 'guardian_relationship' => 'Father',
             ]
         );
+
+        Student::factory()->count(1295)->create();
     }
 }

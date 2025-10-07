@@ -9,9 +9,6 @@
         </div>
 
         <div class="max-w-md w-full space-y-8 relative">
-                <!-- Session Status -->
-                <x-auth-session-status class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl text-green-700 dark:text-green-300 font-medium" :status="session('status')" />
-
                 <form method="POST" action="{{ route('login') }}" class="space-y-6">
                     @csrf
 
@@ -87,7 +84,38 @@
                         </x-primary-button>
                     </div>
                 </form>
+
+                <!-- Divider -->
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 font-medium">
+                            Or continue with
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Google Login Button -->
+                <div class="mt-2">
+                    <a href="{{ route('auth.google') }}" 
+                       class="w-full flex items-center justify-center px-4 py-4 space-x-3 text-gray-600 dark:text-gray-300 transition-all duration-300 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white hover:border-pink-300 dark:hover:border-pink-500 focus:outline-none focus:ring-4 focus:ring-pink-200/50 dark:focus:ring-pink-800/50 transform hover:scale-[1.01] shadow-lg hover:shadow-xl">
+                        <svg class="w-5 h-5" viewBox="0 0 48 48">
+                            <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+                            <path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+                            <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+                            <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+                        </svg>
+                        <span class="font-medium">Login with Google (LCCDO emails only)</span>
+                    </a>
+                </div>
         </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-3 pointer-events-none">
+        <!-- Toasts will be dynamically inserted here -->
     </div>
 
     <style>
@@ -98,6 +126,36 @@
         
         .animate-float {
             animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        .toast-slide-in {
+            animation: slideInRight 0.3s ease-out forwards;
+        }
+        
+        .toast-slide-out {
+            animation: slideOutRight 0.3s ease-in forwards;
         }
         
         /* Custom focus styles */
@@ -119,6 +177,69 @@
     </style>
 
     <script>
+        // Toast Notification System
+        function showToast(message, type = 'error') {
+            const toastContainer = document.getElementById('toastContainer');
+            
+            // Toast color schemes
+            const styles = {
+                error: {
+                    bg: 'bg-red-500 dark:bg-red-600',
+                    icon: 'fa-exclamation-circle',
+                    iconColor: 'text-white'
+                },
+                success: {
+                    bg: 'bg-green-500 dark:bg-green-600',
+                    icon: 'fa-check-circle',
+                    iconColor: 'text-white'
+                },
+                warning: {
+                    bg: 'bg-yellow-500 dark:bg-yellow-600',
+                    icon: 'fa-exclamation-triangle',
+                    iconColor: 'text-white'
+                },
+                info: {
+                    bg: 'bg-blue-500 dark:bg-blue-600',
+                    icon: 'fa-info-circle',
+                    iconColor: 'text-white'
+                }
+            };
+            
+            const style = styles[type] || styles.error;
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `${style.bg} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 min-w-[320px] max-w-md pointer-events-auto toast-slide-in`;
+            
+            toast.innerHTML = `
+                <div class="flex-shrink-0">
+                    <i class="fas ${style.icon} ${style.iconColor} text-xl"></i>
+                </div>
+                <div class="flex-1 font-medium text-sm leading-relaxed">${message}</div>
+                <button onclick="closeToast(this)" class="flex-shrink-0 ml-4 text-white/80 hover:text-white transition-colors duration-200">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                closeToast(toast.querySelector('button'));
+            }, 5000);
+        }
+        
+        function closeToast(button) {
+            const toast = button.closest('div[class*="toast-slide-in"]');
+            if (toast) {
+                toast.classList.remove('toast-slide-in');
+                toast.classList.add('toast-slide-out');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }
+        }
+        
         // Password toggle functionality
         document.getElementById('togglePassword').addEventListener('click', function() {
             const password = document.getElementById('password');
@@ -133,6 +254,36 @@
                 eyeIcon.classList.remove('fa-eye-slash');
                 eyeIcon.classList.add('fa-eye');
             }
+        });
+        
+        // Show toasts for Laravel errors and status messages
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for error messages (Google OAuth errors, validation errors, etc.)
+            @if ($errors->has('email'))
+                showToast("{{ $errors->first('email') }}", 'error');
+            @endif
+            
+            @if ($errors->has('password'))
+                showToast("{{ $errors->first('password') }}", 'error');
+            @endif
+            
+            // Check for success messages
+            @if (session('status'))
+                showToast("{{ session('status') }}", 'success');
+            @endif
+            
+            // Check for any other session errors
+            @if (session('error'))
+                showToast("{{ session('error') }}", 'error');
+            @endif
+            
+            @if (session('warning'))
+                showToast("{{ session('warning') }}", 'warning');
+            @endif
+            
+            @if (session('info'))
+                showToast("{{ session('info') }}", 'info');
+            @endif
         });
     </script>
 </x-guest-layout>
