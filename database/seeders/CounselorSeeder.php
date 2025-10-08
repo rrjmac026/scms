@@ -54,10 +54,10 @@ class CounselorSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
         $counselorUser2 = User::updateOrCreate(
-            ['email' => 'markanthony.delacruz@lccdo.edu.ph'],
+            ['email' => 'sean.serrera@lccdo.edu.ph'],
             [
-                'first_name'       => 'Mark Anthony',
-                'middle_name'      => 'Reyes',
+                'first_name'       => 'Sean Rodel',
+                'middle_name'      => 'Serrera',
                 'last_name'        => 'Dela Cruz',
                 'role'             => 'counselor',
                 'contact_number'   => '09998887777',

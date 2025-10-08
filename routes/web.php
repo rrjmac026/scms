@@ -47,9 +47,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
     Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])
-    ->middleware(['auth', 'verified'])
-    ->name('profile.update-photo');
+        ->middleware(['auth', 'verified'])
+        ->name('profile.update-photo');
+
     //Google OAuth ni siya
     Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('google.connect');
     Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('google.callback');
@@ -58,30 +60,22 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/auth/google/status', [GoogleAuthController::class, 'status'])
         ->name('google.status');
-        
-    
-    //2FA shit
+
+    // 2FA
     Route::post('/profile/2fa/enable', [ProfileController::class, 'enableTwoFactor'])->name('profile.enableTwoFactor');
     Route::post('/profile/2fa/verify', [ProfileController::class, 'verifyTwoFactor'])->name('profile.verifyTwoFactor');
     Route::delete('/profile/2fa/disable', [ProfileController::class, 'disableTwoFactor'])->name('profile.disableTwoFactor');
 });
 
 Route::middleware(['guest'])->group(function () {
-    Route::get('/two-factor-challenge', [AuthenticatedSessionController::class, 'showTwoFactorChallenge'])
-         ->name('two-factor.challenge');
-    Route::post('/two-factor-challenge', [AuthenticatedSessionController::class, 'twoFactorChallenge'])
-         ->name('two-factor.verify');
-    Route::get('/auth/google/login', [GoogleLoginController::class, 'redirectToGoogle'])
-        ->name('auth.google');
-    Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback'])
-        ->name('auth.google.callback');
-        
-    // Keep existing Google Calendar routes
-    Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
-        ->name('google.connect');
-    Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])
-        ->name('google.callback');
+    Route::get('/two-factor-challenge', [AuthenticatedSessionController::class, 'showTwoFactorChallenge'])->name('two-factor.challenge');
+    Route::post('/two-factor-challenge', [AuthenticatedSessionController::class, 'twoFactorChallenge'])->name('two-factor.verify');
+
+    // ✅ Google Login only
+    Route::get('/auth/google/login', [GoogleLoginController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('/auth/google/callback', [GoogleLoginController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 });
+
 
 /*
 |--------------------------------------------------------------------------
