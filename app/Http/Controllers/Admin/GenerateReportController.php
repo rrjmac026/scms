@@ -17,8 +17,8 @@ class GenerateReportController extends Controller
     public function index(Request $request)
     {
         $filters = [
-            'start_date' => $request->input('start_date', now()->startOfMonth()->format('Y-m-d')),
-            'end_date' => $request->input('end_date', now()->endOfMonth()->format('Y-m-d')),
+            'start_date' => $request->input('start_date', now()->startOfMonth()->format('F j, Y')),
+            'end_date' => $request->input('end_date', now()->endOfMonth()->format('F j, Y')),
             'counselor_id' => $request->input('counselor_id', '')
         ];
 
@@ -120,7 +120,7 @@ class GenerateReportController extends Controller
         $pdf->SetFont('Arial','B',16);
         $pdf->Cell(0,10,'Counseling Report',0,1,'C');
         $pdf->SetFont('Arial','',12);
-        $pdf->Cell(0,8,'Period: '.$startDate->format('Y-m-d').' to '.$endDate->format('Y-m-d'),0,1);
+        $pdf->Cell(0,8,'Period: '.$startDate->format('F j, Y').' to '.$endDate->format('F j, Y'),0,1);
         $pdf->Cell(0,8,'Counselor: '.$counselorName,0,1);
         $pdf->Ln(5);
 
@@ -150,7 +150,7 @@ class GenerateReportController extends Controller
             $pdf->Ln();
             $pdf->SetFont('Arial','',9);
             foreach($appointments as $app) {
-                $pdf->Cell(30,8,$app->preferred_date->format('Y-m-d'),1);
+                $pdf->Cell(30,8,$app->preferred_date->format('F j, Y'),1);
                 $pdf->Cell(60,8,substr($app->student->user->name ?? 'N/A', 0, 30),1);
                 $pdf->Cell(60,8,substr($app->counselor->user->name ?? 'N/A', 0, 30),1);
                 $pdf->Cell(30,8,ucfirst($app->status),1);
@@ -172,7 +172,7 @@ class GenerateReportController extends Controller
             $pdf->Ln();
             $pdf->SetFont('Arial','',9);
             foreach($sessions as $session) {
-                $pdf->Cell(30,8,$session->started_at->format('Y-m-d'),1);
+                $pdf->Cell(30,8,$session->started_at->format('F j, Y'),1);
                 $pdf->Cell(60,8,substr($session->student->user->name ?? 'N/A', 0, 30),1);
                 $pdf->Cell(60,8,substr($session->counselor->user->name ?? 'N/A', 0, 30),1);
                 $pdf->Cell(30,8,$session->formatted_duration ?? 'N/A',1);
@@ -194,7 +194,7 @@ class GenerateReportController extends Controller
             $pdf->Ln();
             $pdf->SetFont('Arial','',9);
             foreach($feedbacks as $feedback) {
-                $pdf->Cell(40,8,$feedback->created_at->format('Y-m-d'),1);
+                $pdf->Cell(40,8,$feedback->created_at->format('F j, Y'),1);
                 $pdf->Cell(60,8,substr($feedback->student->user->name ?? 'N/A', 0, 30),1);
                 $pdf->Cell(30,8,$feedback->rating . '/5',1);
                 $pdf->Cell(50,8,substr($feedback->comments ?? 'No comment', 0, 25),1);
@@ -215,8 +215,8 @@ class GenerateReportController extends Controller
     public function exportExcel(Request $request)
     {
         $filters = [
-            'start_date' => $request->input('start_date', now()->startOfMonth()->format('Y-m-d')),
-            'end_date' => $request->input('end_date', now()->endOfMonth()->format('Y-m-d')),
+            'start_date' => $request->input('start_date', now()->startOfMonth()->format('F j, Y')),
+            'end_date' => $request->input('end_date', now()->endOfMonth()->format('F j, Y')),
             'counselor_id' => $request->input('counselor_id', '')
         ];
 
@@ -268,6 +268,6 @@ class GenerateReportController extends Controller
         ];
 
         return (new \App\Exports\CounselingReportExport($analytics, $filters))
-            ->download('report_'.$startDate->format('Y-m-d').'_to_'.$endDate->format('Y-m-d').'.xlsx');
+            ->download('report_'.$startDate->format('F j, Y').'_to_'.$endDate->format('F j, Y').'.xlsx');
     }
 }
