@@ -20,7 +20,7 @@ class CounselorFeedbackController extends Controller
                              ->latest()
                              ->get();
 
-        return view('counselor.feedback.index', compact('feedbacks'));
+        return view('counselors.feedback.index', compact('feedbacks'));
     }
 
     /**
@@ -36,6 +36,6 @@ class CounselorFeedbackController extends Controller
 
         $feedback->load('student', 'appointment');
 
-        return view('counselor.feedback.show', compact('feedback'));
+        return view('counselors.feedback.show', compact('feedback'));
     }
 }

@@ -1,3 +1,4 @@
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -88,14 +89,27 @@
                         </div>
                     </div>
 
+                    @if($appointment->status === 'rejected' && $appointment->rejection_reason)
+                        <div class="mt-6">
+                            <h3 class="text-lg font-medium text-red-600 dark:text-red-400 mb-4">
+                                Rejection Reason
+                            </h3>
+                            <div class="bg-red-50 dark:bg-red-900/30 rounded-lg p-4">
+                                <p class="text-sm text-gray-700 dark:text-gray-200">
+                                    {{ $appointment->rejection_reason }}
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Actions -->
-                    @if($appointment->status === 'pending')
+                    @if(in_array($appointment->status, ['pending', 'approved', 'accepted']))
                         <div class="mt-6 flex justify-end">
-                            <form action="{{ route('student.appointments.destroy', $appointment) }}" method="POST">
+                            <form action="{{ route('student.appointments.cancel', $appointment) }}" method="POST">
                                 @csrf
-                                @method('DELETE')
+                                @method('PATCH')
                                 <x-danger-button onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                    <i class="fas fa-times mr-2"></i>
+                                    <i class="fas fa-ban mr-2"></i>
                                     {{ __('Cancel Appointment') }}
                                 </x-danger-button>
                             </form>

@@ -11,7 +11,7 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         hmr: {
-            host: '192.168.254.106', // imong local IP address gamiton
+            host: '192.168.254.122', // imong local IP address gamiton
         },
         port: 5173,
     },

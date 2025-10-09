@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Edit User') }}
+                {{ __('Change Password for') }} {{ $user->first_name }} {{ $user->last_name }}
             </h2>
             <x-secondary-button onclick="history.back()">
                 <i class="fas fa-arrow-left mr-2"></i>{{ __('Back') }}
@@ -11,141 +11,76 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-2xl">
                 <div class="p-6">
-                    <form action="{{ route('admin.users.update', $user) }}" method="POST" 
-                          class="space-y-6"
-                          x-data="{ role: '{{ old('role', $user->role) }}' }">
+                    <form action="{{ route('admin.users.update-password', $user) }}" method="POST" class="space-y-6">
                         @csrf
                         @method('PUT')
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Personal Information -->
-                            <div class="space-y-6">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Personal Information</h3>
-                                
-                                <div>
-                                    <x-input-label for="first_name" :value="__('First Name')" />
-                                    <x-text-input id="first_name" name="first_name" type="text" class="mt-1 block w-full" 
-                                        :value="old('first_name', $user->first_name)" required />
+
+                        <!-- User Info Display -->
+                        <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="h-12 w-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-lg">
+                                        {{ substr($user->first_name, 0, 1) }}{{ substr($user->last_name, 0, 1) }}
+                                    </div>
                                 </div>
-
                                 <div>
-                                    <x-input-label for="middle_name" :value="__('Middle Name')" />
-                                    <x-text-input id="middle_name" name="middle_name" type="text" class="mt-1 block w-full" 
-                                        :value="old('middle_name', $user->middle_name)" />
-                                </div>
-
-                                <div>
-                                    <x-input-label for="last_name" :value="__('Last Name')" />
-                                    <x-text-input id="last_name" name="last_name" type="text" class="mt-1 block w-full" 
-                                        :value="old('last_name', $user->last_name)" required />
-                                </div>
-                            </div>
-
-                            <!-- Account Information -->
-                            <div class="space-y-6">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Account Information</h3>
-
-                                <div>
-                                    <x-input-label for="email" :value="__('Email')" />
-                                    <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" 
-                                        :value="old('email', $user->email)" required />
-                                </div>
-
-                                <div>
-                                    <x-input-label for="role" :value="__('Role')" />
-                                    <select id="role" name="role" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900"
-                                        x-model="role">
-                                        <option value="student">Student</option>
-                                        <option value="counselor">Counselor</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <x-input-label for="new_password" :value="__('New Password')" />
-                                    <x-text-input id="new_password" name="password" type="password" class="mt-1 block w-full" />
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Leave blank to keep current password</p>
-                                </div>
-
-                                <div>
-                                    <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-                                    <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" />
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $user->first_name }} {{ $user->last_name }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $user->email }}
+                                    </p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500">
+                                        Role: <span class="font-medium">{{ ucfirst($user->role) }}</span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Student Fields -->
-                        <div x-show="role === 'student'" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                            <h3 class="col-span-2 text-lg font-medium text-gray-900 dark:text-gray-100">Student Information</h3>
-
+                        <!-- Password Fields -->
+                        <div class="space-y-4">
                             <div>
-                                <x-input-label for="student_number" :value="__('Student Number')" />
-                                <x-text-input id="student_number" name="student_number" type="text" class="mt-1 block w-full" 
-                                    :value="old('student_number', optional($user->student)->student_number)" />
+                                <x-input-label for="password" :value="__('New Password')" />
+                                <x-text-input id="password" name="password" type="password" 
+                                    class="mt-1 block w-full" required autocomplete="new-password" />
+                                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    Minimum 8 characters
+                                </p>
                             </div>
 
                             <div>
-                                <x-input-label for="course" :value="__('Course')" />
-                                <x-text-input id="course" name="course" type="text" class="mt-1 block w-full" 
-                                    :value="old('course', optional($user->student)->course)" />
-                            </div>
-
-                            <div>
-                                <x-input-label for="year_level" :value="__('Year Level')" />
-                                <x-text-input id="year_level" name="year_level" type="text" class="mt-1 block w-full" 
-                                    :value="old('year_level', optional($user->student)->year_level)" />
-                            </div>
-
-                            <div>
-                                <x-input-label for="special_needs" :value="__('Special Needs')" />
-                                <textarea id="special_needs" name="special_needs" rows="2"
-                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">{{ old('special_needs', optional($user->student)->special_needs) }}</textarea>
+                                <x-input-label for="password_confirmation" :value="__('Confirm New Password')" />
+                                <x-text-input id="password_confirmation" name="password_confirmation" 
+                                    type="password" class="mt-1 block w-full" required autocomplete="new-password" />
+                                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                             </div>
                         </div>
 
-                        <!-- Counselor Fields -->
-                        <div x-show="role === 'counselor'" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                            <h3 class="col-span-2 text-lg font-medium text-gray-900 dark:text-gray-100">Counselor Information</h3>
-
-                            <div>
-                                <x-input-label for="employee_number" :value="__('Employee Number')" />
-                                <x-text-input id="employee_number" name="employee_number" type="text" class="mt-1 block w-full" 
-                                    :value="old('employee_number', optional($user->counselor)->employee_number)" />
-                            </div>
-
-                            <div>
-                                <x-input-label for="gender" :value="__('Gender')" />
-                                <select id="gender" name="gender" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                                    <option value="" disabled {{ old('gender', optional($user->counselor)->gender) ? '' : 'selected' }}>Select Gender</option>
-                                    <option value="male" {{ old('gender', optional($user->counselor)->gender) === 'male' ? 'selected' : '' }}>Male</option>
-                                    <option value="female" {{ old('gender', optional($user->counselor)->gender) === 'female' ? 'selected' : '' }}>Female</option>
-                                    <option value="other" {{ old('gender', optional($user->counselor)->gender) === 'other' ? 'selected' : '' }}>Other</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <x-input-label for="specialization" :value="__('Specialization')" />
-                                <x-text-input id="specialization" name="specialization" type="text" class="mt-1 block w-full" 
-                                    :value="old('specialization', optional($user->counselor)->specialization)" />
-                            </div>
-
-                            <div>
-                                <x-input-label for="contact_number" :value="__('Contact Number')" />
-                                <x-text-input id="contact_number" name="contact_number" type="text" class="mt-1 block w-full" 
-                                    :value="old('contact_number', optional($user->counselor)->contact_number)" />
+                        <!-- Warning Message -->
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                                        The user will need to use this new password for their next login.
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mt-6 flex justify-end gap-4">
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end gap-4">
                             <x-secondary-button type="button" onclick="history.back()">
                                 {{ __('Cancel') }}
                             </x-secondary-button>
                             <x-primary-button>
-                                {{ __('Update User') }}
+                                <i class="fas fa-key mr-2"></i>{{ __('Update Password') }}
                             </x-primary-button>
                         </div>
                     </form>

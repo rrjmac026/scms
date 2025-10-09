@@ -69,7 +69,7 @@
                     <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('admin.users.*') ? 'bg-white/20' : 'bg-blue-50 dark:bg-blue-900/20 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30' }}">
                         <i class="fas fa-users text-lg {{ request()->routeIs('admin.users.*') ? 'text-white' : 'text-blue-500' }}"></i>
                     </div>
-                    <span class="flex-1">{{ __('Manage Users') }}</span>
+                    <span class="flex-1">{{ __('Accounts Management') }}</span>
                     @if(request()->routeIs('admin.users.*'))
                         <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
                     @else

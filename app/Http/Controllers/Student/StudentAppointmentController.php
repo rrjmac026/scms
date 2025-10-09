@@ -126,6 +126,29 @@ class StudentAppointmentController extends Controller
                         ->with('success', 'Appointment cancelled successfully.');
     }
 
+    public function cancel(Appointment $appointment)
+    {
+        $student = auth()->user()->student;
+
+        // Ensure only the owner (student) can cancel
+        if ($appointment->student_id !== $student->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Prevent cancelling completed, rejected, or already cancelled appointments
+        if (in_array($appointment->status, ['completed', 'cancelled', 'rejected'])) {
+            return back()->with('error', 'This appointment can no longer be cancelled.');
+        }
+
+        // Update status to cancelled
+        $appointment->update(['status' => 'cancelled']);
+
+        return redirect()->route('student.appointments.index')
+                        ->with('success', 'Appointment cancelled successfully.');
+    }
+
+
+
     public function studentCalendar()
     {
         $student = auth()->user()->student;

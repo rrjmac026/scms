@@ -1,3 +1,4 @@
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -94,19 +95,20 @@
                                                    class="text-pink-600 dark:text-pink-400 hover:text-pink-900 dark:hover:text-pink-300 mr-3">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                @if($appointment->status === 'pending')
-                                                    <form action="{{ route('student.appointments.destroy', $appointment) }}" 
-                                                          method="POST" 
-                                                          class="inline">
+                                                @if(in_array($appointment->status, ['pending', 'approved', 'accepted']))
+                                                    <form action="{{ route('student.appointments.cancel', $appointment) }}" 
+                                                        method="POST" 
+                                                        class="inline"
+                                                        onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
                                                         @csrf
-                                                        @method('DELETE')
+                                                        @method('PATCH')
                                                         <button type="submit" 
-                                                                onclick="return confirm('Are you sure you want to cancel this appointment?')"
-                                                                class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
-                                                            <i class="fas fa-times"></i>
+                                                                class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200">
+                                                            <i class="fas fa-ban"></i>
                                                         </button>
                                                     </form>
                                                 @endif
+
                                             </td>
                                         </tr>
                                     @endforeach

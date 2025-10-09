@@ -30,6 +30,7 @@ return new class extends Migration
             
             // Role & Auth
             $table->enum('role', ['admin', 'counselor', 'student'])->default('student');
+            $table->string('status')->default('active');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             

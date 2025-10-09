@@ -34,7 +34,8 @@ return new class extends Migration
                 'declined', 
                 'completed', 
                 'rejected',
-                'accepted'
+                'accepted',
+                'cancelled'
             ])->default('pending');
             
             // Concerns and reasons

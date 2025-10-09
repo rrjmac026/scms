@@ -99,7 +99,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/users/import', [UserController::class, 'import'])->name('users.import');
     Route::get('/users/template', [UserController::class, 'downloadTemplate'])->name('users.template');
 
+    Route::get('/users/{user}/change-password', [UserController::class, 'editPassword'])->name('users.edit-password');
+    Route::put('/users/{user}/change-password', [UserController::class, 'updatePassword'])->name('users.update-password');
+
+    Route::post('/users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
+
     Route::resource('users', UserController::class);
+
     Route::resource('students', StudentManagementController::class);
     Route::resource('counselors', CounselorManagementController::class);
 
@@ -117,6 +123,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->name('appointments.approve');
     Route::patch('appointments/{appointment}/reject', [AppointmentController::class, 'reject'])
         ->name('appointments.reject');
+
     
     // Route::get('appointments/{appointment}/debug-calendar', [AppointmentController::class, 'debugCalendarEvent'])
     // ->name('appointments.debug-calendar');
@@ -203,10 +210,8 @@ Route::middleware(['auth', 'role:counselor'])->prefix('counselor')->name('counse
         ->name('reports.export.excel');
 
     // Feedback routes
-    Route::get('feedback', [CounselorFeedbackController::class, 'index'])
-         ->name('feedback.index'); 
-    Route::get('feedback/{feedback}', [CounselorFeedbackController::class, 'show'])
-         ->name('feedback.show');
+    Route::get('/feedbacks', [CounselorFeedbackController::class, 'index'])->name('feedbacks.index');
+    Route::get('/feedbacks/{feedback}', [CounselorFeedbackController::class, 'show'])->name('feedbacks.show');
 });
 
 
@@ -215,6 +220,8 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('dashboard');
     Route::get('/feedback', [StudentController::class, 'feedback'])->name('feedback');
 
+    Route::patch('/appointments/{appointment}/cancel', [StudentAppointmentController::class, 'cancel'])
+        ->name('appointments.cancel');
     Route::resource('appointments', StudentAppointmentController::class);
     Route::get('/student/calendar', [StudentAppointmentController::class, 'studentCalendar'])
         ->name('calendar');

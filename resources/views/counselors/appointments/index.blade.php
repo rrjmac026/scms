@@ -21,53 +21,64 @@
             @endif
 
             {{-- My Appointments Section --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h2 class="text-xl font-bold mb-4">My Appointments</h2>
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-pink-100 dark:border-pink-900/10">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold mb-6 text-gray-900 dark:text-white">My Appointments</h2>
                     
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full divide-y divide-pink-100 dark:divide-pink-900/10">
+                            <thead>
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Time</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-pink-600 dark:text-pink-400 uppercase tracking-wider">Date & Time</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-pink-600 dark:text-pink-400 uppercase tracking-wider">Student</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-pink-600 dark:text-pink-400 uppercase tracking-wider">Category</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-pink-600 dark:text-pink-400 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-pink-600 dark:text-pink-400 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="divide-y divide-pink-50 dark:divide-pink-900/10">
                                 @forelse($appointments as $appointment)
-                                    <tr>
-                                        <td class="px-6 py-4">
-                                            <div class="text-sm font-medium text-gray-900">
+                                    <tr class="hover:bg-pink-50/50 dark:hover:bg-pink-900/10 transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                                 {{ $appointment->preferred_date->format('M d, Y') }}
                                             </div>
-                                            <div class="text-sm text-gray-500">
+                                            <div class="text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $appointment->formatted_time }}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">
-                                            {{ $appointment->student->user->name }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">
-                                            {{ $appointment->category->name ?? 'N/A' }}
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="h-8 w-8 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                                                    <i class="fas fa-user text-pink-500"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                                        {{ $appointment->student->user->name }}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                bg-{{ $appointment->status_color }}-100 text-{{ $appointment->status_color }}-800">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200">
+                                                {{ $appointment->category->name ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                {{ $appointment->status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' : 
+                                                   ($appointment->status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200' : 
+                                                   'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200') }}">
                                                 {{ $appointment->status_label }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 text-sm">
-                                            <div class="flex flex-wrap gap-2">
-                                                {{-- View --}}
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center space-x-3">
                                                 <a href="{{ route('counselor.appointments.show', $appointment) }}" 
-                                                   class="text-blue-600 hover:text-blue-900 hover:underline">
-                                                    View
+                                                   class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
 
-                                                {{-- Accept --}}
                                                 @if($appointment->status === 'approved')
                                                     <form action="{{ route('counselor.appointments.accept', $appointment) }}" 
                                                           method="POST" 
@@ -75,38 +86,37 @@
                                                           onsubmit="return confirm('Are you sure you want to accept this appointment?')">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button type="submit" class="text-green-600 hover:text-green-900 hover:underline">
-                                                            Accept
+                                                        <button type="submit" class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors duration-200">
+                                                            <i class="fas fa-check"></i>
                                                         </button>
                                                     </form>
 
-                                                    {{-- Reject --}}
                                                     <button type="button" 
                                                             onclick="openRejectModal({{ $appointment->id }})" 
-                                                            class="text-red-600 hover:text-red-900 hover:underline cursor-pointer">
-                                                        Reject
+                                                            class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200">
+                                                        <i class="fas fa-times"></i>
                                                     </button>
                                                 @endif
 
-                                                {{-- Complete --}}
-                                                @if(in_array($appointment->status, ['approved', 'accepted']))
+                                                @if($appointment->status === 'accepted')
                                                     <form action="{{ route('counselor.appointments.complete', $appointment) }}" 
                                                         method="POST" 
                                                         class="inline" 
                                                         onsubmit="return confirm('Mark this appointment as completed?')">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button type="submit" class="text-purple-600 hover:text-purple-900 hover:underline">
-                                                            Complete
+                                                        <button type="submit" class="text-pink-600 dark:text-pink-400 hover:text-pink-800 dark:hover:text-pink-300 transition-colors duration-200">
+                                                            <i class="fas fa-check-circle"></i>
                                                         </button>
                                                     </form>
                                                 @endif
+
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                             No appointments assigned yet.
                                         </td>
                                     </tr>

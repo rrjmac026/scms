@@ -2,22 +2,14 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('User Management') }}
+                {{ __('Accounts Management') }}
             </h2>
-            <div class="flex gap-2">
-                <!-- Import Button -->
-                <x-secondary-button
-                    x-data=""
-                    x-on:click.prevent="$dispatch('open-modal', 'import-users')">
-                    <i class="fas fa-file-import mr-2"></i>{{ __('Import Users') }}
-                </x-secondary-button>
-                
-                <!-- Add User Button -->
+            <!-- <div class="flex gap-2">               
                 <a href="{{ route('admin.users.create') }}" 
                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
                     <i class="fas fa-plus mr-2"></i>{{ __('Add User') }}
                 </a>
-            </div>
+            </div> -->
         </div>
     </x-slot>
 
@@ -86,9 +78,17 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                                                Active
-                                            </span>
+                                            @if($user->status === 'active')
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                            bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                                                    Active
+                                                </span>
+                                            @else
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                            bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
+                                                    Inactive
+                                                </span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                             <div class="flex items-center gap-3">
@@ -107,16 +107,29 @@
                                                 </a>
 
                                                 <!-- Delete Button -->
-                                                <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" 
-                                                            class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                                                            onclick="return confirm('Are you sure you want to delete this user?')"
-                                                            title="Delete User">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                @if($user->status === 'active')
+                                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" 
+                                                                class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300"
+                                                                onclick="return confirm('Are you sure you want to deactivate this account?')"
+                                                                title="Deactivate Account">
+                                                            <i class="fas fa-user-slash"></i>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <form action="{{ route('admin.users.reactivate', $user) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" 
+                                                                class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300"
+                                                                onclick="return confirm('Reactivate this account?')"
+                                                                title="Reactivate Account">
+                                                            <i class="fas fa-user-check"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+
                                             </div>
                                         </td>
 

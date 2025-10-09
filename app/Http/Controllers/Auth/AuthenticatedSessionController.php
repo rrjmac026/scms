@@ -23,37 +23,62 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+   public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        // Validate input
+        $credentials = $request->validate([
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        // Try to find the user
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
+
+        if (!$user) {
+            return back()->withErrors([
+                'email' => 'No account found for this email.',
+            ]);
+        }
+
+        // 🚫 Block inactive users
+        if ($user->status === 'inactive') {
+            return back()->withErrors([
+                'email' => 'Your account has been deactivated. Please contact the administrator.',
+            ]);
+        }
+
+        // Try to authenticate
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+            return back()->withErrors([
+                'email' => 'Invalid credentials. Please try again.',
+            ]);
+        }
+
+        // Authentication passed, regenerate session
+        $request->session()->regenerate();
 
         // Get authenticated user
         $user = Auth::user();
 
-        // Check if 2FA is enabled for the user
-        if ($user->two_factor_secret && 
-            !session('auth.two_factor.authenticated')) {
-            Auth::logout(); // Logout the user temporarily
+        // ✅ Two-factor check
+        if ($user->two_factor_secret && !session('auth.two_factor.authenticated')) {
+            Auth::logout(); // Logout temporarily
             
-            // Store user ID in session for 2FA verification
-            session(['auth.two_factor.user_id' => $user->id]);
-            session(['auth.two_factor.remember' => $request->boolean('remember')]);
-            
+            // Store user ID for verification
+            session([
+                'auth.two_factor.user_id' => $user->id,
+                'auth.two_factor.remember' => $request->boolean('remember'),
+            ]);
+
             return redirect()->route('two-factor.challenge');
         }
 
-        // Only proceed with login if 2FA is not enabled or already verified
+        // ✅ Record last login time
         $user->update([
-            'last_login_at' => now()
+            'last_login_at' => now(),
         ]);
 
-        // Log successful login (optional - remove if you don't have ActivityLog)
-        // $this->logLoginActivity($user, 'login_success', $request);
-
-        // Regenerate session for security
-        $request->session()->regenerate();
-
-        // Redirect based on role
+        // ✅ Redirect based on role
         return match($user->role) {
             'admin' => redirect()->intended('admin/dashboard'),
             'counselor' => redirect()->intended('counselor/dashboard'),
@@ -61,6 +86,7 @@ class AuthenticatedSessionController extends Controller
             default => redirect()->intended('dashboard'),
         };
     }
+
 
     /**
      * Destroy an authenticated session.

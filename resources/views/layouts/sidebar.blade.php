@@ -9,19 +9,20 @@
         </div>
 
         <!-- Sidebar with improved transitions -->
-        <aside x-show="$store.sidebar.isOpen" 
-               x-cloak
-               :class="{
-                   'fixed': window.innerWidth < 1024,
-                   'absolute lg:fixed': window.innerWidth >= 1024
-               }"
-               class="top-16 left-0 h-[calc(100vh-4rem)] w-72 max-w-[85vw] sm:max-w-72 bg-white dark:bg-gray-800 border-r border-pink-200 dark:border-pink-700/30 shadow-xl z-40 transform transition-transform duration-300 ease-in-out"
-               x-transition:enter="transform transition-transform duration-300 ease-in-out"
-               x-transition:enter-start="-translate-x-full"
-               x-transition:enter-end="translate-x-0"
-               x-transition:leave="transform transition-transform duration-300 ease-in-out"
-               x-transition:leave-start="translate-x-0"
-               x-transition:leave-end="-translate-x-full">
+        <aside x-show="$store.sidebar.isOpen"
+            x-cloak
+            @click="$event.target.closest('a') && window.innerWidth < 1024 && $store.sidebar.toggle()"
+            :class="{
+                'fixed': window.innerWidth < 1024,
+                'absolute lg:fixed': window.innerWidth >= 1024
+            }"
+            class="top-16 left-0 h-[calc(100vh-4rem)] w-72 max-w-[85vw] sm:max-w-72 bg-white dark:bg-gray-800 border-r border-pink-200 dark:border-pink-700/30 shadow-xl z-40 transform transition-transform duration-300 ease-in-out"
+            x-transition:enter="transform transition-transform duration-300 ease-in-out"
+            x-transition:enter-start="-translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="transform transition-transform duration-300 ease-in-out"
+            x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="-translate-x-full">
             
             <!-- Sidebar Content with improved scrolling -->
             <div class="flex flex-col h-full">

@@ -102,22 +102,29 @@ class CounselorAppointmentController extends Controller
         return back()->with('success', 'Appointment rejected. Student has been notified via email.');
     }
 
-        public function complete(Appointment $appointment)
+    public function complete(Appointment $appointment)
     {
         $counselor = auth()->user()->counselor;
 
+        // Ensure the logged-in counselor owns the appointment
         if ($appointment->counselor_id !== $counselor->id) {
             abort(403, 'Unauthorized action.');
         }
 
-        if (!in_array($appointment->status, ['approved', 'accepted'])) {
-            return back()->with('error', 'Only approved or accepted appointments can be marked as completed.');
+        // Ensure only accepted appointments can be marked as completed
+        if ($appointment->status !== 'accepted') {
+            return back()->with('error', 'Only accepted appointments can be marked as completed.');
         }
 
+        // Update status
         $appointment->update(['status' => 'completed']);
 
-        return back()->with('success', 'Appointment marked as completed.');
+        // Redirect back with success message
+        return redirect()
+            ->route('counselor.appointments.index')
+            ->with('success', 'Appointment marked as completed.');
     }
+
 
     /**
      * Show appointment details
