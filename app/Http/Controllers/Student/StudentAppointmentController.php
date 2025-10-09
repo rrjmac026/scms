@@ -33,13 +33,25 @@ class StudentAppointmentController extends Controller
     public function create()
     {
         $categories = CounselingCategory::where('status', 'active')->get();
+
+        // Get all booked slots and format them for JavaScript
+        $bookedSlots = \App\Models\Appointment::whereIn('status', ['pending', 'approved', 'accepted'])
+            ->get(['preferred_date', 'preferred_time'])
+            ->map(function ($appointment) {
+                return [
+                    'preferred_date' => $appointment->preferred_date instanceof \Carbon\Carbon
+                        ? $appointment->preferred_date->format('Y-m-d')
+                        : $appointment->preferred_date,
+                    'preferred_time' => substr($appointment->preferred_time, 0, 5), // Remove seconds, get HH:MM only
+                ];
+            });
         
         // Get available counselors
         $counselors = Counselor::with('user')
             ->where('status', 'active')
             ->get();
         
-        return view('students.appointments.create', compact('categories', 'counselors'));
+        return view('students.appointments.create', compact('categories', 'counselors', 'bookedSlots'));
     }
 
     /**
@@ -47,28 +59,39 @@ class StudentAppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'preferred_date'          => 'required|date|after_or_equal:today',
-            'preferred_time'          => 'required|date_format:H:i',
-            'concern'                 => 'required|string|max:500',
-            'counseling_category_id'  => 'required|exists:counseling_categories,id',
+        $request->validate([
+            'preferred_date' => 'required|date',
+            'preferred_time' => 'required',
+            'concern' => 'required|string|max:1000',
+            'counseling_category_id' => 'required|exists:counseling_categories,id',
         ]);
 
-        $student = auth()->user()->student;
+        // Add :00 seconds to match database format
+        $timeWithSeconds = $request->preferred_time . ':00';
 
-        Appointment::create([
-            'student_id'              => $student->id,
-            'counselor_id'            => null,
-            'preferred_date'          => $validated['preferred_date'],
-            'preferred_time'          => $validated['preferred_time'], 
-            'concern'                 => $validated['concern'],
-            'counseling_category_id'  => $validated['counseling_category_id'],
-            'status'                  => 'pending',
+        $exists = \App\Models\Appointment::where('preferred_date', $request->preferred_date)
+            ->where('preferred_time', $timeWithSeconds)
+            ->whereIn('status', ['pending', 'approved', 'accepted'])
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors(['preferred_time' => 'This time slot is already booked.'])->withInput();
+        }
+
+        // Proceed saving if not booked
+        \App\Models\Appointment::create([
+            'student_id' => auth()->user()->student->id,
+            'counseling_category_id' => $request->counseling_category_id,
+            'preferred_date' => $request->preferred_date,
+            'preferred_time' => $timeWithSeconds,
+            'concern' => $request->concern,
+            'status' => 'pending',
         ]);
 
-        return redirect()->route('student.appointments.index')
-                        ->with('success', 'Appointment request submitted and pending admin approval.');
+        return redirect()->route('student.appointments.index')->with('success', 'Appointment booked successfully.');
     }
+
+
 
 
     /**
