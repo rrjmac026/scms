@@ -23,9 +23,9 @@ class GoogleAuthController extends Controller
             }
 
             $client = new Google_Client();
-            $client->setClientId(config('services.google.client_id'));
-            $client->setClientSecret(config('services.google.client_secret'));
-            $client->setRedirectUri(config('services.google.redirect'));
+            $client->setClientId(config('services.google_calendar.client_id'));
+            $client->setClientSecret(config('services.google_calendar.client_secret'));
+            $client->setRedirectUri(config('services.google_calendar.redirect'));
 
             // Force offline access to get a refresh token
             $client->setAccessType('offline');
@@ -49,9 +49,10 @@ class GoogleAuthController extends Controller
             $client->setState($state);
 
             $authUrl = $client->createAuthUrl();
-            Log::info('Redirecting user to Google OAuth', [
+            Log::info('Redirecting user to Google OAuth (Calendar)', [
                 'user_id' => $user->id,
-                'auth_url' => $authUrl
+                'auth_url' => $authUrl,
+                'redirect_uri' => config('services.google_calendar.redirect')
             ]);
 
             return redirect($authUrl);
@@ -82,9 +83,9 @@ class GoogleAuthController extends Controller
 
             // Create Google client
             $client = new Google_Client();
-            $client->setClientId(config('services.google.client_id'));
-            $client->setClientSecret(config('services.google.client_secret'));
-            $client->setRedirectUri(config('services.google.redirect'));
+            $client->setClientId(config('services.google_calendar.client_id'));
+            $client->setClientSecret(config('services.google_calendar.client_secret'));
+            $client->setRedirectUri(config('services.google_calendar.redirect'));
             $client->setAccessType('offline'); // Needed for refresh token
             $client->setPrompt('consent');     // Force refresh token on reconnection
 
@@ -141,8 +142,8 @@ class GoogleAuthController extends Controller
             if ($user->google_token) {
                 // Attempt to revoke the token
                 $client = new Google_Client();
-                $client->setClientId(config('services.google.client_id'));
-                $client->setClientSecret(config('services.google.client_secret'));
+                $client->setClientId(config('services.google_calendar.client_id'));
+                $client->setClientSecret(config('services.google_calendar.client_secret'));
                 
                 $tokenData = is_array($user->google_token) ? $user->google_token : json_decode($user->google_token, true);
                 $client->setAccessToken($tokenData);
@@ -231,9 +232,9 @@ class GoogleAuthController extends Controller
     {
         return response()->json([
             'config' => [
-                'client_id' => config('services.google.client_id') ? 'Present' : 'Missing',
-                'client_secret' => config('services.google.client_secret') ? 'Present' : 'Missing',
-                'redirect' => config('services.google.redirect'),
+                'client_id' => config('services.google_calendar.client_id') ? 'Present' : 'Missing',
+                'client_secret' => config('services.google_calendar.client_secret') ? 'Present' : 'Missing',
+                'redirect' => config('services.google_calendar.redirect'),
             ],
             'user' => [
                 'id' => auth()->id(),

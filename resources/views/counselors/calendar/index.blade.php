@@ -19,7 +19,7 @@
                         <i class="fas fa-exclamation-triangle text-yellow-600"></i>
                         <span class="text-sm text-yellow-700 dark:text-yellow-300">Calendar Not Connected</span>
                     </div>
-                    <a href="{{ route('google.connect') }}"
+                    <a href="{{ route('google.calendar.connect') }}"
                     class="px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">
                         <i class="fab fa-google mr-2"></i> Connect Google Calendar
                     </a>
@@ -50,7 +50,7 @@
                         <div>
                             <span class="font-medium">Google Calendar not connected.</span> 
                             Your appointments won't sync to your personal calendar. 
-                            <a href="{{ route('google.connect') }}" class="underline hover:no-underline ml-1">Connect now</a>
+                            <a href="{{ route('google.calendar.connect') }}" class="underline hover:no-underline ml-1">Connect now</a>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
                         <div>
                             <span class="font-medium">Google Calendar connection expired.</span> 
                             Please reconnect to continue syncing appointments. 
-                            <a href="{{ route('google.connect') }}" class="underline hover:no-underline ml-1">Reconnect now</a>
+                            <a href="{{ route('google.calendar.connect') }}" class="underline hover:no-underline ml-1">Reconnect now</a>
                         </div>
                     </div>
                 </div>
