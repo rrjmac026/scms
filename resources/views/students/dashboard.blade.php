@@ -24,10 +24,10 @@
                                 Welcome back, {{ auth()->user()->name }}! 👋
                             </h1>
                             <p class="text-pink-100 text-lg">
-                                Student ID: {{ auth()->user()->student->student_number ?? 'N/A' }}
+                                Student ID: {{ $student->student_number ?? 'N/A' }}
                             </p>
                             <p class="text-pink-100">
-                                {{ auth()->user()->student->course ?? 'Course not set' }} - Year {{ auth()->user()->student->year_level ?? 'N/A' }}
+                                {{ $student->course ?? 'Course not set' }} - Year {{ $student->year_level ?? 'N/A' }}
                             </p>
                         </div>
                         <div class="hidden md:block">
@@ -76,7 +76,7 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Counseling Sessions</p>
                                 <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ auth()->user()->student->counselingSessions()->count() ?? 0 }}
+                                    {{ $sessionsCount }}
                                 </p>
                             </div>
                         </div>
@@ -96,7 +96,7 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Appointments</p>
                                 <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ auth()->user()->student->appointments()->where('status', 'pending')->count() ?? 0 }}
+                                    {{ $pendingCount }}
                                 </p>
                             </div>
                         </div>
@@ -116,7 +116,7 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Feedback Given</p>
                                 <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ auth()->user()->student->feedbacks()->count() ?? 0 }}
+                                    {{ $feedbackCount }}
                                 </p>
                             </div>
                         </div>
