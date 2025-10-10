@@ -38,7 +38,7 @@
                             </div>
                             <div class="text-right">
                                 <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Users</p>
-                                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $totalUsers ?? 1247 }}</p>
+                                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $totalUsers }}</p>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
@@ -62,7 +62,7 @@
                             </div>
                             <div class="text-right">
                                 <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Active Students</p>
-                                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $activeStudents ?? 892 }}</p>
+                                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $activeStudents }}</p>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
@@ -86,7 +86,7 @@
                             </div>
                             <div class="text-right">
                                 <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Sessions</p>
-                                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $totalSessions ?? 567 }}</p>
+                                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $totalSessions }}</p>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
@@ -110,7 +110,7 @@
                             </div>
                             <div class="text-right">
                                 <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Pending Appointments</p>
-                                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $pendingAppointments ?? 23 }}</p>
+                                <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $pendingAppointments }}</p>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
@@ -226,43 +226,57 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                @foreach(range(1, 5) as $index)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
-                                                <span class="text-white font-semibold text-sm">JD</span>
+                                @forelse($recentSessions as $session)
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
+                                                    <span class="text-white font-semibold text-sm">
+                                                        {{ strtoupper(substr($session->student->user->first_name, 0, 1)) }}
+                                                        {{ strtoupper(substr($session->student->user->last_name, 0, 1)) }}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        {{ $session->student->user->name }}
+                                                    </div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                        {{ $session->student->student_number ?? 'N/A' }}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <div class="text-sm font-semibold text-gray-900 dark:text-white">John Doe {{ $index }}</div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">ST{{ 2024000 + $index }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                {{ $session->counselor->user->name ?? 'Unassigned' }}
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">Jane Smith</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">Senior Counselor</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900 dark:text-white">{{ now()->subDays($index)->format('M j, Y') }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ now()->subDays($index)->format('g:i A') }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                            <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                            Completed
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <div class="flex space-x-2">
-                                            <a href="#" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">View</a>
-                                            <span class="text-gray-300 dark:text-gray-600">|</span>
-                                            <a href="#" class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 font-medium">Edit</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ $session->counselor->specialization ?? 'Counselor' }}
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900 dark:text-white">{{ $session->created_at->format('M j, Y') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $session->created_at->format('g:i A') }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                                <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                                Completed
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <div class="flex space-x-2">
+                                                <a href="{{ route('admin.counseling-sessions.show', $session->id) }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">View</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">No recent sessions found.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
+
                         </table>
                     </div>
                     <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">

@@ -14,11 +14,28 @@ class StudentManagementController extends Controller
     /**
      * Display a listing of students.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $students = Student::with('user')->latest()->paginate(10);
-        return view('admin.students.index', compact('students'));
+        $search = $request->get('search');
+
+        $students = Student::with('user')
+            ->whereHas('user', function ($query) use ($search) {
+                if ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                    });
+                }
+            })
+            ->join('users', 'students.user_id', '=', 'users.id')
+            ->orderBy('users.last_name', 'asc') // sort alphabetically
+            ->select('students.*') // prevent column collision
+            ->paginate(10);
+
+        return view('admin.students.index', compact('students', 'search'));
     }
+
 
     /**
      * Show the form for creating a new student.

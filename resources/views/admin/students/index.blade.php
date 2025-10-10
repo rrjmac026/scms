@@ -142,4 +142,65 @@
             </div>
         </div>
     </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('search-input');
+    const suggestionsBox = document.getElementById('suggestions');
+
+    searchInput.addEventListener('input', async function () {
+        const query = this.value.trim();
+
+        if (query.length < 2) {
+            suggestionsBox.classList.add('hidden');
+            return;
+        }
+
+        try {
+            const response = await fetch(`{{ route('admin.students.index') }}?search=${encodeURIComponent(query)}&ajax=1`);
+            const html = await response.text();
+
+            // Parse the HTML response and extract student rows (optional shortcut)
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+
+            // Grab student names/emails from table (customize depending on your markup)
+            const students = Array.from(tempDiv.querySelectorAll('tbody tr')).map(row => {
+                const name = row.querySelector('td:first-child .text-sm.font-medium')?.textContent?.trim() || 'Unknown';
+                const email = row.querySelector('td:first-child .text-sm.text-gray-500')?.textContent?.trim() || '';
+                const link = row.querySelector('a.text-blue-600')?.getAttribute('href') || '#';
+                return { name, email, link };
+            });
+
+            // Show suggestions
+            if (students.length > 0) {
+                suggestionsBox.innerHTML = students
+                    .slice(0, 5)
+                    .map(s => `
+                        <li>
+                            <a href="${s.link}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <div class="font-medium text-gray-900 dark:text-gray-100">${s.name}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${s.email}</div>
+                            </a>
+                        </li>
+                    `)
+                    .join('');
+                suggestionsBox.classList.remove('hidden');
+            } else {
+                suggestionsBox.classList.add('hidden');
+            }
+
+        } catch (error) {
+            console.error('Error fetching suggestions:', error);
+        }
+    });
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!suggestionsBox.contains(e.target) && e.target !== searchInput) {
+            suggestionsBox.classList.add('hidden');
+        }
+    });
+});
+</script>
+
 </x-app-layout>

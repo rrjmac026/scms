@@ -55,9 +55,7 @@
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Appointments</p>
-                                <p class="text-2xl font-semibold">
-                                    {{ optional(auth()->user()->counselor)->appointments()->count() ?? 0 }}
-                                </p>
+                                <p class="text-2xl font-semibold">{{ $totalAppointments }}</p>
                             </div>
                         </div>
                     </div>
@@ -75,9 +73,7 @@
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Sessions Completed</p>
-                                <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ auth()->user()->counselor->counselingSessions()->where('status', 'completed')->count() ?? 0 }}
-                                </p>
+                                <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $completedSessions }}</p>
                             </div>
                         </div>
                     </div>
@@ -95,12 +91,7 @@
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Today's Appointment</p>
-                                <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ auth()->user()->counselor->appointments()
-                                        ->whereDate('preferred_date', today())
-                                        ->distinct('student_id')
-                                        ->count() ?? 0 }}
-                                </p>
+                                <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $todaysAppointments }}</p>
                             </div>
                         </div>
                     </div>
@@ -120,7 +111,7 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Students</p>
                                 <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ auth()->user()->counselor->counselingSessions()->distinct('student_id')->count() ?? 0 }}
+                                    {{ $activeStudents }}
                                 </p>
                             </div>
                         </div>
