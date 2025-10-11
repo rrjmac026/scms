@@ -1,4 +1,3 @@
-
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -12,7 +11,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="{ showCancelModal: false, cancelUrl: '', appointmentId: null }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
@@ -87,7 +86,8 @@
                                                     ($appointment->status === 'accepted' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-500' :
                                                     ($appointment->status === 'completed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500' :
                                                     'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-500'))) }}">
-                                                    {{ ucfirst($appointment->status) }}
+
+                                                    {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -96,19 +96,12 @@
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 @if(in_array($appointment->status, ['pending', 'approved', 'accepted']))
-                                                    <form action="{{ route('student.appointments.cancel', $appointment) }}" 
-                                                        method="POST" 
-                                                        class="inline"
-                                                        onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" 
-                                                                class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200">
-                                                            <i class="fas fa-ban"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button 
+                                                        @click="showCancelModal = true; cancelUrl = '{{ route('student.appointments.cancel', $appointment) }}'"
+                                                        class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>
                                                 @endif
-
                                             </td>
                                         </tr>
                                     @endforeach
@@ -120,6 +113,38 @@
                         </div>
                     @endif
                 </div>
+            </div>
+        </div>
+
+        <!-- Cancel Modal -->
+        <div x-show="showCancelModal" x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">
+                    Cancel Appointment
+                </h2>
+                <form :action="cancelUrl" method="POST" class="space-y-4">
+                    @csrf
+                    @method('PATCH')
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Reason for cancellation <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="cancelled_reason" rows="3" required
+                            class="w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button"
+                            @click="showCancelModal = false"
+                            class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                            Close
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+                            Confirm Cancel
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

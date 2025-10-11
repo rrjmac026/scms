@@ -80,7 +80,7 @@
                     <!-- Concern/Notes -->
                     <div class="mt-6">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                            Appointment Notes
+                            Reason for Appointment
                         </h3>
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                             <p class="text-sm text-gray-600 dark:text-gray-300">

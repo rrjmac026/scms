@@ -144,13 +144,13 @@ class AppointmentController extends Controller
 
         $availableCounselors = collect();
         
-        // Only show available counselors for pending admin approval
         if ($appointment->status === 'pending_admin_approval') {
             $availableCounselors = $this->getAvailableCounselors($appointment->preferred_date);
         }
 
         return view('admin.appointments.show', compact('appointment', 'availableCounselors'));
     }
+
 
     /**
      * Show the form for editing the specified appointment.

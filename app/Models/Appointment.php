@@ -21,9 +21,7 @@ class Appointment extends Model
         'proposed_time',
         'status',
         'concern',
-        'reschedule_reason',
-        'student_reschedule_response',
-        'rejection_reason',
+        'cancelled_reason', // gi add nako ni if ever mag cancel og appointment ang student
         'google_event_id',
     ];
 

@@ -27,7 +27,7 @@
                                 Student ID: {{ $student->student_number ?? 'N/A' }}
                             </p>
                             <p class="text-pink-100">
-                                {{ $student->course ?? 'Course not set' }} - Year {{ $student->year_level ?? 'N/A' }}
+                                {{ $student->strand ?? 'Course not set' }} - Grade {{ $student->grade_level ?? 'N/A' }}
                             </p>
                         </div>
                         <div class="hidden md:block">

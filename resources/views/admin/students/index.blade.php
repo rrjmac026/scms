@@ -5,20 +5,68 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Student Management') }}
             </h2>
-            <a href="{{ route('admin.students.create') }}" 
-               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                <i class="fas fa-plus mr-2"></i>{{ __('Add Student') }}
-            </a>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('importModal').classList.remove('hidden')" 
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center gap-2">
+                    <i class="fas fa-file-import"></i>
+                    <span>{{ __('Import CSV') }}</span>
+                </button>
+                <a href="{{ route('admin.students.download-template') }}" 
+                   class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 flex items-center gap-2">
+                    <i class="fas fa-download"></i>
+                    <span>{{ __('Download Template') }}</span>
+                </a>
+                <a href="{{ route('admin.students.create') }}" 
+                   class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
+                    <i class="fas fa-plus"></i>
+                    <span>{{ __('Add Student') }}</span>
+                </a>
+            </div>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Success/Error Messages -->
+            @if(session('success'))
+                <div class="mb-6 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-200 px-4 py-3 rounded-lg relative" role="alert">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        <span class="block sm:inline">{{ session('success') }}</span>
+                    </div>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="mb-6 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg relative" role="alert">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle mr-3"></i>
+                        <span class="block sm:inline">{{ session('error') }}</span>
+                    </div>
+                </div>
+            @endif
+
+            @if(session('import_errors'))
+                <div class="mb-6 bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-600 text-yellow-700 dark:text-yellow-200 px-4 py-3 rounded-lg relative" role="alert">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle mr-3 mt-1"></i>
+                        <div>
+                            <strong class="font-bold">Import Errors:</strong>
+                            <ul class="mt-2 list-disc list-inside">
+                                @foreach(session('import_errors') as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Search & Filter -->
             <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                 <form class="flex flex-wrap gap-4">
                     <div class="flex-1 min-w-[200px]">
-                        <input type="text" name="search" 
+                        <input type="text" name="search" value="{{ $search ?? '' }}"
                                class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                                placeholder="Search by name or student number...">
                     </div>
@@ -35,9 +83,9 @@
                         <option value="GAS">GAS</option>
                         <option value="TVL">TVL</option>
                     </select>
-                    <x-primary-button type="submit">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                         <i class="fas fa-search mr-2"></i>Search
-                    </x-primary-button>
+                    </button>
                 </form>
             </div>
 
@@ -142,65 +190,104 @@
             </div>
         </div>
     </div>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('search-input');
-    const suggestionsBox = document.getElementById('suggestions');
 
-    searchInput.addEventListener('input', async function () {
-        const query = this.value.trim();
+    <!-- Import Modal -->
+    <div id="importModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-lg bg-white dark:bg-gray-800">
+            <div class="flex items-start justify-between p-4 border-b dark:border-gray-700">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <i class="fas fa-file-import text-green-600"></i>
+                    Import Students from CSV
+                </h3>
+                <button onclick="document.getElementById('importModal').classList.add('hidden')" 
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form action="{{ route('admin.students.import') }}" method="POST" enctype="multipart/form-data" class="p-6">
+                @csrf
+                
+                <div class="mb-6">
+                    <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 mr-3 mt-1"></i>
+                            <div class="text-sm text-blue-700 dark:text-blue-300">
+                                <p class="font-semibold mb-2">Before importing:</p>
+                                <ul class="list-disc list-inside space-y-1 ml-2">
+                                    <li>Download the CSV template to see the required format</li>
+                                    <li>Make sure all required fields are filled: first_name, last_name, email, student_number</li>
+                                    <li>Email addresses and student numbers must be unique</li>
+                                    <li>Date format should be: YYYY-MM-DD (e.g., 2007-01-15)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
 
-        if (query.length < 2) {
-            suggestionsBox.classList.add('hidden');
-            return;
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        <i class="fas fa-file-csv mr-2"></i>Choose CSV File
+                    </label>
+                    <div class="flex items-center justify-center w-full">
+                        <label for="csv_file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 transition-all duration-200">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 dark:text-gray-500 mb-4"></i>
+                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <span class="font-semibold">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">CSV or TXT files only (MAX. 2MB)</p>
+                                <p id="file-name" class="mt-4 text-sm text-green-600 dark:text-green-400 font-medium hidden"></p>
+                            </div>
+                            <input id="csv_file" name="csv_file" type="file" accept=".csv,.txt" class="hidden" required onchange="displayFileName(this)" />
+                        </label>
+                    </div>
+                    @error('csv_file')
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex items-center justify-end gap-3">
+                    <button type="button" 
+                            onclick="document.getElementById('importModal').classList.add('hidden')"
+                            class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:border-gray-600 dark:focus:ring-gray-700 transition-colors duration-200">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 transition-colors duration-200">
+                        <i class="fas fa-file-import mr-2"></i>Import Students
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    function displayFileName(input) {
+        const fileName = input.files[0]?.name;
+        const fileNameDisplay = document.getElementById('file-name');
+        if (fileName) {
+            fileNameDisplay.textContent = '📄 ' + fileName;
+            fileNameDisplay.classList.remove('hidden');
         }
+    }
 
-        try {
-            const response = await fetch(`{{ route('admin.students.index') }}?search=${encodeURIComponent(query)}&ajax=1`);
-            const html = await response.text();
-
-            // Parse the HTML response and extract student rows (optional shortcut)
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-
-            // Grab student names/emails from table (customize depending on your markup)
-            const students = Array.from(tempDiv.querySelectorAll('tbody tr')).map(row => {
-                const name = row.querySelector('td:first-child .text-sm.font-medium')?.textContent?.trim() || 'Unknown';
-                const email = row.querySelector('td:first-child .text-sm.text-gray-500')?.textContent?.trim() || '';
-                const link = row.querySelector('a.text-blue-600')?.getAttribute('href') || '#';
-                return { name, email, link };
-            });
-
-            // Show suggestions
-            if (students.length > 0) {
-                suggestionsBox.innerHTML = students
-                    .slice(0, 5)
-                    .map(s => `
-                        <li>
-                            <a href="${s.link}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <div class="font-medium text-gray-900 dark:text-gray-100">${s.name}</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">${s.email}</div>
-                            </a>
-                        </li>
-                    `)
-                    .join('');
-                suggestionsBox.classList.remove('hidden');
-            } else {
-                suggestionsBox.classList.add('hidden');
-            }
-
-        } catch (error) {
-            console.error('Error fetching suggestions:', error);
+    // Close modal when clicking outside
+    document.getElementById('importModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
         }
     });
 
-    // Hide suggestions when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!suggestionsBox.contains(e.target) && e.target !== searchInput) {
-            suggestionsBox.classList.add('hidden');
-        }
+    // Auto-hide success messages after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('[role="alert"]');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            }, 5000);
+        });
     });
-});
-</script>
+    </script>
 
 </x-app-layout>

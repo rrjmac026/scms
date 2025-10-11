@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\Counselor;
 use App\Models\CounselingSession;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class StudentManagementController extends Controller
 {
@@ -203,5 +206,184 @@ class StudentManagementController extends Controller
 
         return redirect()->route('admin.students.index')
                          ->with('success', 'Student deleted successfully.');
+    }
+
+    /**
+     * Import students from CSV file.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+
+        $file = $request->file('csv_file');
+        $path = $file->getRealPath();
+        $csv = array_map('str_getcsv', file($path));
+        
+        // Get headers from first row
+        $headers = array_map('trim', $csv[0]);
+        unset($csv[0]);
+
+        $successCount = 0;
+        $errorCount = 0;
+        $errors = [];
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($csv as $key => $row) {
+                $rowNumber = $key + 2; // +2 because array starts at 0 and we removed header
+                
+                // Map CSV columns to array
+                $data = array_combine($headers, $row);
+
+                // Validate required fields including LRN uniqueness
+                $validator = Validator::make($data, [
+                    'first_name' => 'required|string|max:255',
+                    'last_name' => 'required|string|max:255',
+                    'email' => 'required|email|unique:users,email',
+                    'student_number' => 'required|string|max:50|unique:students,student_number',
+                    'lrn' => 'nullable|string|max:20|unique:students,lrn', // Added LRN validation
+                ]);
+
+                if ($validator->fails()) {
+                    $errorCount++;
+                    $errors[] = "Row {$rowNumber}: " . implode(', ', $validator->errors()->all());
+                    continue; // Skip this row and continue with next
+                }
+
+                // Create user
+                $user = User::create([
+                    'first_name' => trim($data['first_name']),
+                    'middle_name' => trim($data['middle_name'] ?? ''),
+                    'last_name' => trim($data['last_name']),
+                    'email' => trim($data['email']),
+                    'password' => Hash::make($data['password'] ?? 'password123'),
+                    'role' => 'student',
+                ]);
+
+                // Create student
+                Student::create([
+                    'user_id' => $user->id,
+                    'student_number' => trim($data['student_number']),
+                    'lrn' => !empty(trim($data['lrn'] ?? '')) ? trim($data['lrn']) : null, // Ensure empty strings become null
+                    'strand' => trim($data['strand'] ?? ''),
+                    'grade_level' => trim($data['grade_level'] ?? ''),
+                    'special_needs' => trim($data['special_needs'] ?? ''),
+                    'birthdate' => !empty($data['birthdate']) ? date('Y-m-d', strtotime($data['birthdate'])) : null,
+                    'gender' => trim($data['gender'] ?? ''),
+                    'address' => trim($data['address'] ?? ''),
+                    'contact_number' => trim($data['contact_number'] ?? ''),
+                    'civil_status' => trim($data['civil_status'] ?? ''),
+                    'nationality' => trim($data['nationality'] ?? ''),
+                    'religion' => trim($data['religion'] ?? ''),
+                    'father_name' => trim($data['father_name'] ?? ''),
+                    'father_contact' => trim($data['father_contact'] ?? ''),
+                    'father_occupation' => trim($data['father_occupation'] ?? ''),
+                    'mother_name' => trim($data['mother_name'] ?? ''),
+                    'mother_contact' => trim($data['mother_contact'] ?? ''),
+                    'mother_occupation' => trim($data['mother_occupation'] ?? ''),
+                    'guardian_name' => trim($data['guardian_name'] ?? ''),
+                    'guardian_contact' => trim($data['guardian_contact'] ?? ''),
+                    'guardian_relationship' => trim($data['guardian_relationship'] ?? ''),
+                ]);
+
+                $successCount++;
+            }
+
+            DB::commit();
+
+            $message = "Import completed: {$successCount} students imported successfully.";
+            if ($errorCount > 0) {
+                $message .= " {$errorCount} rows failed.";
+            }
+
+            return redirect()->route('admin.students.index')
+                ->with('success', $message)
+                ->with('import_errors', $errors);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('admin.students.index')
+                ->with('error', 'Import failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download CSV template for student import.
+     */
+    public function downloadTemplate()
+    {
+        $headers = [
+            'first_name',
+            'middle_name',
+            'last_name',
+            'email',
+            'password',
+            'student_number',
+            'lrn',
+            'strand',
+            'grade_level',
+            'special_needs',
+            'birthdate',
+            'gender',
+            'address',
+            'contact_number',
+            'civil_status',
+            'nationality',
+            'religion',
+            'father_name',
+            'father_contact',
+            'father_occupation',
+            'mother_name',
+            'mother_contact',
+            'mother_occupation',
+            'guardian_name',
+            'guardian_contact',
+            'guardian_relationship',
+        ];
+
+        $filename = 'students_import_template.csv';
+        $handle = fopen('php://output', 'w');
+        
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        fputcsv($handle, $headers);
+        
+        
+        $sample = [
+            'Juan',
+            'Santos',
+            'Dela Cruz',
+            'juan.delacruz@lccdo.edu.ph',
+            'password123',
+            '2024-0001',
+            '123456789012',
+            'STEM',
+            'Grade 11',
+            '',
+            '2007-01-15',
+            'Male',
+            '123 Main St, City',
+            '09171234567',
+            'Single',
+            'Filipino',
+            'Roman Catholic',
+            'Pedro Dela Cruz',
+            '09181234567',
+            'Engineer',
+            'Maria Dela Cruz',
+            '09191234567',
+            'Teacher',
+            '',
+            '',
+            '',
+        ];
+        
+        fputcsv($handle, $sample);
+        fclose($handle);
+        exit;
     }
 }

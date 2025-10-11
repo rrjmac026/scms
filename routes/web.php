@@ -106,6 +106,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::resource('users', UserController::class);
 
+    Route::post('students/import', [StudentManagementController::class, 'import'])
+        ->name('students.import');
+    Route::get('students/download-template', [StudentManagementController::class, 'downloadTemplate'])
+        ->name('students.download-template');
     Route::resource('students', StudentManagementController::class);
     Route::resource('counselors', CounselorManagementController::class);
 

@@ -8,11 +8,11 @@ export default defineConfig({
             refresh: true,
         }),
     ],
-    server: {
-        host: '0.0.0.0',
-        hmr: {
-            host: '192.168.254.122', // imong local IP address gamiton
-        },
-        port: 5173,
-    },
+    // server: {
+    //     host: '0.0.0.0',
+    //     hmr: {
+    //         host: '192.168.254.122', // imong local IP address gamiton
+    //     },
+    //     port: 5173,
+    // },
 });
