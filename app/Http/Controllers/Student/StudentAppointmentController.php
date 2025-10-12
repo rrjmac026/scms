@@ -9,6 +9,7 @@ use App\Models\Counselor;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class StudentAppointmentController extends Controller
 {
@@ -34,23 +35,20 @@ class StudentAppointmentController extends Controller
     {
         $categories = CounselingCategory::where('status', 'active')->get();
 
-        // Get all booked slots and format them for JavaScript
-        $bookedSlots = \App\Models\Appointment::whereIn('status', ['pending', 'approved', 'accepted'])
+        // Get all booked slots (pending, approved, accepted)
+        $bookedSlots = Appointment::whereIn('status', ['pending', 'approved', 'accepted'])
             ->get(['preferred_date', 'preferred_time'])
-            ->map(function ($appointment) {
-                return [
-                    'preferred_date' => $appointment->preferred_date instanceof \Carbon\Carbon
-                        ? $appointment->preferred_date->format('Y-m-d')
-                        : $appointment->preferred_date,
-                    'preferred_time' => substr($appointment->preferred_time, 0, 5), // Remove seconds, get HH:MM only
-                ];
-            });
-        
-        // Get available counselors
+            ->map(fn($appointment) => [
+                'preferred_date' => $appointment->preferred_date instanceof Carbon
+                    ? $appointment->preferred_date->format('Y-m-d')
+                    : $appointment->preferred_date,
+                'preferred_time' => substr($appointment->preferred_time, 0, 5), // HH:MM only
+            ]);
+
         $counselors = Counselor::with('user')
             ->where('status', 'active')
             ->get();
-        
+
         return view('students.appointments.create', compact('categories', 'counselors', 'bookedSlots'));
     }
 
@@ -66,20 +64,20 @@ class StudentAppointmentController extends Controller
             'counseling_category_id' => 'required|exists:counseling_categories,id',
         ]);
 
-        // Add :00 seconds to match database format
         $timeWithSeconds = $request->preferred_time . ':00';
 
-        $exists = \App\Models\Appointment::where('preferred_date', $request->preferred_date)
+        $exists = Appointment::where('preferred_date', $request->preferred_date)
             ->where('preferred_time', $timeWithSeconds)
             ->whereIn('status', ['pending', 'approved', 'accepted'])
             ->exists();
 
         if ($exists) {
-            return back()->withErrors(['preferred_time' => 'This time slot is already booked.'])->withInput();
+            return back()
+                ->withErrors(['preferred_time' => 'This time slot is already booked.'])
+                ->withInput();
         }
 
-        // Proceed saving if not booked
-        \App\Models\Appointment::create([
+        $appointment = Appointment::create([
             'student_id' => auth()->user()->student->id,
             'counseling_category_id' => $request->counseling_category_id,
             'preferred_date' => $request->preferred_date,
@@ -88,14 +86,16 @@ class StudentAppointmentController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('student.appointments.index')->with('success', 'Appointment booked successfully.');
+        // 🔄 Optional Google Calendar Sync
+        app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
+
+        return redirect()
+            ->route('student.appointments.index')
+            ->with('success', 'Appointment booked successfully.');
     }
 
-
-
-
     /**
-     * Show a specific appointment details.
+     * Show specific appointment details.
      */
     public function show(Appointment $appointment)
     {
@@ -111,7 +111,7 @@ class StudentAppointmentController extends Controller
     }
 
     /**
-     * Cancel an appointment (only if 1 day before and still pending/approved).
+     * Cancel an appointment (for pending/approved/accepted only).
      */
     public function destroy(Appointment $appointment)
     {
@@ -121,12 +121,13 @@ class StudentAppointmentController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        if (!in_array($appointment->status, ['pending', 'approved'])) {
-            return redirect()->route('student.appointments.index')
-                            ->with('error', 'Only pending or approved appointments can be cancelled.');
+        if (!in_array($appointment->status, ['pending', 'approved', 'accepted'])) {
+            return redirect()
+                ->route('student.appointments.index')
+                ->with('error', 'Only pending, approved, or accepted appointments can be cancelled.');
         }
 
-        $date = $appointment->preferred_date instanceof \Carbon\Carbon
+        $date = $appointment->preferred_date instanceof Carbon
             ? $appointment->preferred_date->format('Y-m-d')
             : $appointment->preferred_date;
 
@@ -134,21 +135,24 @@ class StudentAppointmentController extends Controller
         $appointmentDateTime = Carbon::createFromFormat('Y-m-d H:i', "$date $time");
 
         if ($appointmentDateTime->isBefore(now()->addDay())) {
-            return redirect()->route('student.appointments.index')
-                            ->with('error', 'You can only cancel at least 1 day before the appointment.');
+            return redirect()
+                ->route('student.appointments.index')
+                ->with('error', 'You can only cancel at least 1 day before the appointment.');
         }
 
-        $appointment->update(['status' => 'cancelled_by_student']);
+        $appointment->update(['status' => 'cancelled']);
 
-        // Notify counselor if assigned
-        if ($appointment->counselor_id) {
-            // Add notification logic here
-        }
+        // 🔄 Google Calendar Sync
+        app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
 
-        return redirect()->route('student.appointments.index')
-                        ->with('success', 'Appointment cancelled successfully.');
+        return redirect()
+            ->route('student.appointments.index')
+            ->with('success', 'Appointment cancelled successfully.');
     }
 
+    /**
+     * Cancel appointment with reason.
+     */
     public function cancel(Request $request, Appointment $appointment)
     {
         $student = auth()->user()->student;
@@ -157,7 +161,7 @@ class StudentAppointmentController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        if (in_array($appointment->status, ['completed', 'cancelled', 'rejected'])) {
+        if (in_array($appointment->status, ['completed', 'cancelled', 'rejected', 'declined'])) {
             return back()->with('error', 'This appointment can no longer be cancelled.');
         }
 
@@ -170,63 +174,58 @@ class StudentAppointmentController extends Controller
             'cancelled_reason' => $request->cancelled_reason,
         ]);
 
-        // Optional: notify admin or counselor here
+        // 🔄 Google Calendar Sync
+        app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
 
-        return redirect()->route('student.appointments.index')
-                        ->with('success', 'Appointment cancelled successfully.');
+        return redirect()
+            ->route('student.appointments.index')
+            ->with('success', 'Appointment cancelled successfully.');
     }
 
-
-
+    /**
+     * Display appointments on student calendar view.
+     */
     public function studentCalendar()
     {
         $student = auth()->user()->student;
 
         $appointments = Appointment::with(['counselor.user', 'category'])
-            ->where('student_id', $student->id) 
-            ->whereIn('status', ['pending', 'approved', 'completed', 'reschedule_requested_by_counselor'])
+            ->where('student_id', $student->id)
+            ->whereIn('status', ['pending', 'approved', 'accepted', 'completed'])
             ->get()
             ->map(function ($appointment) {
-                $counselorName = $appointment->counselor 
-                    ? $appointment->counselor->user->name 
+                $counselorName = $appointment->counselor
+                    ? $appointment->counselor->user->name
                     : 'Unassigned';
-                
-                $startDateTime = $appointment->preferred_date;
-                if ($appointment->preferred_time) {
-                    $date = $appointment->preferred_date instanceof \Carbon\Carbon
-                        ? $appointment->preferred_date->format('Y-m-d')
-                        : $appointment->preferred_date;
-                    
-                    $time = substr($appointment->preferred_time, 0, 5);
-                    $startDateTime = $date . 'T' . $time . ':00';
-                }
-                
+
+                $date = $appointment->preferred_date instanceof Carbon
+                    ? $appointment->preferred_date->format('Y-m-d')
+                    : $appointment->preferred_date;
+
+                $time = substr($appointment->preferred_time, 0, 5);
+                $startDateTime = "{$date}T{$time}:00";
+
                 return [
-                    'id'    => $appointment->id,
-                    'title' => 'Session with ' . $counselorName . ' (' . ucfirst($appointment->status) . ')',
+                    'id' => $appointment->id,
+                    'title' => "Session with {$counselorName} (" . ucfirst($appointment->status) . ")",
                     'start' => $startDateTime,
                     'color' => match ($appointment->status) {
-                        'pending'   => '#fbbf24',
-                        'approved'  => '#3b82f6',
-                        'completed' => '#10b981',
-                        'reschedule_requested_by_counselor' => '#f97316',
-                        default     => '#6b7280',
+                        'pending' => '#fbbf24',   // Yellow
+                        'approved' => '#3b82f6',  // Blue
+                        'accepted' => '#8b5cf6',  // Purple
+                        'completed' => '#10b981', // Green
+                        default => '#6b7280',     // Gray
                     },
                     'extendedProps' => [
-                        'counselor'   => $counselorName,
-                        'category'    => $appointment->category->name ?? 'General',
-                        'status'      => $appointment->status,
+                        'counselor' => $counselorName,
+                        'category' => $appointment->category->name ?? 'General',
+                        'status' => $appointment->status,
                         'description' => Str::limit($appointment->concern ?? '', 50),
+                        'google_event_id' => $appointment->google_event_id, // ← ADD THIS LINE!
                     ],
                 ];
             });
 
-        return view('students.calendar.index', [
-            'appointments' => $appointments,
-        ]);
+        return view('students.calendar.index', compact('appointments'));
     }
-
-
-
-
 }

@@ -31,70 +31,90 @@ class GoogleCalendarService
     }
 
     public function getCalendarServiceForUser($user)
-    {
-        if (!$user) {
-            Log::error("No user provided to getCalendarServiceForUser");
-            return null;
-        }
-
-        if (!$user->google_token) {
-            Log::info("User {$user->id} doesn't have a Google token");
-            return null;
-        }
-
-        try {
-            $client = $this->getClient();
+        {
+            Log::info("=== GET CALENDAR SERVICE STARTED ===");
+            Log::info("User ID: {$user->id}");
             
-            // Handle both array and JSON string formats
-            $tokenData = is_array($user->google_token) 
-                ? $user->google_token 
-                : json_decode($user->google_token, true);
-            
-            if (!$tokenData) {
-                Log::error("Invalid token format for user {$user->id}");
+            if (!$user) {
+                Log::error("No user provided to getCalendarServiceForUser");
                 return null;
             }
-            
-            $client->setAccessToken($tokenData);
 
-            // Refresh if expired
-            if ($client->isAccessTokenExpired()) {
-                Log::info("Token expired for user {$user->id}, attempting refresh");
-                
-                $refreshToken = $client->getRefreshToken() ?? $tokenData['refresh_token'] ?? null;
-                
-                if ($refreshToken) {
-                    $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
-                    
-                    if (isset($newToken['error'])) {
-                        Log::error("Token refresh failed for user {$user->id}: " . $newToken['error']);
-                        return null;
-                    }
-                    
-                    // Preserve refresh token if not included in new token
-                    if (!isset($newToken['refresh_token']) && isset($tokenData['refresh_token'])) {
-                        $newToken['refresh_token'] = $tokenData['refresh_token'];
-                    }
-                    
-                    $user->google_token = $newToken;
-                    $user->google_token_expires_at = Carbon::now()->addSeconds($newToken['expires_in'] ?? 3600);
-                    $user->save();
-                    
-                    Log::info("Token refreshed successfully for user {$user->id}");
-                } else {
-                    Log::error("No refresh token available for user {$user->id}");
-                    return null;
-                }
+            if (!$user->google_token) {
+                Log::error("User {$user->id} doesn't have a Google token");
+                return null;
             }
 
-            return new Google_Service_Calendar($client);
-            
-        } catch (\Exception $e) {
-            Log::error("Failed to get calendar service for user {$user->id}: " . $e->getMessage());
-            Log::error("Stack trace: " . $e->getTraceAsString());
-            return null;
+            Log::info("User has google_token");
+
+            try {
+                $client = $this->getClient();
+                Log::info("Google Client created");
+                
+                // Handle both array and JSON string formats
+                $tokenData = is_array($user->google_token) 
+                    ? $user->google_token 
+                    : json_decode($user->google_token, true);
+                
+                if (!$tokenData) {
+                    Log::error("Invalid token format for user {$user->id}");
+                    Log::error("Token data: " . print_r($user->google_token, true));
+                    return null;
+                }
+                
+                Log::info("Token data decoded successfully");
+                Log::info("Token has access_token: " . (isset($tokenData['access_token']) ? 'YES' : 'NO'));
+                Log::info("Token has refresh_token: " . (isset($tokenData['refresh_token']) ? 'YES' : 'NO'));
+                
+                $client->setAccessToken($tokenData);
+                Log::info("Access token set on client");
+
+                // Refresh if expired
+                if ($client->isAccessTokenExpired()) {
+                    Log::warning("Token expired for user {$user->id}, attempting refresh");
+                    
+                    $refreshToken = $client->getRefreshToken() ?? $tokenData['refresh_token'] ?? null;
+                    
+                    if ($refreshToken) {
+                        Log::info("Refresh token found, fetching new access token");
+                        $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+                        
+                        if (isset($newToken['error'])) {
+                            Log::error("Token refresh failed for user {$user->id}: " . $newToken['error']);
+                            return null;
+                        }
+                        
+                        // Preserve refresh token if not included in new token
+                        if (!isset($newToken['refresh_token']) && isset($tokenData['refresh_token'])) {
+                            $newToken['refresh_token'] = $tokenData['refresh_token'];
+                        }
+                        
+                        $user->google_token = $newToken;
+                        $user->google_token_expires_at = Carbon::now()->addSeconds($newToken['expires_in'] ?? 3600);
+                        $user->save();
+                        
+                        Log::info("Token refreshed successfully for user {$user->id}");
+                    } else {
+                        Log::error("No refresh token available for user {$user->id}");
+                        return null;
+                    }
+                } else {
+                    Log::info("Token is still valid, no refresh needed");
+                }
+
+                $service = new Google_Service_Calendar($client);
+                Log::info("Google_Service_Calendar created successfully");
+                Log::info("=== GET CALENDAR SERVICE COMPLETED ===");
+                
+                return $service;
+                
+            } catch (\Exception $e) {
+                Log::error("=== GET CALENDAR SERVICE FAILED ===");
+                Log::error("Failed to get calendar service for user {$user->id}: " . $e->getMessage());
+                Log::error("Stack trace: " . $e->getTraceAsString());
+                return null;
+            }
         }
-    }
 
     /**
      * Get user's primary calendar events for a date range
@@ -236,29 +256,49 @@ class GoogleCalendarService
      * Helper method for creating events with standard format
      */
     public function createEvent($user, $eventData)
-    {
-        $service = $this->getCalendarServiceForUser($user);
-        
-        if (!$service) {
-            throw new \Exception("Could not get Google Calendar service for user");
-        }
+        {
+            Log::info("=== CREATE EVENT STARTED ===");
+            Log::info("User ID: {$user->id}");
+            Log::info("Event data:", $eventData);
+            
+            $service = $this->getCalendarServiceForUser($user);
+            
+            if (!$service) {
+                Log::error("Could not get Google Calendar service for user {$user->id}");
+                throw new \Exception("Could not get Google Calendar service for user");
+            }
 
-        try {
-            $event = new Google_Service_Calendar_Event($eventData);
-            
-            $createdEvent = $service->events->insert('primary', $event, [
-                'sendUpdates' => 'all'
-            ]);
-            
-            Log::info("Google Calendar event created with ID: " . $createdEvent->getId());
-            
-            return $createdEvent;
-            
-        } catch (\Exception $e) {
-            Log::error("Failed to create Google Calendar event: " . $e->getMessage());
-            throw $e;
+            Log::info("Calendar service obtained successfully");
+
+            try {
+                Log::info("Creating Google_Service_Calendar_Event object");
+                $event = new Google_Service_Calendar_Event($eventData);
+                
+                Log::info("Inserting event into primary calendar");
+                $createdEvent = $service->events->insert('primary', $event, [
+                    'sendUpdates' => 'all'
+                ]);
+                
+                $eventId = $createdEvent->getId();
+                Log::info("Google Calendar event created successfully with ID: {$eventId}");
+                
+                // Verify the event ID is not null
+                if (!$eventId) {
+                    Log::error("Event was created but ID is null!");
+                    throw new \Exception("Event created but no ID returned");
+                }
+                
+                Log::info("=== CREATE EVENT COMPLETED ===");
+                return $createdEvent;
+                
+            } catch (\Exception $e) {
+                Log::error("=== CREATE EVENT FAILED ===");
+                Log::error("Error message: " . $e->getMessage());
+                Log::error("Error code: " . $e->getCode());
+                Log::error("Stack trace: " . $e->getTraceAsString());
+                throw $e;
+            }
         }
-    }
 
     /**
      * Update a Google Calendar event

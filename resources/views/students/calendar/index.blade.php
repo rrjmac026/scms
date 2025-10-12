@@ -1,4 +1,4 @@
-{{-- resources/views/admin/calendar/index.blade.php --}}
+{{-- resources/views/student/calendar/index.blade.php --}}
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
