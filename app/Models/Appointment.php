@@ -21,7 +21,7 @@ class Appointment extends Model
         'proposed_time',
         'status',
         'concern',
-        'cancelled_reason', // gi add nako ni if ever mag cancel og appointment ang student
+        'cancelled_reason',
         'google_event_id',
     ];
 

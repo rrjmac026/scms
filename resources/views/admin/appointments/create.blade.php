@@ -1,3 +1,4 @@
+{{-- resources/views/admin/appointments/create.blade.php --}}
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -22,8 +23,43 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Error Alert -->
+            @if(session('error'))
+                <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3">
+                    <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+                    <div class="flex-1">
+                        <p class="text-sm text-red-800 dark:text-red-200 font-medium">{{ session('error') }}</p>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            @endif
+
+            <!-- Validation Errors Summary -->
+            @if($errors->any())
+                <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-semibold text-red-800 dark:text-red-200 mb-2">
+                                Please fix the following errors:
+                            </h3>
+                            <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300 space-y-1">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 dark:border-gray-700">
-                <form action="{{ route('admin.appointments.store') }}" method="POST" class="p-6">
+                <form action="{{ route('admin.appointments.store') }}" method="POST" class="p-6" id="appointmentForm">
                     @csrf
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -63,23 +99,6 @@
                             <x-input-error :messages="$errors->get('preferred_date')" class="mt-2" />
                         </div>
 
-                        <!-- Time -->
-                        <div>
-                            <x-input-label for="preferred_time" value="{{ __('Time') }}" />
-                            <select id="preferred_time" name="preferred_time" required
-                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500">
-                                <option value="">Select Time</option>
-                                <option value="09:00" {{ old('preferred_time') == '09:00' ? 'selected' : '' }}>9:00 AM</option>
-                                <option value="10:00" {{ old('preferred_time') == '10:00' ? 'selected' : '' }}>10:00 AM</option>
-                                <option value="11:00" {{ old('preferred_time') == '11:00' ? 'selected' : '' }}>11:00 AM</option>
-                                <option value="13:00" {{ old('preferred_time') == '13:00' ? 'selected' : '' }}>1:00 PM</option>
-                                <option value="14:00" {{ old('preferred_time') == '14:00' ? 'selected' : '' }}>2:00 PM</option>
-                                <option value="15:00" {{ old('preferred_time') == '15:00' ? 'selected' : '' }}>3:00 PM</option>
-                                <option value="16:00" {{ old('preferred_time') == '16:00' ? 'selected' : '' }}>4:00 PM</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('preferred_time')" class="mt-2" />
-                        </div>
-
                         <!-- Category -->
                         <div>
                             <x-input-label for="counseling_category_id" value="{{ __('Category') }}" />
@@ -95,22 +114,101 @@
                             <x-input-error :messages="$errors->get('counseling_category_id')" class="mt-2" />
                         </div>
 
+                        <!-- Time Slot Selection with Visual Cards -->
+                        <div class="md:col-span-2">
+                            <x-input-label for="preferred_time" :value="__('Preferred Time')" />
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-3">
+                                <i class="fas fa-info-circle"></i>
+                                Select a date first to see available time slots
+                            </p>
+                            
+                            <!-- Hidden input to store selected time -->
+                            <input type="hidden" id="preferred_time" name="preferred_time" required>
+                            
+                            <!-- Time slot grid -->
+                            <div id="time-slots-container" class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+                                <button type="button" class="time-slot" data-time="09:00" disabled>
+                                    <span class="time">9:00 AM</span>
+                                    <span class="status"></span>
+                                </button>
+                                <button type="button" class="time-slot" data-time="10:00" disabled>
+                                    <span class="time">10:00 AM</span>
+                                    <span class="status"></span>
+                                </button>
+                                <button type="button" class="time-slot" data-time="11:00" disabled>
+                                    <span class="time">11:00 AM</span>
+                                    <span class="status"></span>
+                                </button>
+                                <button type="button" class="time-slot" data-time="13:00" disabled>
+                                    <span class="time">1:00 PM</span>
+                                    <span class="status"></span>
+                                </button>
+                                <button type="button" class="time-slot" data-time="14:00" disabled>
+                                    <span class="time">2:00 PM</span>
+                                    <span class="status"></span>
+                                </button>
+                                <button type="button" class="time-slot" data-time="15:00" disabled>
+                                    <span class="time">3:00 PM</span>
+                                    <span class="status"></span>
+                                </button>
+                                <button type="button" class="time-slot" data-time="16:00" disabled>
+                                    <span class="time">4:00 PM</span>
+                                    <span class="status"></span>
+                                </button>
+                            </div>
+                            
+                            <!-- Legend -->
+                            <div class="flex gap-4 mt-4 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded bg-green-500"></div>
+                                    <span class="text-gray-600 dark:text-gray-400">Available</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded bg-red-500"></div>
+                                    <span class="text-gray-600 dark:text-gray-400">Booked</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded bg-blue-500"></div>
+                                    <span class="text-gray-600 dark:text-gray-400">Selected</span>
+                                </div>
+                            </div>
+                            
+                            <x-input-error :messages="$errors->get('preferred_time')" class="mt-2" />
+                            
+                            <!-- Time selection error message -->
+                            <div id="time-error" class="hidden mt-2 text-sm text-red-600 dark:text-red-400">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span id="time-error-message"></span>
+                            </div>
+                        </div>
 
                         <!-- Status -->
                         <div>
                             <x-input-label for="status" value="{{ __('Status') }}" />
                             <select name="status" id="status" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500" required>
-                                <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="pending" {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="approved" {{ old('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                             </select>
                             <x-input-error :messages="$errors->get('status')" class="mt-2" />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-info-circle"></i>
+                                Approved appointments will be added to Google Calendar (if connected)
+                            </p>
                         </div>
 
                         <!-- Concern/Notes -->
                         <div class="md:col-span-2">
                             <x-input-label for="concern" value="{{ __('Concern/Notes') }}" />
-                            <textarea id="concern" name="concern" rows="4" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500" required>{{ old('concern') }}</textarea>
-                            <x-input-error :messages="$errors->get('concern')" class="mt-2" />
+                            <textarea id="concern" name="concern" rows="4" 
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500" 
+                                required 
+                                maxlength="500">{{ old('concern') }}</textarea>
+                            <div class="flex justify-between mt-1">
+                                <x-input-error :messages="$errors->get('concern')" />
+                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                    <span id="char-count">0</span>/500
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -118,13 +216,319 @@
                         <x-secondary-button type="button" onclick="history.back()">
                             {{ __('Cancel') }}
                         </x-secondary-button>
-                        <x-primary-button>
+                        <x-primary-button id="submitBtn">
                             <i class="fas fa-save mr-2"></i>
-                            {{ __('Create Appointment') }}
+                            <span id="submitBtnText">{{ __('Create Appointment') }}</span>
                         </x-primary-button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <style>
+        .time-slot {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .dark .time-slot {
+            background-color: #1f2937;
+            border-color: #374151;
+        }
+
+        .time-slot .time {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .dark .time-slot .time {
+            color: #d1d5db;
+        }
+
+        .time-slot .status {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .time-slot:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Available slots */
+        .time-slot.available {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .dark .time-slot.available {
+            background-color: #064e3b;
+            border-color: #10b981;
+        }
+
+        .time-slot.available:hover {
+            background-color: #dcfce7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .time-slot.available:hover {
+            background-color: #065f46;
+        }
+
+        /* Booked slots */
+        .time-slot.booked {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .dark .time-slot.booked {
+            background-color: #7f1d1d;
+            border-color: #ef4444;
+        }
+
+        .time-slot.booked .status::after {
+            content: '(Booked)';
+        }
+
+        /* Selected slot */
+        .time-slot.selected {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+        }
+
+        .dark .time-slot.selected {
+            background-color: #1e3a8a;
+            border-color: #3b82f6;
+        }
+
+        .time-slot.selected .status::after {
+            content: '(Selected)';
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('appointmentForm');
+            const dateInput = document.getElementById('preferred_date');
+            const timeHiddenInput = document.getElementById('preferred_time');
+            const timeSlotButtons = document.querySelectorAll('.time-slot');
+            const concernTextarea = document.getElementById('concern');
+            const charCount = document.getElementById('char-count');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const timeError = document.getElementById('time-error');
+            const timeErrorMessage = document.getElementById('time-error-message');
+
+            const bookedSlots = @json($bookedSlots ?? []);
+
+            // Character counter
+            concernTextarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+            });
+
+            // Initialize character count
+            charCount.textContent = concernTextarea.value.length;
+
+            // Handle date change
+            dateInput.addEventListener('change', function () {
+                try {
+                    const selectedDate = this.value;
+                    if (!selectedDate) {
+                        showTimeError('Please select a date');
+                        return;
+                    }
+
+                    const dateObj = new Date(selectedDate + 'T00:00:00');
+                    const day = dateObj.getDay();
+
+                    if (day === 0 || day === 6) {
+                        showTimeError('Appointments can only be booked on weekdays (Monday to Friday)');
+                        this.value = '';
+                        disableAllTimeSlots();
+                        return;
+                    }
+
+                    hideTimeError();
+                    updateTimeSlots(selectedDate);
+                } catch (error) {
+                    console.error('Date validation error:', error);
+                    showTimeError('Invalid date selected');
+                }
+            });
+
+            // Handle time slot selection
+            timeSlotButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    if (this.classList.contains('booked') || this.disabled) {
+                        return;
+                    }
+
+                    if (!dateInput.value) {
+                        showTimeError('Please select a date first');
+                        return;
+                    }
+
+                    // Remove selected class from all buttons
+                    timeSlotButtons.forEach(btn => btn.classList.remove('selected'));
+
+                    // Add selected class to clicked button
+                    this.classList.add('selected');
+
+                    // Update hidden input
+                    timeHiddenInput.value = this.dataset.time;
+                    
+                    hideTimeError();
+                });
+            });
+
+            // Form submission validation
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                const errors = [];
+
+                // Check if date is selected
+                if (!dateInput.value) {
+                    errors.push('Please select a date');
+                    isValid = false;
+                }
+
+                // Check if time is selected
+                if (!timeHiddenInput.value) {
+                    errors.push('Please select a time slot');
+                    showTimeError('Please select a time slot');
+                    isValid = false;
+                }
+
+                // Check if student is selected
+                const studentSelect = document.getElementById('student_id');
+                if (!studentSelect.value) {
+                    errors.push('Please select a student');
+                    isValid = false;
+                }
+
+                // Check if category is selected
+                const categorySelect = document.getElementById('counseling_category_id');
+                if (!categorySelect.value) {
+                    errors.push('Please select a counseling category');
+                    isValid = false;
+                }
+
+                // Check if concern is filled
+                if (!concernTextarea.value.trim()) {
+                    errors.push('Please provide concern/notes');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    
+                    // Show errors at the top
+                    if (errors.length > 0) {
+                        alert('Please fix the following errors:\n\n• ' + errors.join('\n• '));
+                    }
+                    
+                    // Scroll to first error
+                    const firstError = document.querySelector('.text-red-600, #time-error:not(.hidden)');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    
+                    return false;
+                }
+
+                // Disable submit button and show loading state
+                submitBtn.disabled = true;
+                submitBtnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
+            });
+
+            function updateTimeSlots(selectedDate) {
+                console.log('Selected date:', selectedDate);
+                console.log('Booked slots:', bookedSlots);
+                
+                let hasAvailableSlots = false;
+
+                timeSlotButtons.forEach(button => {
+                    const time = button.dataset.time;
+                    
+                    const isBooked = bookedSlots.some(slot => {
+                        const slotMatches = slot.preferred_date === selectedDate && slot.preferred_time === time;
+                        if (slotMatches) {
+                            console.log('Found booked slot:', slot);
+                        }
+                        return slotMatches;
+                    });
+
+                    // Reset classes
+                    button.classList.remove('available', 'booked', 'selected');
+                    button.disabled = false;
+
+                    if (isBooked) {
+                        button.classList.add('booked');
+                        button.disabled = true;
+                        console.log('Marking as booked:', time);
+                    } else {
+                        button.classList.add('available');
+                        hasAvailableSlots = true;
+                    }
+                });
+
+                // Clear selection
+                timeHiddenInput.value = '';
+
+                // Show message if no slots available
+                if (!hasAvailableSlots) {
+                    showTimeError('No available time slots for this date. Please choose another date.');
+                } else {
+                    hideTimeError();
+                }
+            }
+
+            function disableAllTimeSlots() {
+                timeSlotButtons.forEach(button => {
+                    button.classList.remove('available', 'booked', 'selected');
+                    button.disabled = true;
+                });
+                timeHiddenInput.value = '';
+            }
+
+            function showTimeError(message) {
+                timeErrorMessage.textContent = message;
+                timeError.classList.remove('hidden');
+            }
+
+            function hideTimeError() {
+                timeError.classList.add('hidden');
+            }
+
+            // Restore old time selection if validation fails
+            @if(old('preferred_time'))
+                const oldTime = "{{ old('preferred_time') }}";
+                const oldDate = "{{ old('preferred_date') }}";
+                
+                if (oldDate) {
+                    setTimeout(() => {
+                        updateTimeSlots(oldDate);
+                        
+                        // Select the old time
+                        timeSlotButtons.forEach(btn => {
+                            if (btn.dataset.time === oldTime) {
+                                btn.classList.add('selected');
+                                timeHiddenInput.value = oldTime;
+                            }
+                        });
+                    }, 100);
+                }
+            @endif
+        });
+    </script>
 </x-app-layout>

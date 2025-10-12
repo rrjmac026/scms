@@ -165,19 +165,19 @@ class StudentManagementController extends Controller
         $validated = $request->validate([
             'user_id'        => 'required|exists:users,id',
             'student_number' => 'required|string|max:50|unique:students,student_number,' . $student->id,
-            'lrn'            => 'nullable|string|max:50',
-            'strand'         => 'nullable|string|max:255',
-            'grade_level'    => 'nullable|string|max:50',
-            'special_needs'  => 'nullable|string|max:500',
+            'lrn'            => 'required|string|max:50',
+            'strand'         => 'required|string|max:255',
+            'grade_level'    => 'required|string|max:50',
+            'special_needs'  => 'required|string|max:500',
 
             // Personal Info
-            'birthdate'      => 'nullable|date',
-            'gender'         => 'nullable|string|max:50',
-            'address'        => 'nullable|string|max:500',
-            'contact_number' => 'nullable|string|max:50',
-            'civil_status'   => 'nullable|string|max:50',
-            'nationality'    => 'nullable|string|max:100',
-            'religion'       => 'nullable|string|max:100',
+            'birthdate'      => 'required|date',
+            'gender'         => 'required|string|max:50',
+            'address'        => 'required|string|max:500',
+            'contact_number' => 'required|string|max:50',
+            'civil_status'   => 'required|string|max:50',
+            'nationality'    => 'required|string|max:100',
+            'religion'       => 'required|string|max:100',
 
             // Parent/Guardian Info
             'father_name'    => 'nullable|string|max:255',

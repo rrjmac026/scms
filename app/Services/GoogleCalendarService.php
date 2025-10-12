@@ -13,9 +13,11 @@ class GoogleCalendarService
     public function getClient()
     {
         $client = new Google_Client();
-        $client->setClientId(config('services.google.client_id'));
-        $client->setClientSecret(config('services.google.client_secret'));
-        $client->setRedirectUri(config('services.google.redirect'));
+        
+        // FIXED: Use google_calendar instead of google to match GoogleAuthController
+        $client->setClientId(config('services.google_calendar.client_id'));
+        $client->setClientSecret(config('services.google_calendar.client_secret'));
+        $client->setRedirectUri(config('services.google_calendar.redirect'));
         
         // Add both read and write scopes for calendar
         $client->addScope('https://www.googleapis.com/auth/calendar');
@@ -30,6 +32,11 @@ class GoogleCalendarService
 
     public function getCalendarServiceForUser($user)
     {
+        if (!$user) {
+            Log::error("No user provided to getCalendarServiceForUser");
+            return null;
+        }
+
         if (!$user->google_token) {
             Log::info("User {$user->id} doesn't have a Google token");
             return null;
@@ -52,6 +59,8 @@ class GoogleCalendarService
 
             // Refresh if expired
             if ($client->isAccessTokenExpired()) {
+                Log::info("Token expired for user {$user->id}, attempting refresh");
+                
                 $refreshToken = $client->getRefreshToken() ?? $tokenData['refresh_token'] ?? null;
                 
                 if ($refreshToken) {
@@ -82,6 +91,7 @@ class GoogleCalendarService
             
         } catch (\Exception $e) {
             Log::error("Failed to get calendar service for user {$user->id}: " . $e->getMessage());
+            Log::error("Stack trace: " . $e->getTraceAsString());
             return null;
         }
     }
@@ -196,8 +206,10 @@ class GoogleCalendarService
                     ? json_decode($user->google_token, true) 
                     : $user->google_token;
                 
-                $client->setAccessToken($tokenData);
-                $client->revokeToken();
+                if ($tokenData && isset($tokenData['access_token'])) {
+                    $client->setAccessToken($tokenData);
+                    $client->revokeToken();
+                }
             }
             
             $user->google_token = null;
@@ -216,6 +228,97 @@ class GoogleCalendarService
             $user->save();
             
             return true;
+        }
+    }
+
+    /**
+     * Create a Google Calendar event
+     * Helper method for creating events with standard format
+     */
+    public function createEvent($user, $eventData)
+    {
+        $service = $this->getCalendarServiceForUser($user);
+        
+        if (!$service) {
+            throw new \Exception("Could not get Google Calendar service for user");
+        }
+
+        try {
+            $event = new Google_Service_Calendar_Event($eventData);
+            
+            $createdEvent = $service->events->insert('primary', $event, [
+                'sendUpdates' => 'all'
+            ]);
+            
+            Log::info("Google Calendar event created with ID: " . $createdEvent->getId());
+            
+            return $createdEvent;
+            
+        } catch (\Exception $e) {
+            Log::error("Failed to create Google Calendar event: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Update a Google Calendar event
+     */
+    public function updateEvent($user, $eventId, $eventData)
+    {
+        $service = $this->getCalendarServiceForUser($user);
+        
+        if (!$service) {
+            throw new \Exception("Could not get Google Calendar service for user");
+        }
+
+        try {
+            $event = $service->events->get('primary', $eventId);
+            
+            // Update event properties
+            foreach ($eventData as $key => $value) {
+                $setter = 'set' . ucfirst($key);
+                if (method_exists($event, $setter)) {
+                    $event->$setter($value);
+                }
+            }
+            
+            $updatedEvent = $service->events->update('primary', $eventId, $event, [
+                'sendUpdates' => 'all'
+            ]);
+            
+            Log::info("Google Calendar event updated: " . $eventId);
+            
+            return $updatedEvent;
+            
+        } catch (\Exception $e) {
+            Log::error("Failed to update Google Calendar event {$eventId}: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Delete a Google Calendar event
+     */
+    public function deleteEvent($user, $eventId)
+    {
+        $service = $this->getCalendarServiceForUser($user);
+        
+        if (!$service) {
+            throw new \Exception("Could not get Google Calendar service for user");
+        }
+
+        try {
+            $service->events->delete('primary', $eventId, [
+                'sendUpdates' => 'all'
+            ]);
+            
+            Log::info("Google Calendar event deleted: " . $eventId);
+            
+            return true;
+            
+        } catch (\Exception $e) {
+            Log::error("Failed to delete Google Calendar event {$eventId}: " . $e->getMessage());
+            throw $e;
         }
     }
 }

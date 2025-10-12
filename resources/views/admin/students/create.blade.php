@@ -82,7 +82,7 @@
                                 <div>
                                     <x-input-label for="lrn" :value="__('LRN (Learner Reference Number)')" />
                                     <x-text-input id="lrn" name="lrn" type="text" 
-                                        class="mt-1 block w-full" :value="old('lrn')" />
+                                        class="mt-1 block w-full" :value="old('lrn')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('lrn')" />
                                 </div>
 
