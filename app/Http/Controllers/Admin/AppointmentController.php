@@ -10,12 +10,19 @@ use App\Models\CounselingCategory;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
-use App\Services\GoogleCalendarService;
-use Google_Service_Calendar_Event;
+use App\Services\AppointmentCalendarSyncService; // ← Use the sync service!
 use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
+    protected $syncService;
+
+    // ✅ Inject the sync service
+    public function __construct(AppointmentCalendarSyncService $syncService)
+    {
+        $this->syncService = $syncService;
+    }
+
     /**
      * Display a listing of appointments.
      */
@@ -74,7 +81,7 @@ class AppointmentController extends Controller
     /**
      * Store a newly created appointment (Admin privilege - can directly approve and assign)
      */
-    public function store(Request $request, GoogleCalendarService $gcal)
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
@@ -109,30 +116,23 @@ class AppointmentController extends Controller
             'student_id' => $validated['student_id'],
             'counselor_id' => $validated['counselor_id'],
             'preferred_date' => $validated['preferred_date'],
-            'preferred_time' => $validated['preferred_time'],
+            'preferred_time' => $validated['preferred_time'] . ':00', // Add seconds
             'concern' => $validated['concern'],
             'counseling_category_id' => $validated['counseling_category_id'],
             'status' => 'approved',
         ]);
 
-        $appointment->load('counselor.user', 'student.user');
-
-        // Attempt Google Calendar sync
-        $googleMsg = '';
-        if ($appointment->counselor->user && $appointment->counselor->user->google_token) {
-            try {
-                $this->createGoogleCalendarEvent($appointment, $gcal);
-                $googleMsg = ' Google Calendar event created.';
-            } catch (\Exception $e) {
-                Log::error("Google Calendar event creation failed for appointment {$appointment->id}: " . $e->getMessage());
-                $googleMsg = ' Failed to create Google Calendar event.';
-            }
-        } else {
-            $googleMsg = ' Counselor does not have Google Calendar connected.';
+        // 🔄 Use the sync service instead of direct Google Calendar calls
+        try {
+            $this->syncService->sync($appointment);
+            $message = 'Appointment created and approved successfully. Google Calendar synced.';
+        } catch (\Exception $e) {
+            Log::error("Sync failed for appointment {$appointment->id}: " . $e->getMessage());
+            $message = 'Appointment created but Google Calendar sync failed.';
         }
 
         return redirect()->route('admin.appointments.index')
-            ->with('success', 'Appointment created and approved successfully.' . $googleMsg);
+            ->with('success', $message);
     }
 
     /**
@@ -151,7 +151,6 @@ class AppointmentController extends Controller
         return view('admin.appointments.show', compact('appointment', 'availableCounselors'));
     }
 
-
     /**
      * Show the form for editing the specified appointment.
      */
@@ -167,7 +166,7 @@ class AppointmentController extends Controller
     /**
      * Update the specified appointment.
      */
-    public function update(Request $request, Appointment $appointment, GoogleCalendarService $gcal)
+    public function update(Request $request, Appointment $appointment)
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
@@ -203,23 +202,26 @@ class AppointmentController extends Controller
         }
 
         // Update appointment
-        $appointment->update($validated);
-        $appointment->load('counselor.user', 'student.user');
+        $appointment->update([
+            'student_id' => $validated['student_id'],
+            'counselor_id' => $validated['counselor_id'],
+            'preferred_date' => $validated['preferred_date'],
+            'preferred_time' => $validated['preferred_time'] . ':00', // Add seconds
+            'concern' => $validated['concern'],
+            'counseling_category_id' => $validated['counseling_category_id'],
+        ]);
 
-        // Update Google Calendar event if exists
-        $googleMsg = '';
-        if ($appointment->google_event_id && $appointment->counselor->user && $appointment->counselor->user->google_token) {
-            try {
-                $this->updateGoogleCalendarEvent($appointment, $gcal);
-                $googleMsg = ' Google Calendar event updated.';
-            } catch (\Exception $e) {
-                Log::error("Google Calendar event update failed for appointment {$appointment->id}: " . $e->getMessage());
-                $googleMsg = ' Failed to update Google Calendar event.';
-            }
+        // 🔄 Use the sync service to update Google Calendar
+        try {
+            $this->syncService->sync($appointment);
+            $message = 'Appointment updated successfully. Google Calendar synced.';
+        } catch (\Exception $e) {
+            Log::error("Sync failed for appointment {$appointment->id}: " . $e->getMessage());
+            $message = 'Appointment updated but Google Calendar sync failed.';
         }
 
         return redirect()->route('admin.appointments.index')
-            ->with('success', 'Appointment updated successfully.' . $googleMsg);
+            ->with('success', $message);
     }
 
     /**
@@ -264,15 +266,18 @@ class AppointmentController extends Controller
             'status' => 'approved',
         ]);
 
+        // 🔄 Sync to Google Calendar
+        try {
+            $this->syncService->sync($appointment);
+        } catch (\Exception $e) {
+            Log::error("Sync failed after approval: " . $e->getMessage());
+        }
+
         // Send notification to counselor
         $counselor->user->notify(new \App\Notifications\CounselorAppointmentAssigned($appointment));
 
         return back()->with('success', "Appointment approved and counselor {$counselor->user->name} assigned and notified automatically.");
     }
-
-
-
-
 
     /**
      * Reject appointment (for student-submitted requests)
@@ -293,182 +298,18 @@ class AppointmentController extends Controller
                 'rejection_reason' => $validated['rejection_reason']
             ]);
 
+            // 🔄 Sync to remove from Google Calendar if it exists
+            try {
+                $this->syncService->sync($appointment);
+            } catch (\Exception $e) {
+                Log::error("Sync failed after rejection: " . $e->getMessage());
+            }
+
             return back()->with('success', 'Appointment rejected successfully.');
 
         } catch (\Exception $e) {
             Log::error('Error rejecting appointment: ' . $e->getMessage());
             return back()->with('error', 'An error occurred while rejecting the appointment.');
-        }
-    }
-
-    /**
-     * Create Google Calendar event for the appointment
-     */
-    protected function createGoogleCalendarEvent(Appointment $appointment, GoogleCalendarService $gcal)
-    {
-        try {
-            Log::info("Starting Google Calendar event creation for appointment {$appointment->id}");
-            
-            if (!$appointment->counselor || !$appointment->counselor->user) {
-                Log::error("No counselor or counselor user for appointment {$appointment->id}");
-                return;
-            }
-
-            $service = $gcal->getCalendarServiceForUser($appointment->counselor->user);
-
-            if (!$service) {
-                Log::warning("Counselor doesn't have Google Calendar connected");
-                return;
-            }
-
-            // Get raw date and time values
-            $rawDate = $appointment->getOriginal('preferred_date');
-            $rawTime = $appointment->getOriginal('preferred_time');
-            
-            $dateString = substr($rawDate, 0, 10);
-            $timeString = substr($rawTime, 0, 5);
-            
-            Log::info("Date: {$dateString}, Time: {$timeString}");
-            
-            // Format time as 12-hour format for display
-            $formattedTime = Carbon::createFromFormat('H:i', $timeString)->format('g:i A');
-            
-            // Create all-day event with time in title and description
-            $event = new Google_Service_Calendar_Event([
-                'summary' => 'Counseling Session - ' . $appointment->student->user->name . ' at ' . $formattedTime,
-                'description' => $this->formatEventDescription($appointment),
-                'start' => [
-                    'date' => $dateString,
-                ],
-                'end' => [
-                    'date' => Carbon::parse($dateString)->addDay()->format('Y-m-d'),
-                ],
-                'attendees' => [
-                    ['email' => $appointment->student->user->email, 'displayName' => $appointment->student->user->name],
-                    ['email' => $appointment->counselor->user->email, 'displayName' => $appointment->counselor->user->name]
-                ],
-                'reminders' => [
-                    'useDefault' => false,
-                    'overrides' => [
-                        ['method' => 'email', 'minutes' => 24 * 60],
-                        ['method' => 'popup', 'minutes' => 60],
-                    ],
-                ],
-                'location' => 'Counseling Office',
-                'colorId' => '2',
-            ]);
-
-            $created = $service->events->insert('primary', $event, [
-                'sendUpdates' => 'all'
-            ]);
-
-            $appointment->google_event_id = $created->getId();
-            $appointment->save();
-
-            Log::info("Google Calendar event created successfully");
-
-        } catch (\Exception $e) {
-            Log::error('Google Calendar event creation failed: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-        }
-    }
-
-    /**
-     * Format the event description
-     */
-    protected function formatEventDescription(Appointment $appointment)
-    {
-        $description = "Counseling Session Details:\n\n";
-        
-        $timeString = substr($appointment->getOriginal('preferred_time'), 0, 5);
-        $formattedTime = Carbon::createFromFormat('H:i', $timeString)->format('h:i A');
-        $description .= "⏰ Scheduled Time: " . $formattedTime . "\n\n";
-        
-        $description .= "Student: " . $appointment->student->user->name . "\n";
-        $description .= "Email: " . $appointment->student->user->email . "\n";
-        
-        if ($appointment->category) {
-            $description .= "Category: " . $appointment->category->name . "\n";
-        }
-        
-        if ($appointment->concern) {
-            $description .= "Concern: " . $appointment->concern . "\n";
-        }
-        
-        $description .= "\nAppointment ID: " . $appointment->id;
-        
-        return $description;
-    }
-
-    /**
-     * Update Google Calendar event
-     */
-    protected function updateGoogleCalendarEvent(Appointment $appointment, GoogleCalendarService $gcal)
-    {
-        try {
-            if (!$appointment->google_event_id || !$appointment->counselor) {
-                return;
-            }
-
-            $service = $gcal->getCalendarServiceForUser($appointment->counselor->user);
-            
-            if (!$service) {
-                return;
-            }
-
-            $event = $service->events->get('primary', $appointment->google_event_id);
-
-            $rawDate = $appointment->getOriginal('preferred_date');
-            $rawTime = $appointment->getOriginal('preferred_time');
-            
-            $dateString = substr($rawDate, 0, 10);
-            $timeString = substr($rawTime, 0, 5);
-            
-            $formattedTime = Carbon::createFromFormat('H:i', $timeString)->format('g:i A');
-
-            $event->setSummary('Counseling Session - ' . $appointment->student->user->name . ' at ' . $formattedTime);
-            $event->setDescription($this->formatEventDescription($appointment));
-            $event->getStart()->setDate($dateString);
-            $event->getEnd()->setDate(Carbon::parse($dateString)->addDay()->format('Y-m-d'));
-
-            $service->events->update('primary', $appointment->google_event_id, $event, [
-                'sendUpdates' => 'all'
-            ]);
-
-            Log::info("Google Calendar event updated successfully");
-
-        } catch (\Exception $e) {
-            Log::error('Google Calendar event update failed: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Delete Google Calendar event
-     */
-    protected function deleteGoogleCalendarEvent(Appointment $appointment, GoogleCalendarService $gcal)
-    {
-        try {
-            if (!$appointment->google_event_id || !$appointment->counselor) {
-                return;
-            }
-
-            $service = $gcal->getCalendarServiceForUser($appointment->counselor->user);
-            
-            if (!$service) {
-                return;
-            }
-
-            $service->events->delete('primary', $appointment->google_event_id, [
-                'sendUpdates' => 'all'
-            ]);
-
-            $appointment->google_event_id = null;
-            $appointment->save();
-
-            Log::info("Google Calendar event deleted successfully");
-
-        } catch (\Exception $e) {
-            Log::error('Google Calendar event deletion failed: ' . $e->getMessage());
         }
     }
 
@@ -507,7 +348,8 @@ class AppointmentController extends Controller
                         // Check if counselor already has an appointment on this date
                         return !$counselor->appointments()
                             ->whereDate('preferred_date', $date)
-                            ->whereIn('status', ['approved', 'completed'])                            ->exists();
+                            ->whereIn('status', ['approved', 'completed'])
+                            ->exists();
 
                     } catch (\Exception $e) {
                         Log::error("Error processing counselor {$counselor->id}: " . $e->getMessage());
@@ -564,7 +406,8 @@ class AppointmentController extends Controller
                         'counselor'   => $counselorName,
                         'category'    => $appointment->category->name ?? 'General',
                         'status'      => $appointment->status,
-                        'description' => Str::limit($appointment->concern ?? '', 50)
+                        'description' => Str::limit($appointment->concern ?? '', 50),
+                        'google_event_id' => $appointment->google_event_id, // ← IMPORTANT!
                     ]
                 ];
             });
@@ -577,14 +420,16 @@ class AppointmentController extends Controller
     /**
      * Delete appointment
      */
-    public function destroy(Appointment $appointment, GoogleCalendarService $gcal)
+    public function destroy(Appointment $appointment)
     {
         try {
-            // Delete Google Calendar event if exists
-            if ($appointment->google_event_id && $appointment->counselor && $appointment->counselor->user) {
-                $this->deleteGoogleCalendarEvent($appointment, $gcal);
-            }
+            // Change status to cancelled to trigger Google Calendar deletion
+            $appointment->update(['status' => 'cancelled']);
+            
+            // 🔄 Sync to remove from Google Calendar
+            $this->syncService->sync($appointment);
 
+            // Now delete the appointment
             $appointment->delete();
 
             return redirect()->route('admin.appointments.index')
@@ -594,6 +439,4 @@ class AppointmentController extends Controller
             return redirect()->back()->with('error', 'An error occurred while deleting the appointment.');
         }
     }
-
-    
 }
