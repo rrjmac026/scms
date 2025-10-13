@@ -23,6 +23,7 @@ class Appointment extends Model
         'concern',
         'cancelled_reason',
         'google_event_id',
+        'rejection_reason',
     ];
 
     protected $casts = [

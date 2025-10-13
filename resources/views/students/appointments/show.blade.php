@@ -113,6 +113,8 @@
                         </div>
                     @endif
 
+                    
+
                     <!-- Actions -->
                     @if(in_array($appointment->status, ['pending', 'approved', 'accepted']))
                         <div class="mt-6 flex justify-end">

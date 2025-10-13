@@ -301,6 +301,17 @@
                                     {{ $appointment->concern }}
                                 </dd>
                             </div>
+
+                            @if($appointment->status === 'rejected' && $appointment->rejection_reason)
+                                <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
+                                    <dt class="text-sm font-medium text-red-600 dark:text-red-400 flex items-center">
+                                        <i class="fas fa-ban mr-2"></i> Rejection Reason
+                                    </dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                                        "{{ $appointment->rejection_reason }}"
+                                    </dd>
+                                </div>
+                            @endif
                         </dl>
 
                         @if($appointment->status === 'pending')
