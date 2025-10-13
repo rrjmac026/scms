@@ -307,23 +307,28 @@
                                 </dd>
                             </div>
 
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Reason for Appointment</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                                    {{ $appointment->concern }}
+                            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Reason for Appointment
+                                </dt>
+                                <br>
+                                <dd class="mt-1 text-xl text-gray-900 dark:text-gray-100">
+                                    "{{ $appointment->concern }}"
                                 </dd>
                             </div>
 
                             @if($appointment->status === 'rejected' && $appointment->rejection_reason)
-                                <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
+                                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                                     <dt class="text-sm font-medium text-red-600 dark:text-red-400 flex items-center">
                                         <i class="fas fa-ban mr-2"></i> Rejection Reason
                                     </dt>
-                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                                    <br>
+                                    <dd class="mt-1 text-xl text-gray-900 dark:text-gray-100">
                                         "{{ $appointment->rejection_reason }}"
                                     </dd>
                                 </div>
                             @endif
+
 
                             @if($appointment->status === 'cancelled')
                                 <div class="mt-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-lg">

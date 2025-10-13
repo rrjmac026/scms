@@ -297,7 +297,7 @@
 
                             <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Reason for Appointment</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                                <dd class="mt-1 text-md text-gray-900 dark:text-gray-100">
                                     {{ $appointment->concern }}
                                 </dd>
                             </div>
@@ -307,7 +307,7 @@
                                     <dt class="text-sm font-medium text-red-600 dark:text-red-400 flex items-center">
                                         <i class="fas fa-ban mr-2"></i> Rejection Reason
                                     </dt>
-                                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                                    <dd class="mt-1 text-md text-gray-900 dark:text-gray-100">
                                         "{{ $appointment->rejection_reason }}"
                                     </dd>
                                 </div>
