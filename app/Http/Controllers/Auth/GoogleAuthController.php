@@ -207,7 +207,7 @@ class GoogleAuthController extends Controller
         $user = Auth::user();
 
         // If you have an is_admin boolean
-        if ($user->is_admin ?? false) {
+        if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 

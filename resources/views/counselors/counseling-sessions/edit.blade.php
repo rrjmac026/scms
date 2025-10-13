@@ -17,11 +17,19 @@
                         <div>
                             <x-input-label for="status" :value="__('Session Status')" />
                             <select id="status" name="status" required
+                                @disabled(!$counselingSession->started_at)
                                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 dark:focus:ring-pink-800">
                                 <option value="pending" {{ $counselingSession->status === 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="ongoing" {{ $counselingSession->status === 'ongoing' ? 'selected' : '' }}>Ongoing</option>
                                 <option value="completed" {{ $counselingSession->status === 'completed' ? 'selected' : '' }}>Completed</option>
                             </select>
+
+                            @if(!$counselingSession->started_at)
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    ⚠️ You can update the status once the session has started.
+                                </p>
+                            @endif
+
                         </div>
 
                         <!-- Updated Notes -->

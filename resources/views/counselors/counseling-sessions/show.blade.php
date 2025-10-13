@@ -5,9 +5,9 @@
                 {{ __('Session Details') }}
             </h2>
             <div class="flex gap-2">
-                <x-secondary-button onclick="history.back()">
+                <!-- <x-secondary-button onclick="history.back()">
                     <i class="fas fa-arrow-left mr-2"></i>{{ __('Back') }}
-                </x-secondary-button>
+                </x-secondary-button> -->
             </div>
         </div>
     </x-slot>
