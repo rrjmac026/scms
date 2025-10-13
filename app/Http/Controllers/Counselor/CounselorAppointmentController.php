@@ -6,12 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Counselor;
 use App\Models\CounselingSession;
+use App\Services\AppointmentCalendarSyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class CounselorAppointmentController extends Controller
 {
+    protected $syncService;
+
+    // ✅ Inject the sync service
+    public function __construct(AppointmentCalendarSyncService $syncService)
+    {
+        $this->syncService = $syncService;
+    }
+
     /**
      * Display counselor's appointments with unassigned ones
      */
@@ -50,7 +60,19 @@ class CounselorAppointmentController extends Controller
             return back()->with('error', 'Only approved appointments can be accepted.');
         }
 
+        if (!$appointment->counselor_id) {
+            return back()->with('error', 'This appointment has not been assigned to a counselor yet.');
+        }
+
         $appointment->update(['status' => 'accepted']);
+
+        // 🔄 Sync to Google Calendar
+        try {
+            $this->syncService->sync($appointment);
+            Log::info("Calendar synced after counselor accepted appointment {$appointment->id}");
+        } catch (\Exception $e) {
+            Log::error("Failed to sync calendar after accept: " . $e->getMessage());
+        }
 
         // Send notification to student
         $appointment->student->user->notify(new \App\Notifications\AppointmentAccepted($appointment));
@@ -65,11 +87,8 @@ class CounselorAppointmentController extends Controller
                 'status'         => 'pending',
             ]);
         }
-        if (!$appointment->counselor_id) {
-            return back()->with('error', 'This appointment has not been assigned to a counselor yet.');
-        }
 
-        return back()->with('success', 'Appointment accepted successfully. Student has been notified via email.');
+        return back()->with('success', 'Appointment accepted successfully. Student has been notified via email and calendar updated.');
     }
 
     /**
@@ -96,12 +115,23 @@ class CounselorAppointmentController extends Controller
             'rejection_reason' => $validated['rejection_reason'],
         ]);
 
+        // 🔄 Sync to Google Calendar (will delete the event)
+        try {
+            $this->syncService->sync($appointment);
+            Log::info("Calendar synced after counselor rejected appointment {$appointment->id}");
+        } catch (\Exception $e) {
+            Log::error("Failed to sync calendar after reject: " . $e->getMessage());
+        }
+
         // Send rejection notification to student
         $appointment->student->user->notify(new \App\Notifications\AppointmentRejected($appointment));
 
-        return back()->with('success', 'Appointment rejected. Student has been notified via email.');
+        return back()->with('success', 'Appointment rejected. Student has been notified via email and event removed from calendars.');
     }
 
+    /**
+     * Mark appointment as completed
+     */
     public function complete(Appointment $appointment)
     {
         $counselor = auth()->user()->counselor;
@@ -119,12 +149,19 @@ class CounselorAppointmentController extends Controller
         // Update status
         $appointment->update(['status' => 'completed']);
 
+        // 🔄 Sync to Google Calendar (will delete/archive the event)
+        try {
+            $this->syncService->sync($appointment);
+            Log::info("Calendar synced after counselor completed appointment {$appointment->id}");
+        } catch (\Exception $e) {
+            Log::error("Failed to sync calendar after complete: " . $e->getMessage());
+        }
+
         // Redirect back with success message
         return redirect()
             ->route('counselor.appointments.index')
-            ->with('success', 'Appointment marked as completed.');
+            ->with('success', 'Appointment marked as completed and removed from calendars.');
     }
-
 
     /**
      * Show appointment details
@@ -186,7 +223,7 @@ class CounselorAppointmentController extends Controller
                         'category'    => $appointment->category->name ?? 'General',
                         'status'      => $appointment->status,
                         'description' => Str::limit($appointment->concern ?? '', 50),
-                        'google_event_id' => $appointment->google_event_id,
+                        'google_event_id' => $appointment->google_event_id, // ✅ Include this
                     ],
                 ];
             });
