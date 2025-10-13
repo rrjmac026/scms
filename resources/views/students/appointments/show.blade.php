@@ -89,6 +89,17 @@
                         </div>
                     </div>
 
+                    @if($appointment->status === 'cancelled')
+                                <div class="mt-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-lg">
+                                    <h4 class="text-sm font-semibold text-red-700 dark:text-red-400 mb-1">
+                                        <i class="fas fa-ban mr-2"></i>Cancelled Reason
+                                    </h4>
+                                    <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                                        {{ $appointment->cancelled_reason ?? 'No reason provided.' }}
+                                    </p>
+                                </div>
+                            @endif
+
                     @if($appointment->status === 'rejected' && $appointment->rejection_reason)
                         <div class="mt-6">
                             <h3 class="text-lg font-medium text-red-600 dark:text-red-400 mb-4">
