@@ -374,7 +374,7 @@ class AppointmentController extends Controller
     public function calendar()
     {
         $appointments = Appointment::with(['student.user', 'counselor.user', 'category'])
-            ->whereIn('status', ['pending', 'approved', 'completed'])            
+            ->whereIn('status', ['pending', 'approved', 'accepted', 'completed'])  // ← Add 'accepted'
             ->get()
             ->map(function ($appointment) {
                 $counselorName = $appointment->counselor 
@@ -398,6 +398,7 @@ class AppointmentController extends Controller
                     'color'       => match ($appointment->status) {
                         'pending' => '#f59e0b',
                         'approved' => '#3b82f6',
+                        'accepted' => '#10b981',
                         'completed' => '#16a34a',
                         'rejected' => '#ef4444',
                     },

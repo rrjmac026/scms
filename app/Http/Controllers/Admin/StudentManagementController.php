@@ -68,9 +68,9 @@ class StudentManagementController extends Controller
 
             // student fields
             'student_number'  => 'required|string|max:50|unique:students,student_number',
-            'lrn'             => 'nullable|string|max:50',
-            'strand'          => 'nullable|string|max:255',
-            'grade_level'     => 'nullable|string|max:50',
+            'lrn'             => 'required|string|max:50',
+            'strand'          => 'required|string|max:255',
+            'grade_level'     => 'required|string|max:50',
             'special_needs'   => 'nullable|string|max:500',
 
             // Personal Info
