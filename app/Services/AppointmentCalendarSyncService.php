@@ -39,7 +39,7 @@ class AppointmentCalendarSyncService
             switch ($appointment->status) {
                 case 'pending':
                 case 'approved':
-                case 'accepted':
+                case 'completed':  // ← Keep completed appointments in calendar
                     Log::info("Creating/updating events in all calendars");
                     $this->syncToAllCalendars($calendarOwners, $appointment);
                     break;
