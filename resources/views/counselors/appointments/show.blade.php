@@ -298,6 +298,7 @@
                             <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Reason for Appointment</dt>
                                 <dd class="mt-1 text-md text-gray-900 dark:text-gray-100">
+                                    <i class="fas fa-comment-dots mr-1 text-gray-400"></i>
                                     {{ $appointment->concern }}
                                 </dd>
                             </div>
