@@ -43,7 +43,6 @@ return new class extends Migration
             $table->text('concern')->nullable();
             $table->text('reschedule_reason')->nullable();
             $table->text('student_reschedule_response')->nullable();
-            $table->text('rejection_reason')->nullable();
             
             // Optional: Google Calendar integration
             $table->string('google_event_id')->nullable();

@@ -4,10 +4,6 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Counseling Sessions') }}
             </h2>
-            <a href="{{ route('admin.counseling-sessions.create') }}" 
-               class="px-4 py-2 bg-gradient-to-r from-pink-400 to-pink-500 text-white rounded-xl hover:from-pink-500 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg">
-                <i class="fas fa-plus mr-2"></i>{{ __('New Session') }}
-            </a>
         </div>
     </x-slot>
 
@@ -81,10 +77,6 @@
                                                     <a href="{{ route('admin.counseling-sessions.show', $session) }}" 
                                                        class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
                                                         <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="{{ route('admin.counseling-sessions.edit', $session) }}" 
-                                                       class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
-                                                        <i class="fas fa-edit"></i>
                                                     </a>
                                                     <form action="{{ route('admin.counseling-sessions.destroy', $session) }}" 
                                                           method="POST" 
