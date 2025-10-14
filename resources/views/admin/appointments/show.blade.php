@@ -335,7 +335,7 @@
                                     <h4 class="text-sm font-semibold text-red-700 dark:text-red-400 mb-1">
                                         <i class="fas fa-ban mr-2"></i>Cancelled Reason
                                     </h4>
-                                    <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                                    <p class="mt-1 text-xl text-gray-900 dark:text-gray-100">
                                         {{ $appointment->cancelled_reason ?? 'No reason provided.' }}
                                     </p>
                                 </div>
