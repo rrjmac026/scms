@@ -30,7 +30,7 @@
                                 <div>
                                     <x-input-label for="middle_name" :value="__('Middle Name')" />
                                     <x-text-input id="middle_name" name="middle_name" type="text" class="mt-1 block w-full" 
-                                        :value="old('middle_name')" />
+                                        :value="old('middle_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('middle_name')" />
                                 </div>
 
@@ -119,7 +119,7 @@
                                     <x-input-label for="special_needs" :value="__('Special Needs/Considerations')" />
                                     <textarea id="special_needs" name="special_needs" 
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-                                        rows="3">{{ old('special_needs') }}</textarea>
+                                        rows="3" required>{{ old('special_needs') }}</textarea>
                                     <x-input-error class="mt-2" :messages="$errors->get('special_needs')" />
                                 </div>
                             </div>
@@ -133,14 +133,14 @@
                                 <div>
                                     <x-input-label for="birthdate" :value="__('Birthdate')" />
                                     <x-text-input id="birthdate" name="birthdate" type="date" 
-                                        class="mt-1 block w-full" :value="old('birthdate')" />
+                                        class="mt-1 block w-full" :value="old('birthdate')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('birthdate')" />
                                 </div>
 
                                 <!-- Gender -->
                                 <div>
                                     <x-input-label for="gender" :value="__('Gender')" />
-                                    <select id="gender" name="gender" 
+                                    <select id="gender" name="gender" required
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                                         <option value="">Select Gender</option>
                                         <option value="Male" {{ old('gender') === 'Male' ? 'selected' : '' }}>Male</option>
@@ -154,7 +154,7 @@
                                     <x-input-label for="address" :value="__('Address')" />
                                     <textarea id="address" name="address" 
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-                                        rows="2">{{ old('address') }}</textarea>
+                                        rows="2" required>{{ old('address') }}</textarea>
                                     <x-input-error class="mt-2" :messages="$errors->get('address')" />
                                 </div>
 
@@ -162,14 +162,14 @@
                                 <div>
                                     <x-input-label for="contact_number" :value="__('Contact Number')" />
                                     <x-text-input id="contact_number" name="contact_number" type="text" 
-                                        class="mt-1 block w-full" :value="old('contact_number')" />
+                                        class="mt-1 block w-full" :value="old('contact_number')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('contact_number')" />
                                 </div>
 
                                 <!-- Civil Status -->
                                 <div>
                                     <x-input-label for="civil_status" :value="__('Civil Status')" />
-                                    <select id="civil_status" name="civil_status" 
+                                    <select id="civil_status" name="civil_status" required
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                                         <option value="">Select Civil Status</option>
                                         <option value="Single" {{ old('civil_status') === 'Single' ? 'selected' : '' }}>Single</option>
@@ -182,7 +182,7 @@
                                 <div>
                                     <x-input-label for="nationality" :value="__('Nationality')" />
                                     <x-text-input id="nationality" name="nationality" type="text" 
-                                        class="mt-1 block w-full" :value="old('nationality')" />
+                                        class="mt-1 block w-full" :value="old('nationality')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('nationality')" />
                                 </div>
 
@@ -190,7 +190,7 @@
                                 <div>
                                     <x-input-label for="religion" :value="__('Religion')" />
                                     <x-text-input id="religion" name="religion" type="text" 
-                                        class="mt-1 block w-full" :value="old('religion')" />
+                                        class="mt-1 block w-full" :value="old('religion')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('religion')" />
                                 </div>
                             </div>
@@ -204,7 +204,7 @@
                                 <div>
                                     <x-input-label for="father_name" :value="__('Full Name')" />
                                     <x-text-input id="father_name" name="father_name" type="text" 
-                                        class="mt-1 block w-full" :value="old('father_name')" />
+                                        class="mt-1 block w-full" :value="old('father_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('father_name')" />
                                 </div>
 
@@ -212,7 +212,7 @@
                                 <div>
                                     <x-input-label for="father_contact" :value="__('Contact Number')" />
                                     <x-text-input id="father_contact" name="father_contact" type="text" 
-                                        class="mt-1 block w-full" :value="old('father_contact')" />
+                                        class="mt-1 block w-full" :value="old('father_contact')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('father_contact')" />
                                 </div>
 
@@ -220,7 +220,7 @@
                                 <div>
                                     <x-input-label for="father_occupation" :value="__('Occupation')" />
                                     <x-text-input id="father_occupation" name="father_occupation" type="text" 
-                                        class="mt-1 block w-full" :value="old('father_occupation')" />
+                                        class="mt-1 block w-full" :value="old('father_occupation')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('father_occupation')" />
                                 </div>
                             </div>
@@ -234,7 +234,7 @@
                                 <div>
                                     <x-input-label for="mother_name" :value="__('Full Name')" />
                                     <x-text-input id="mother_name" name="mother_name" type="text" 
-                                        class="mt-1 block w-full" :value="old('mother_name')" />
+                                        class="mt-1 block w-full" :value="old('mother_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('mother_name')" />
                                 </div>
 
@@ -242,7 +242,7 @@
                                 <div>
                                     <x-input-label for="mother_contact" :value="__('Contact Number')" />
                                     <x-text-input id="mother_contact" name="mother_contact" type="text" 
-                                        class="mt-1 block w-full" :value="old('mother_contact')" />
+                                        class="mt-1 block w-full" :value="old('mother_contact')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('mother_contact')" />
                                 </div>
 
@@ -250,7 +250,7 @@
                                 <div>
                                     <x-input-label for="mother_occupation" :value="__('Occupation')" />
                                     <x-text-input id="mother_occupation" name="mother_occupation" type="text" 
-                                        class="mt-1 block w-full" :value="old('mother_occupation')" />
+                                        class="mt-1 block w-full" :value="old('mother_occupation')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('mother_occupation')" />
                                 </div>
                             </div>
@@ -264,7 +264,7 @@
                                 <div>
                                     <x-input-label for="guardian_name" :value="__('Full Name')" />
                                     <x-text-input id="guardian_name" name="guardian_name" type="text" 
-                                        class="mt-1 block w-full" :value="old('guardian_name')" />
+                                        class="mt-1 block w-full" :value="old('guardian_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('guardian_name')" />
                                 </div>
 
@@ -272,7 +272,7 @@
                                 <div>
                                     <x-input-label for="guardian_contact" :value="__('Contact Number')" />
                                     <x-text-input id="guardian_contact" name="guardian_contact" type="text" 
-                                        class="mt-1 block w-full" :value="old('guardian_contact')" />
+                                        class="mt-1 block w-full" :value="old('guardian_contact')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('guardian_contact')" />
                                 </div>
 
@@ -281,7 +281,7 @@
                                     <x-input-label for="guardian_relationship" :value="__('Relationship')" />
                                     <x-text-input id="guardian_relationship" name="guardian_relationship" type="text" 
                                         class="mt-1 block w-full" :value="old('guardian_relationship')" 
-                                        placeholder="e.g., Aunt, Uncle, Grandparent" />
+                                        placeholder="e.g., Aunt, Uncle, Grandparent" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('guardian_relationship')" />
                                 </div>
                             </div>

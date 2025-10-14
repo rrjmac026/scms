@@ -61,7 +61,7 @@ class StudentManagementController extends Controller
         $validated = $request->validate([
             // user fields
             'first_name'      => 'required|string|max:255',
-            'middle_name'     => 'nullable|string|max:255',
+            'middle_name'     => 'required|string|max:255',
             'last_name'       => 'required|string|max:255',
             'email'           => 'required|string|email|max:255|unique:users',
             'password'        => 'required|string|min:8|confirmed',
@@ -71,27 +71,27 @@ class StudentManagementController extends Controller
             'lrn'             => 'required|string|max:50',
             'strand'          => 'required|string|max:255',
             'grade_level'     => 'required|string|max:50',
-            'special_needs'   => 'nullable|string|max:500',
+            'special_needs'   => 'required|string|max:500',
 
             // Personal Info
-            'birthdate'       => 'nullable|date',
-            'gender'          => 'nullable|string|max:50',
-            'address'         => 'nullable|string|max:500',
-            'contact_number'  => 'nullable|string|max:50',
-            'civil_status'    => 'nullable|string|max:50',
-            'nationality'     => 'nullable|string|max:100',
-            'religion'        => 'nullable|string|max:100',
+            'birthdate'       => 'required|date',
+            'gender'          => 'required|string|max:50',
+            'address'         => 'required|string|max:500',
+            'contact_number'  => 'required|string|max:50',
+            'civil_status'    => 'required|string|max:50',
+            'nationality'     => 'required|string|max:100',
+            'religion'        => 'required|string|max:100',
 
             // Parent/Guardian Info
-            'father_name'     => 'nullable|string|max:255',
-            'father_contact'  => 'nullable|string|max:50',
-            'father_occupation' => 'nullable|string|max:255',
-            'mother_name'     => 'nullable|string|max:255',
-            'mother_contact'  => 'nullable|string|max:50',
-            'mother_occupation' => 'nullable|string|max:255',
-            'guardian_name'   => 'nullable|string|max:255',
-            'guardian_contact' => 'nullable|string|max:50',
-            'guardian_relationship' => 'nullable|string|max:100',
+            'father_name'     => 'required|string|max:255',
+            'father_contact'  => 'required|string|max:50',
+            'father_occupation' => 'required|string|max:255',
+            'mother_name'     => 'required|string|max:255',
+            'mother_contact'  => 'required|string|max:50',
+            'mother_occupation' => 'required|string|max:255',
+            'guardian_name'   => 'required|string|max:255',
+            'guardian_contact' => 'required|string|max:50',
+            'guardian_relationship' => 'required|string|max:100',
         ]);
 
         // create user
@@ -180,15 +180,15 @@ class StudentManagementController extends Controller
             'religion'       => 'required|string|max:100',
 
             // Parent/Guardian Info
-            'father_name'    => 'nullable|string|max:255',
-            'father_contact' => 'nullable|string|max:50',
-            'father_occupation' => 'nullable|string|max:255',
-            'mother_name'    => 'nullable|string|max:255',
-            'mother_contact' => 'nullable|string|max:50',
-            'mother_occupation' => 'nullable|string|max:255',
-            'guardian_name'  => 'nullable|string|max:255',
-            'guardian_contact' => 'nullable|string|max:50',
-            'guardian_relationship' => 'nullable|string|max:100',
+            'father_name'    => 'required|string|max:255',
+            'father_contact' => 'required|string|max:50',
+            'father_occupation' => 'required|string|max:255',
+            'mother_name'    => 'required|string|max:255',
+            'mother_contact' => 'required|string|max:50',
+            'mother_occupation' => 'required|string|max:255',
+            'guardian_name'  => 'required|string|max:255',
+            'guardian_contact' => 'required|string|max:50',
+            'guardian_relationship' => 'required|string|max:100',
         ]);
 
         $student->update($validated);
@@ -244,7 +244,7 @@ class StudentManagementController extends Controller
                     'last_name' => 'required|string|max:255',
                     'email' => 'required|email|unique:users,email',
                     'student_number' => 'required|string|max:50|unique:students,student_number',
-                    'lrn' => 'nullable|string|max:20|unique:students,lrn', // Added LRN validation
+                    'lrn' => 'required|string|max:20|unique:students,lrn', // Added LRN validation
                 ]);
 
                 if ($validator->fails()) {
