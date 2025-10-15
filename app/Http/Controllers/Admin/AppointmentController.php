@@ -282,35 +282,27 @@ class AppointmentController extends Controller
     /**
      * Reject appointment (for student-submitted requests)
      */
-    public function reject(Request $request, Appointment $appointment)
+    public function reject(Appointment $appointment)
     {
-        try {
-            if ($appointment->status !== 'pending') {
-                return back()->with('error', 'Only pending appointments can be rejected.');
-            }
-
-            $validated = $request->validate([
-                'rejection_reason' => 'required|string|max:500'
-            ]);
-
-            $appointment->update([
-                'status' => 'rejected',
-                'rejection_reason' => $validated['rejection_reason']
-            ]);
-
-            // 🔄 Sync to remove from Google Calendar if it exists
-            try {
-                $this->syncService->sync($appointment);
-            } catch (\Exception $e) {
-                Log::error("Sync failed after rejection: " . $e->getMessage());
-            }
-
-            return back()->with('success', 'Appointment rejected successfully.');
-
-        } catch (\Exception $e) {
-            Log::error('Error rejecting appointment: ' . $e->getMessage());
-            return back()->with('error', 'An error occurred while rejecting the appointment.');
+        if ($appointment->status !== 'accepted') {
+            return redirect()->back()->with('error', 'Only accepted appointments can be rejected.');
         }
+
+        $appointment->update(['status' => 'rejected']); // or whatever final status you want
+
+        return redirect()->back()->with('success', 'Appointment has been rejected.');
+    }
+
+
+    public function decline(Appointment $appointment)
+    {
+        if (!in_array($appointment->status, ['pending', 'approved'])) {
+            return redirect()->back()->with('error', 'Only pending or approved appointments can be declined.');
+        }
+
+        $appointment->update(['status' => 'declined']);
+
+        return redirect()->back()->with('success', 'Appointment has been declined.');
     }
 
     /**

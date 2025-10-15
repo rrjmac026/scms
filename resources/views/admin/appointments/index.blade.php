@@ -220,10 +220,12 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                                 {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' :
-                                                   ($appointment->status === 'approved' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' :
-                                                   ($appointment->status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
-                                                   ($appointment->status === 'completed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' :
-                                                   'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'))) }}">
+                                                ($appointment->status === 'approved' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' :
+                                                ($appointment->status === 'accepted' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
+                                                ($appointment->status === 'declined' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300' :
+                                                ($appointment->status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' :
+                                                ($appointment->status === 'completed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' :
+                                                'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300'))))) }}">
                                                 {{ str_replace('_', ' ', ucfirst($appointment->status)) }}
                                             </span>
                                         </td>
@@ -240,25 +242,68 @@
                                                             <i class="fas fa-check mr-1"></i> Approve
                                                         </button>
                                                     </form>
+
+                                                    <!-- Decline Form (for pending) -->
+                                                    <form action="{{ route('admin.appointments.decline', $appointment) }}" method="POST"
+                                                        onsubmit="return confirm('Are you sure you want to decline this pending appointment?');">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" 
+                                                                class="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                                                title="Decline pending appointment">
+                                                            <i class="fas fa-times-circle mr-1"></i> Decline
+                                                        </button>
+                                                    </form>
                                                 @endif
+
+                                                @if($appointment->status === 'approved')
+                                                    <!-- Decline Form (for approved) -->
+                                                    <form action="{{ route('admin.appointments.decline', $appointment) }}" method="POST"
+                                                        onsubmit="return confirm('Are you sure you want to decline this approved appointment?');">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" 
+                                                                class="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                                                title="Decline approved appointment">
+                                                            <i class="fas fa-times-circle mr-1"></i> Decline
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+                                                @if($appointment->status === 'accepted')
+                                                    <!-- Reject Form (only for accepted) -->
+                                                    <form action="{{ route('admin.appointments.reject', $appointment) }}" method="POST"
+                                                        onsubmit="return confirm('Are you sure you want to reject this accepted appointment?');">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" 
+                                                                class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                                                title="Reject accepted appointment">
+                                                            <i class="fas fa-ban mr-1"></i> Reject
+                                                        </button>
+                                                    </form>
+                                                @endif
+
                                                 <!-- View Details -->
                                                 <a href="{{ route('admin.appointments.show', $appointment) }}" 
-                                                   class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
-                                                   title="View Details">
+                                                class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+                                                title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
 
                                                 <!-- Edit -->
-                                                <a href="{{ route('admin.appointments.edit', $appointment) }}" 
-                                                   class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 transition-colors"
-                                                   title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
+                                                @if(in_array($appointment->status, ['pending', 'approved', 'accepted']))
+                                                    <a href="{{ route('admin.appointments.edit', $appointment) }}" 
+                                                    class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 transition-colors"
+                                                    title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                @endif
 
                                                 <!-- Delete -->
                                                 <form action="{{ route('admin.appointments.destroy', $appointment) }}" 
-                                                      method="POST" 
-                                                      onsubmit="return confirm('Are you sure you want to delete this appointment?');">
+                                                    method="POST" 
+                                                    onsubmit="return confirm('Are you sure you want to delete this appointment?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" 

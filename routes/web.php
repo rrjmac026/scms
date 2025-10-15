@@ -123,6 +123,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
     // Route::post('appointments/{appointment}/assign', [AppointmentController::class, 'assignCounselor'])
     //      ->name('appointments.assign');
+    Route::patch('/appointments/{appointment}/decline', [AppointmentController::class, 'decline'])
+        ->name('appointments.decline');
     Route::patch('appointments/{appointment}/approve', [AppointmentController::class, 'approve'])
         ->name('appointments.approve');
     Route::patch('appointments/{appointment}/reject', [AppointmentController::class, 'reject'])

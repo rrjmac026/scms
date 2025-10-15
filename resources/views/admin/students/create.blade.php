@@ -46,7 +46,11 @@
                                 <div>
                                     <x-input-label for="email" :value="__('Email')" />
                                     <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" 
-                                        :value="old('email')" required />
+                                        :value="old('email')" required 
+                                        placeholder="student@lccdo.edu.ph" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        Must be a valid @lccdo.edu.ph email address
+                                    </p>
                                     <x-input-error class="mt-2" :messages="$errors->get('email')" />
                                 </div>
 
@@ -112,7 +116,6 @@
                                     </select>
                                     <x-input-error class="mt-2" :messages="$errors->get('grade_level')" />
                                 </div>
-
 
                                 <!-- Special Needs -->
                                 <div class="md:col-span-2">

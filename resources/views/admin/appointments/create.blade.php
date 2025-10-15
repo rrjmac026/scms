@@ -64,30 +64,115 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Student Selection -->
+                        {{-- Replace the Student Selection div with this enhanced searchable version --}}
+
+                        <!-- Student Selection with Search -->
                         <div>
                             <x-input-label for="student_id" value="{{ __('Student') }}" />
-                            <select name="student_id" id="student_id" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500" required>
-                                <option value="">Select Student</option>
-                                @foreach($students as $student)
-                                    <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
-                                        {{ $student->user->name }} ({{ $student->student_number }})
-                                    </option>
-                                @endforeach
-                            </select>
+                            
+                            <div class="relative mt-1">
+                                <!-- Search Input -->
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        id="student_search" 
+                                        placeholder="Search student by name or number..."
+                                        class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500 pl-10"
+                                        autocomplete="off"
+                                    />
+                                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    
+                                    <!-- Clear button -->
+                                    <button 
+                                        type="button" 
+                                        id="clear_search" 
+                                        class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    >
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Hidden select for form submission -->
+                                <select name="student_id" id="student_id" class="hidden" required>
+                                    <option value="">Select Student</option>
+                                    @foreach($students as $student)
+                                        <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
+                                            {{ $student->user->name }} ({{ $student->student_number }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                
+                                <!-- Dropdown list -->
+                                <div 
+                                    id="student_dropdown" 
+                                    class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+                                >
+                                    <div id="student_list" class="py-1">
+                                        @foreach($students as $student)
+                                            <div 
+                                                class="student-option px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                                                data-id="{{ $student->id }}"
+                                                data-name="{{ strtolower($student->user->name) }}"
+                                                data-number="{{ strtolower($student->student_number) }}"
+                                            >
+                                                <div class="font-medium text-gray-900 dark:text-gray-100">
+                                                    {{ $student->user->name }}
+                                                </div>
+                                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ $student->student_number }}
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    
+                                    <!-- No results message -->
+                                    <div id="no_results" class="hidden px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                                        <i class="fas fa-search mb-2 text-2xl"></i>
+                                        <p>No students found</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Selected student display -->
+                            <div id="selected_student" class="hidden mt-2 p-3 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-medium text-gray-900 dark:text-gray-100" id="selected_name"></div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400" id="selected_number"></div>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        id="remove_student"
+                                        class="text-pink-500 hover:text-pink-700 dark:hover:text-pink-400"
+                                        title="Remove selection"
+                                    >
+                                        <i class="fas fa-times-circle text-xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <x-input-error :messages="$errors->get('student_id')" class="mt-2" />
                         </div>
 
                         <!-- Counselor Selection -->
                         <div>
-                            <x-input-label for="counselor_id" value="{{ __('Counselor (Optional)') }}" />
-                            <select name="counselor_id" id="counselor_id" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500">
-                                <option value="">Auto Assign</option>
-                                @foreach($counselors as $counselor)
-                                    <option value="{{ $counselor->id }}" {{ old('counselor_id') == $counselor->id ? 'selected' : '' }}>
-                                        {{ $counselor->user->name }} - {{ $counselor->specialization }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-input-label for="counselor_id" value="{{ __('Counselor') }}" />
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" name="auto_assign" id="auto_assign" class="rounded border-gray-300 dark:border-gray-700 text-pink-600"
+                                        {{ old('auto_assign') ? 'checked' : '' }}>
+                                    <label for="auto_assign" class="text-sm text-gray-600 dark:text-gray-400">Auto-assign counselor based on student's grade level</label>
+                                </div>
+                                
+                                <select name="counselor_id" id="counselor_id" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500">
+                                    <option value="">Select Counselor</option>
+                                    @foreach($counselors as $counselor)
+                                        <option value="{{ $counselor->id }}" {{ old('counselor_id') == $counselor->id ? 'selected' : '' }}>
+                                            {{ $counselor->user->name }} - {{ $counselor->specialization }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <x-input-error :messages="$errors->get('counselor_id')" class="mt-2" />
                         </div>
 
@@ -529,6 +614,114 @@
                     }, 100);
                 }
             @endif
+        });
+    </script>
+
+    <script>
+        // Student search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('student_search');
+            const clearSearchBtn = document.getElementById('clear_search');
+            const dropdown = document.getElementById('student_dropdown');
+            const studentList = document.getElementById('student_list');
+            const noResults = document.getElementById('no_results');
+            const studentOptions = document.querySelectorAll('.student-option');
+            const selectedStudent = document.getElementById('selected_student');
+            const selectedName = document.getElementById('selected_name');
+            const selectedNumber = document.getElementById('selected_number');
+            const removeStudentBtn = document.getElementById('remove_student');
+            const hiddenSelect = document.getElementById('student_id');
+
+            // Show dropdown when focusing on search input
+            searchInput.addEventListener('focus', () => {
+                dropdown.classList.remove('hidden');
+            });
+
+            // Handle search input
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                let hasResults = false;
+
+                // Toggle clear button
+                clearSearchBtn.classList.toggle('hidden', !searchTerm);
+
+                studentOptions.forEach(option => {
+                    const name = option.dataset.name;
+                    const number = option.dataset.number;
+                    
+                    if (name.includes(searchTerm) || number.includes(searchTerm)) {
+                        option.classList.remove('hidden');
+                        hasResults = true;
+                    } else {
+                        option.classList.add('hidden');
+                    }
+                });
+
+                // Toggle no results message
+                noResults.classList.toggle('hidden', hasResults);
+            });
+
+            // Clear search
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearSearchBtn.classList.add('hidden');
+                studentOptions.forEach(option => option.classList.remove('hidden'));
+                noResults.classList.add('hidden');
+                searchInput.focus();
+            });
+
+            // Handle student selection
+            studentOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const id = option.dataset.id;
+                    const name = option.querySelector('.font-medium').textContent.trim();
+                    const number = option.querySelector('.text-sm').textContent.trim();
+
+                    // Update hidden select
+                    hiddenSelect.value = id;
+
+                    // Update display
+                    selectedName.textContent = name;
+                    selectedNumber.textContent = number;
+                    selectedStudent.classList.remove('hidden');
+                    
+                    // Clear and hide search
+                    searchInput.value = '';
+                    dropdown.classList.add('hidden');
+                });
+            });
+
+            // Remove selected student
+            removeStudentBtn.addEventListener('click', () => {
+                hiddenSelect.value = '';
+                selectedStudent.classList.add('hidden');
+                searchInput.value = '';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.relative') && !dropdown.classList.contains('hidden')) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+
+    <script>
+        // Add this at the end of your existing scripts
+        document.addEventListener('DOMContentLoaded', function() {
+            const autoAssignCheckbox = document.getElementById('auto_assign');
+            const counselorSelect = document.getElementById('counselor_id');
+
+            autoAssignCheckbox.addEventListener('change', function() {
+                counselorSelect.disabled = this.checked;
+                if (this.checked) {
+                    counselorSelect.value = '';
+                }
+            });
+
+            // Initial state
+            counselorSelect.disabled = autoAssignCheckbox.checked;
         });
     </script>
 </x-app-layout>

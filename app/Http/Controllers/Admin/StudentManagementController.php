@@ -32,20 +32,18 @@ class StudentManagementController extends Controller
                 }
             })
             ->join('users', 'students.user_id', '=', 'users.id')
-            ->orderBy('users.last_name', 'asc') // sort alphabetically
-            ->select('students.*') // prevent column collision
+            ->orderBy('users.last_name', 'asc')
+            ->select('students.*')
             ->paginate(10);
 
         return view('admin.students.index', compact('students', 'search'));
     }
-
 
     /**
      * Show the form for creating a new student.
      */
     public function create()
     {
-        // get users who are students but not yet linked in Student table
         $users = User::where('role', 'student')
                     ->whereDoesntHave('student')
                     ->get();
@@ -59,11 +57,18 @@ class StudentManagementController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // user fields
+            // user fields with custom email validation
             'first_name'      => 'required|string|max:255',
             'middle_name'     => 'required|string|max:255',
             'last_name'       => 'required|string|max:255',
-            'email'           => 'required|string|email|max:255|unique:users',
+            'email'           => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users',
+                'regex:/^[\w\-\.]+@lccdo\.edu\.ph$/'  // Only allow @lccdo.edu.ph domain
+            ],
             'password'        => 'required|string|min:8|confirmed',
 
             // student fields
@@ -92,6 +97,9 @@ class StudentManagementController extends Controller
             'guardian_name'   => 'required|string|max:255',
             'guardian_contact' => 'required|string|max:50',
             'guardian_relationship' => 'required|string|max:100',
+        ], [
+            // Custom error messages
+            'email.regex' => 'The email must be a valid @lccdo.edu.ph email address.',
         ]);
 
         // create user
@@ -138,7 +146,6 @@ class StudentManagementController extends Controller
                         ->with('success', 'Student created successfully.');
     }
 
-
     /**
      * Display the specified student.
      */
@@ -162,6 +169,9 @@ class StudentManagementController extends Controller
      */
     public function update(Request $request, Student $student)
     {
+        // Get the user's current email to allow them to keep it
+        $currentEmail = $student->user->email;
+        
         $validated = $request->validate([
             'user_id'        => 'required|exists:users,id',
             'student_number' => 'required|string|max:50|unique:students,student_number,' . $student->id,
@@ -169,6 +179,17 @@ class StudentManagementController extends Controller
             'strand'         => 'required|string|max:255',
             'grade_level'    => 'required|string|max:50',
             'special_needs'  => 'required|string|max:500',
+
+            // Email validation for updates (if you allow email updates)
+            'email'          => [
+                'sometimes',
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users,email,' . $student->user_id,
+                'regex:/^[\w\-\.]+@lccdo\.edu\.ph$/'
+            ],
 
             // Personal Info
             'birthdate'      => 'required|date',
@@ -189,7 +210,15 @@ class StudentManagementController extends Controller
             'guardian_name'  => 'required|string|max:255',
             'guardian_contact' => 'required|string|max:50',
             'guardian_relationship' => 'required|string|max:100',
+        ], [
+            // Custom error messages
+            'email.regex' => 'The email must be a valid @lccdo.edu.ph email address.',
         ]);
+
+        // Update user email if provided
+        if (isset($validated['email']) && $validated['email'] !== $currentEmail) {
+            $student->user->update(['email' => $validated['email']]);
+        }
 
         $student->update($validated);
 
@@ -221,7 +250,6 @@ class StudentManagementController extends Controller
         $path = $file->getRealPath();
         $csv = array_map('str_getcsv', file($path));
         
-        // Get headers from first row
         $headers = array_map('trim', $csv[0]);
         unset($csv[0]);
 
@@ -233,27 +261,32 @@ class StudentManagementController extends Controller
 
         try {
             foreach ($csv as $key => $row) {
-                $rowNumber = $key + 2; // +2 because array starts at 0 and we removed header
+                $rowNumber = $key + 2;
                 
-                // Map CSV columns to array
                 $data = array_combine($headers, $row);
 
-                // Validate required fields including LRN uniqueness
+                // Validate with @lccdo.edu.ph domain requirement
                 $validator = Validator::make($data, [
                     'first_name' => 'required|string|max:255',
                     'last_name' => 'required|string|max:255',
-                    'email' => 'required|email|unique:users,email',
+                    'email' => [
+                        'required',
+                        'email',
+                        'unique:users,email',
+                        'regex:/^[\w\-\.]+@lccdo\.edu\.ph$/'
+                    ],
                     'student_number' => 'required|string|max:50|unique:students,student_number',
-                    'lrn' => 'required|string|max:20|unique:students,lrn', // Added LRN validation
+                    'lrn' => 'required|string|max:20|unique:students,lrn',
+                ], [
+                    'email.regex' => 'Email must be a valid @lccdo.edu.ph address',
                 ]);
 
                 if ($validator->fails()) {
                     $errorCount++;
                     $errors[] = "Row {$rowNumber}: " . implode(', ', $validator->errors()->all());
-                    continue; // Skip this row and continue with next
+                    continue;
                 }
 
-                // Create user
                 $user = User::create([
                     'first_name' => trim($data['first_name']),
                     'middle_name' => trim($data['middle_name'] ?? ''),
@@ -263,11 +296,10 @@ class StudentManagementController extends Controller
                     'role' => 'student',
                 ]);
 
-                // Create student
                 Student::create([
                     'user_id' => $user->id,
                     'student_number' => trim($data['student_number']),
-                    'lrn' => !empty(trim($data['lrn'] ?? '')) ? trim($data['lrn']) : null, // Ensure empty strings become null
+                    'lrn' => !empty(trim($data['lrn'] ?? '')) ? trim($data['lrn']) : null,
                     'strand' => trim($data['strand'] ?? ''),
                     'grade_level' => trim($data['grade_level'] ?? ''),
                     'special_needs' => trim($data['special_needs'] ?? ''),
@@ -351,7 +383,6 @@ class StudentManagementController extends Controller
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         
         fputcsv($handle, $headers);
-        
         
         $sample = [
             'Juan',
