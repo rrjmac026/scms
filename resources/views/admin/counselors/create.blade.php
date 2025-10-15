@@ -27,6 +27,17 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('first_name')" />
                                 </div>
 
+                                <!-- Middle Name -->
+                                <div>
+                                    <x-input-label for="middle_name" :value="__('Middle Name')" />
+                                    <x-text-input id="middle_name" name="middle_name" type="text" 
+                                        class="mt-1 block w-full" :value="old('middle_name')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('middle_name')" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ __('Optional') }}
+                                    </p>
+                                </div>
+
                                 <!-- Last Name -->
                                 <div>
                                     <x-input-label for="last_name" :value="__('Last Name')" />
@@ -35,41 +46,16 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('last_name')" />
                                 </div>
 
-                                <!-- Gender -->
-                                <div>
-                                    <x-input-label for="gender" :value="__('Gender')" />
-                                    <select id="gender" name="gender" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:ring-pink-500 focus:border-pink-500">
-                                        <option value="">-- Select Gender --</option>
-                                        <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                                        <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-                                        <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
-                                    </select>
-                                    <x-input-error class="mt-2" :messages="$errors->get('gender')" />
-                                </div>
-
-                                <!-- Birth Date -->
-                                <div>
-                                    <x-input-label for="birth_date" :value="__('Birth Date')" />
-                                    <x-text-input id="birth_date" name="birth_date" type="date" 
-                                        class="mt-1 block w-full" :value="old('birth_date')" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('birth_date')" />
-                                </div>
-
-                                <!-- Bio -->
-                                <div>
-                                    <x-input-label for="bio" :value="__('Short Bio')" />
-                                    <textarea id="bio" name="bio" rows="3"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:ring-pink-500 focus:border-pink-500"
-                                    >{{ old('bio') }}</textarea>
-                                    <x-input-error class="mt-2" :messages="$errors->get('bio')" />
-                                </div>
-
                                 <!-- Email -->
                                 <div>
                                     <x-input-label for="email" :value="__('Email')" />
                                     <x-text-input id="email" name="email" type="email" 
-                                        class="mt-1 block w-full" :value="old('email')" required />
+                                        class="mt-1 block w-full" :value="old('email')" required 
+                                        placeholder="example@lccdo.edu.ph" />
                                     <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ __('Must be a valid @lccdo.edu.ph email address') }}
+                                    </p>
                                 </div>
 
                                 <!-- Password -->
@@ -102,13 +88,14 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('employee_number')" />
                                 </div>
 
-                                <div class="mt-4">
+                                <!-- Assigned Grade Level -->
+                                <div>
                                     <x-input-label for="assigned_grade_level" :value="__('Assigned Grade Level')" />
                                     <select name="assigned_grade_level" id="assigned_grade_level"
-                                        class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:ring-pink-500 focus:border-pink-500">
                                         <option value="">Select Grade Level</option>
-                                        <option value="11" {{ old('assigned_grade_level', $counselor->assigned_grade_level ?? '') == '11' ? 'selected' : '' }}>Grade 11</option>
-                                        <option value="12" {{ old('assigned_grade_level', $counselor->assigned_grade_level ?? '') == '12' ? 'selected' : '' }}>Grade 12</option>
+                                        <option value="11" {{ old('assigned_grade_level') == '11' ? 'selected' : '' }}>Grade 11</option>
+                                        <option value="12" {{ old('assigned_grade_level') == '12' ? 'selected' : '' }}>Grade 12</option>
                                     </select>
                                     <x-input-error class="mt-2" :messages="$errors->get('assigned_grade_level')" />
                                 </div>
@@ -133,7 +120,7 @@
 
                         <!-- Buttons -->
                         <div class="flex items-center justify-end gap-4">
-                            <x-secondary-button onclick="history.back()">
+                            <x-secondary-button type="button" onclick="history.back()">
                                 {{ __('Cancel') }}
                             </x-secondary-button>
                             <x-primary-button>

@@ -26,6 +26,17 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('first_name')" />
                                 </div>
 
+                                <!-- Middle Name -->
+                                <div>
+                                    <x-input-label for="middle_name" :value="__('Middle Name')" />
+                                    <x-text-input id="middle_name" name="middle_name" type="text" class="mt-1 block w-full" 
+                                        :value="old('middle_name', $counselor->user->middle_name)" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('middle_name')" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ __('Optional') }}
+                                    </p>
+                                </div>
+
                                 <!-- Last Name -->
                                 <div>
                                     <x-input-label for="last_name" :value="__('Last Name')" />
@@ -38,8 +49,12 @@
                                 <div>
                                     <x-input-label for="email" :value="__('Email')" />
                                     <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" 
-                                        :value="old('email', $counselor->user->email)" required />
+                                        :value="old('email', $counselor->user->email)" required 
+                                        placeholder="example@lccdo.edu.ph" />
                                     <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ __('Must be a valid @lccdo.edu.ph email address') }}
+                                    </p>
                                 </div>
 
                                 <!-- Password -->
@@ -72,10 +87,11 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('employee_number')" />
                                 </div>
 
-                                <div class="mt-4">
+                                <!-- Assigned Grade Level -->
+                                <div>
                                     <x-input-label for="assigned_grade_level" :value="__('Assigned Grade Level')" />
                                     <select name="assigned_grade_level" id="assigned_grade_level"
-                                        class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:ring-red-500 focus:border-red-500">
                                         <option value="">Select Grade Level</option>
                                         <option value="11" {{ old('assigned_grade_level', $counselor->assigned_grade_level ?? '') == '11' ? 'selected' : '' }}>Grade 11</option>
                                         <option value="12" {{ old('assigned_grade_level', $counselor->assigned_grade_level ?? '') == '12' ? 'selected' : '' }}>Grade 12</option>
@@ -101,7 +117,7 @@
                         </div>
 
                         <div class="flex items-center justify-end gap-4">
-                            <x-secondary-button onclick="history.back()">
+                            <x-secondary-button type="button" onclick="history.back()">
                                 {{ __('Cancel') }}
                             </x-secondary-button>
                             <x-primary-button>

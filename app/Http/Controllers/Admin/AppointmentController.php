@@ -288,11 +288,13 @@ class AppointmentController extends Controller
             return redirect()->back()->with('error', 'Only accepted appointments can be rejected.');
         }
 
-        $appointment->update(['status' => 'rejected']); // or whatever final status you want
+        $appointment->update(['status' => 'rejected']);
+        
+        // Add notification
+        $appointment->student->user->notify(new \App\Notifications\AppointmentRejected($appointment));
 
         return redirect()->back()->with('success', 'Appointment has been rejected.');
     }
-
 
     public function decline(Appointment $appointment)
     {
@@ -301,6 +303,9 @@ class AppointmentController extends Controller
         }
 
         $appointment->update(['status' => 'declined']);
+        
+        // Add notification
+        $appointment->student->user->notify(new \App\Notifications\AppointmentDeclined($appointment));
 
         return redirect()->back()->with('success', 'Appointment has been declined.');
     }

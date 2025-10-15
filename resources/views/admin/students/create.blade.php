@@ -13,6 +13,9 @@
                 <div class="p-6">
                     <form action="{{ route('admin.students.store') }}" method="POST" class="space-y-8" novalidate>
                         @csrf
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            Fields marked with <span class="text-red-500">*</span> are required
+                        </p>
                         
                         <!-- User Account Information -->
                         <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
@@ -20,7 +23,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- First Name -->
                                 <div>
-                                    <x-input-label for="first_name" :value="__('First Name')" />
+                                    <x-input-label for="first_name">
+                                        {{ __('First Name') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="first_name" name="first_name" type="text" class="mt-1 block w-full" 
                                         :value="old('first_name')" required autofocus />
                                     <x-input-error class="mt-2" :messages="$errors->get('first_name')" />
@@ -28,7 +33,9 @@
 
                                 <!-- Middle Name -->
                                 <div>
-                                    <x-input-label for="middle_name" :value="__('Middle Name')" />
+                                    <x-input-label for="middle_name">
+                                        {{ __('Middle Name') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="middle_name" name="middle_name" type="text" class="mt-1 block w-full" 
                                         :value="old('middle_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('middle_name')" />
@@ -36,7 +43,9 @@
 
                                 <!-- Last Name -->
                                 <div>
-                                    <x-input-label for="last_name" :value="__('Last Name')" />
+                                    <x-input-label for="last_name">
+                                        {{ __('Last Name') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="last_name" name="last_name" type="text" class="mt-1 block w-full" 
                                         :value="old('last_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('last_name')" />
@@ -44,7 +53,9 @@
 
                                 <!-- Email -->
                                 <div>
-                                    <x-input-label for="email" :value="__('Email')" />
+                                    <x-input-label for="email">
+                                        {{ __('Email') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" 
                                         :value="old('email')" required 
                                         placeholder="student@lccdo.edu.ph" />
@@ -56,14 +67,18 @@
 
                                 <!-- Password -->
                                 <div>
-                                    <x-input-label for="password" :value="__('Password')" />
+                                    <x-input-label for="password">
+                                        {{ __('Password') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('password')" />
                                 </div>
 
                                 <!-- Confirm Password -->
                                 <div>
-                                    <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+                                    <x-input-label for="password_confirmation">
+                                        {{ __('Confirm Password') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="password_confirmation" name="password_confirmation" type="password" 
                                         class="mt-1 block w-full" required />
                                 </div>
@@ -76,7 +91,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Student Number -->
                                 <div>
-                                    <x-input-label for="student_number" :value="__('Student Number')" />
+                                    <x-input-label for="student_number">
+                                        {{ __('Student Number') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="student_number" name="student_number" type="text" 
                                         class="mt-1 block w-full" :value="old('student_number')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('student_number')" />
@@ -84,7 +101,9 @@
 
                                 <!-- LRN -->
                                 <div>
-                                    <x-input-label for="lrn" :value="__('LRN (Learner Reference Number)')" />
+                                    <x-input-label for="lrn">
+                                        {{ __('LRN (Learner Reference Number)') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="lrn" name="lrn" type="text" 
                                         class="mt-1 block w-full" :value="old('lrn')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('lrn')" />
@@ -92,7 +111,9 @@
 
                                 <!-- Strand -->
                                 <div>
-                                    <x-input-label for="strand" :value="__('Strand')" />
+                                    <x-input-label for="strand">
+                                        {{ __('Strand') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <select id="strand" name="strand" required
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                                         <option value="">Select Strand</option>
@@ -107,7 +128,9 @@
 
                                 <!-- Grade Level -->
                                 <div>
-                                    <x-input-label for="grade_level" :value="__('Grade Level')" />
+                                    <x-input-label for="grade_level">
+                                        {{ __('Grade Level') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <select id="grade_level" name="grade_level" required
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                                         <option value="">Select Grade Level</option>
@@ -119,7 +142,9 @@
 
                                 <!-- Special Needs -->
                                 <div class="md:col-span-2">
-                                    <x-input-label for="special_needs" :value="__('Special Needs/Considerations')" />
+                                    <x-input-label for="special_needs">
+                                        {{ __('Special Needs/Considerations') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <textarea id="special_needs" name="special_needs" 
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                                         rows="3" required>{{ old('special_needs') }}</textarea>
@@ -134,7 +159,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Birthdate -->
                                 <div>
-                                    <x-input-label for="birthdate" :value="__('Birthdate')" />
+                                    <x-input-label for="birthdate">
+                                        {{ __('Birthdate') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="birthdate" name="birthdate" type="date" 
                                         class="mt-1 block w-full" :value="old('birthdate')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('birthdate')" />
@@ -142,7 +169,9 @@
 
                                 <!-- Gender -->
                                 <div>
-                                    <x-input-label for="gender" :value="__('Gender')" />
+                                    <x-input-label for="gender">
+                                        {{ __('Gender') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <select id="gender" name="gender" required
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                                         <option value="">Select Gender</option>
@@ -154,7 +183,9 @@
 
                                 <!-- Address -->
                                 <div class="md:col-span-2">
-                                    <x-input-label for="address" :value="__('Address')" />
+                                    <x-input-label for="address">
+                                        {{ __('Address') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <textarea id="address" name="address" 
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                                         rows="2" required>{{ old('address') }}</textarea>
@@ -163,7 +194,9 @@
 
                                 <!-- Contact Number -->
                                 <div>
-                                    <x-input-label for="contact_number" :value="__('Contact Number')" />
+                                    <x-input-label for="contact_number">
+                                        {{ __('Contact Number') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="contact_number" name="contact_number" type="text" 
                                         class="mt-1 block w-full" :value="old('contact_number')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('contact_number')" />
@@ -171,7 +204,9 @@
 
                                 <!-- Civil Status -->
                                 <div>
-                                    <x-input-label for="civil_status" :value="__('Civil Status')" />
+                                    <x-input-label for="civil_status">
+                                        {{ __('Civil Status') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <select id="civil_status" name="civil_status" required
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                                         <option value="">Select Civil Status</option>
@@ -183,7 +218,9 @@
 
                                 <!-- Nationality -->
                                 <div>
-                                    <x-input-label for="nationality" :value="__('Nationality')" />
+                                    <x-input-label for="nationality">
+                                        {{ __('Nationality') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="nationality" name="nationality" type="text" 
                                         class="mt-1 block w-full" :value="old('nationality')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('nationality')" />
@@ -191,7 +228,9 @@
 
                                 <!-- Religion -->
                                 <div>
-                                    <x-input-label for="religion" :value="__('Religion')" />
+                                    <x-input-label for="religion">
+                                        {{ __('Religion') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="religion" name="religion" type="text" 
                                         class="mt-1 block w-full" :value="old('religion')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('religion')" />
@@ -205,7 +244,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <!-- Father Name -->
                                 <div>
-                                    <x-input-label for="father_name" :value="__('Full Name')" />
+                                    <x-input-label for="father_name">
+                                        {{ __('Full Name') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="father_name" name="father_name" type="text" 
                                         class="mt-1 block w-full" :value="old('father_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('father_name')" />
@@ -213,7 +254,9 @@
 
                                 <!-- Father Contact -->
                                 <div>
-                                    <x-input-label for="father_contact" :value="__('Contact Number')" />
+                                    <x-input-label for="father_contact">
+                                        {{ __('Contact Number') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="father_contact" name="father_contact" type="text" 
                                         class="mt-1 block w-full" :value="old('father_contact')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('father_contact')" />
@@ -221,7 +264,9 @@
 
                                 <!-- Father Occupation -->
                                 <div>
-                                    <x-input-label for="father_occupation" :value="__('Occupation')" />
+                                    <x-input-label for="father_occupation">
+                                        {{ __('Occupation') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="father_occupation" name="father_occupation" type="text" 
                                         class="mt-1 block w-full" :value="old('father_occupation')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('father_occupation')" />
@@ -235,7 +280,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <!-- Mother Name -->
                                 <div>
-                                    <x-input-label for="mother_name" :value="__('Full Name')" />
+                                    <x-input-label for="mother_name">
+                                        {{ __('Full Name') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="mother_name" name="mother_name" type="text" 
                                         class="mt-1 block w-full" :value="old('mother_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('mother_name')" />
@@ -243,7 +290,9 @@
 
                                 <!-- Mother Contact -->
                                 <div>
-                                    <x-input-label for="mother_contact" :value="__('Contact Number')" />
+                                    <x-input-label for="mother_contact">
+                                        {{ __('Contact Number') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="mother_contact" name="mother_contact" type="text" 
                                         class="mt-1 block w-full" :value="old('mother_contact')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('mother_contact')" />
@@ -251,7 +300,9 @@
 
                                 <!-- Mother Occupation -->
                                 <div>
-                                    <x-input-label for="mother_occupation" :value="__('Occupation')" />
+                                    <x-input-label for="mother_occupation">
+                                        {{ __('Occupation') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="mother_occupation" name="mother_occupation" type="text" 
                                         class="mt-1 block w-full" :value="old('mother_occupation')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('mother_occupation')" />
@@ -265,7 +316,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <!-- Guardian Name -->
                                 <div>
-                                    <x-input-label for="guardian_name" :value="__('Full Name')" />
+                                    <x-input-label for="guardian_name">
+                                        {{ __('Full Name') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="guardian_name" name="guardian_name" type="text" 
                                         class="mt-1 block w-full" :value="old('guardian_name')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('guardian_name')" />
@@ -273,7 +326,9 @@
 
                                 <!-- Guardian Contact -->
                                 <div>
-                                    <x-input-label for="guardian_contact" :value="__('Contact Number')" />
+                                    <x-input-label for="guardian_contact">
+                                        {{ __('Contact Number') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="guardian_contact" name="guardian_contact" type="text" 
                                         class="mt-1 block w-full" :value="old('guardian_contact')" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('guardian_contact')" />
@@ -281,7 +336,9 @@
 
                                 <!-- Guardian Relationship -->
                                 <div>
-                                    <x-input-label for="guardian_relationship" :value="__('Relationship')" />
+                                    <x-input-label for="guardian_relationship">
+                                        {{ __('Relationship') }} <span class="text-red-500">*</span>
+                                    </x-input-label>
                                     <x-text-input id="guardian_relationship" name="guardian_relationship" type="text" 
                                         class="mt-1 block w-full" :value="old('guardian_relationship')" 
                                         placeholder="e.g., Aunt, Uncle, Grandparent" required />

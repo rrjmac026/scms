@@ -56,13 +56,22 @@ class CounselorManagementController extends Controller
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users',
+                'regex:/^[a-zA-Z0-9._%+-]+@lccdo\.edu\.ph$/'
+            ],
             'password' => 'required|string|min:8|confirmed',
 
             // Counselor fields
             'employee_number' => 'required|string|max:50|unique:counselors',
             'assigned_grade_level' => 'nullable|string|max:50',
             'availability_schedule' => 'nullable|array',
+        ], [
+            'email.regex' => 'Email must be a valid @lccdo.edu.ph address.',
         ]);
 
         // Create user
@@ -106,13 +115,22 @@ class CounselorManagementController extends Controller
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $counselor->user_id,
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users,email,' . $counselor->user_id,
+                'regex:/^[a-zA-Z0-9._%+-]+@lccdo\.edu\.ph$/'
+            ],
             'password' => 'nullable|string|min:8|confirmed',
 
             // Counselor fields
             'employee_number' => 'required|string|max:50|unique:counselors,employee_number,' . $counselor->id,
             'assigned_grade_level' => 'nullable|string|max:50',
             'availability_schedule' => 'nullable|array',
+        ], [
+            'email.regex' => 'Email must be a valid @lccdo.edu.ph address.',
         ]);
 
         // Update user
