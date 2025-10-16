@@ -8,14 +8,35 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Feedback</div>
                     <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
-                        {{ $feedbacks->total() }}
+                        {{ number_format($totalFeedbacks) }}
                     </div>
                 </div>
-                <!-- Add more stats cards as needed -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Average Overall Rating</div>
+                    <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
+                        {{ number_format($averageRating, 1) }}/5
+                    </div>
+                    <div class="flex text-yellow-400 mt-2">
+                        @for ($i = 1; $i <= 5; $i++)
+                            <i class="fas fa-star {{ $i <= round($averageRating) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                        @endfor
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Detailed Questions Average</div>
+                    <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
+                        {{ number_format($detailedAverage, 1) }}/5
+                    </div>
+                    <div class="flex text-yellow-400 mt-2">
+                        @for ($i = 1; $i <= 5; $i++)
+                            <i class="fas fa-star {{ $i <= round($detailedAverage) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                        @endfor
+                    </div>
+                </div>
             </div>
 
             <!-- Feedback Table -->
@@ -28,7 +49,8 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Student</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Counselor</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rating</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Average Rating</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Comments</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
@@ -57,14 +79,20 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
                                                 <span class="text-lg font-semibold text-gray-900 dark:text-gray-100 mr-2">
-                                                    {{ $feedback->rating }}/5
+                                                    {{ number_format($feedback->detailed_average ?? 0, 1) }}/5
                                                 </span>
                                                 <div class="flex text-yellow-400">
                                                     @for ($i = 1; $i <= 5; $i++)
-                                                        <i class="fas fa-star {{ $i <= $feedback->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                                                        <i class="fas fa-star {{ $i <= round($feedback->detailed_average ?? 0) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
                                                     @endfor
                                                 </div>
+
                                             </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                                                {{ $feedback->comments ?? 'No comments' }}
+                                            </p>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <a href="{{ route('admin.feedback.show', $feedback) }}" 
@@ -76,7 +104,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                        <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                             No feedback records found
                                         </td>
                                     </tr>

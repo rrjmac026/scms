@@ -13,11 +13,19 @@ class AdminFeedbackController extends Controller
      */
     public function index()
     {
-        $feedbacks = Feedback::with('student', 'counselor', 'appointment')
-                             ->latest()
-                             ->paginate(20);
+        $feedbacks = Feedback::with('student.user', 'counselor.user', 'appointment')
+            ->latest()
+            ->paginate(20);
 
-        return view('admin.feedbacks.index', compact('feedbacks'));
+        $totalFeedbacks = Feedback::count();
+
+        // Average across all stored ratings (optional)
+        $averageRating = Feedback::avg('rating') ?? 0;
+
+        // Overall detailed average across all feedbacks (q1–q12)
+        $detailedAverage = $this->calculateDetailedAverage();
+
+        return view('admin.feedbacks.index', compact('feedbacks', 'totalFeedbacks', 'averageRating', 'detailedAverage'));
     }
 
     /**
@@ -25,8 +33,42 @@ class AdminFeedbackController extends Controller
      */
     public function show(Feedback $feedback)
     {
-        $feedback->load('student', 'counselor', 'appointment');
+        $feedback->load('student.user', 'counselor.user', 'appointment');
 
-        return view('admin.feedbacks.show', compact('feedback'));
+        // Calculate detailed average
+        $detailedAvg = $feedback->detailed_average;
+
+        // Count answered questions
+        $answeredQuestionsCount = 0;
+        for ($i = 1; $i <= 12; $i++) {
+            $key = "q{$i}";
+            if (!empty($feedback->$key) && is_numeric($feedback->$key)) {
+                $answeredQuestionsCount++;
+            }
+        }
+
+        return view('admin.feedbacks.show', compact('feedback', 'detailedAvg', 'answeredQuestionsCount'));
+    }
+
+    /**
+     * Calculate average across all detailed question ratings (q1-q12)
+     */
+    private function calculateDetailedAverage()
+    {
+        $feedbacks = Feedback::all();
+        $totalRatings = 0;
+        $ratingCount = 0;
+
+        foreach ($feedbacks as $feedback) {
+            for ($i = 1; $i <= 12; $i++) {
+                $key = "q{$i}";
+                if (!empty($feedback->$key) && is_numeric($feedback->$key)) {
+                    $totalRatings += $feedback->$key;
+                    $ratingCount++;
+                }
+            }
+        }
+
+        return $ratingCount > 0 ? round($totalRatings / $ratingCount, 2) : 0;
     }
 }

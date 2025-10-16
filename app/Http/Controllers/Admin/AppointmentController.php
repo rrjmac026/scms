@@ -81,11 +81,14 @@ class AppointmentController extends Controller
     /**
      * Store a newly created appointment (Admin privilege - can directly approve and assign)
      */
+    /**
+ * Store a newly created appointment (Admin privilege - can directly approve and assign)
+ */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'counselor_id' => 'required|exists:counselors,id',
+            'counselor_id' => 'nullable|exists:counselors,id', // Made nullable for auto-assign
             'preferred_date' => [
                 'required',
                 'date',
@@ -100,21 +103,71 @@ class AppointmentController extends Controller
             'preferred_time' => 'required|date_format:H:i',
             'concern' => 'required|string|max:500',
             'counseling_category_id' => 'required|exists:counseling_categories,id',
+            'auto_assign' => 'nullable|boolean', // Add auto_assign to validation
         ]);
 
-        // Check if counselor is available
-        $availableCounselors = $this->getAvailableCounselors($validated['preferred_date']);
-        
-        if (!$availableCounselors->contains('id', $validated['counselor_id'])) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Selected counselor is not available on the selected date.');
+        $counselorId = null;
+
+        // Handle auto-assignment if checkbox is checked
+        if ($request->has('auto_assign') && $request->auto_assign) {
+            $student = Student::findOrFail($validated['student_id']);
+            $gradeLevel = $student->grade_level ?? null;
+
+            if (!$gradeLevel) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Student does not have a grade level assigned. Cannot auto-assign counselor.');
+            }
+
+            // Find counselor by assigned grade level
+            $counselor = Counselor::where('assigned_grade_level', $gradeLevel)
+                ->where('status', 'active')
+                ->first();
+
+            if (!$counselor) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'No counselor available for grade level ' . $gradeLevel . '. Please select manually.');
+            }
+
+            // Check if counselor is available on the selected date/time
+            $hasConflict = Appointment::where('counselor_id', $counselor->id)
+                ->where('preferred_date', $validated['preferred_date'])
+                ->where('preferred_time', $validated['preferred_time'] . ':00')
+                ->whereIn('status', ['approved', 'completed'])
+                ->exists();
+
+            if ($hasConflict) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'The assigned counselor for this grade level is not available at the selected time. Please choose another time or select a counselor manually.');
+            }
+
+            $counselorId = $counselor->id;
+        } else {
+            // Manual selection - validate counselor is provided
+            $counselorId = $validated['counselor_id'] ?? null;
+            
+            if (!$counselorId) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Please select a counselor or enable auto-assign.');
+            }
+
+            // Check if manually selected counselor is available
+            $availableCounselors = $this->getAvailableCounselors($validated['preferred_date']);
+            
+            if (!$availableCounselors->contains('id', $counselorId)) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Selected counselor is not available on the selected date.');
+            }
         }
 
         // Admin creates appointment as already approved
         $appointment = Appointment::create([
             'student_id' => $validated['student_id'],
-            'counselor_id' => $validated['counselor_id'],
+            'counselor_id' => $counselorId,
             'preferred_date' => $validated['preferred_date'],
             'preferred_time' => $validated['preferred_time'] . ':00', // Add seconds
             'concern' => $validated['concern'],
@@ -130,6 +183,12 @@ class AppointmentController extends Controller
             Log::error("Sync failed for appointment {$appointment->id}: " . $e->getMessage());
             $message = 'Appointment created but Google Calendar sync failed.';
         }
+
+        // Get counselor name for success message
+        $counselor = Counselor::with('user')->find($counselorId);
+        $counselorName = $counselor->user->name ?? 'Unknown';
+        
+        $message .= " Counselor: {$counselorName}";
 
         return redirect()->route('admin.appointments.index')
             ->with('success', $message);

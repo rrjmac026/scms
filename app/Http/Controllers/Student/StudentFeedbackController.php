@@ -112,11 +112,11 @@ class StudentFeedbackController extends Controller
             [
                 'rating' => 'nullable|integer|min:1|max:5', 
                 'comments' => 'nullable|string|max:1000',
-                'likes' => 'nullable|string|max:1000'  // This was missing!
+                'likes' => 'nullable|string|max:1000'
             ],
             array_combine(
-                array_map(fn($i) => "q$i", range(1, 10)), // q1..q10
-                array_fill(0, 10, 'required|integer|min:1|max:5')
+                array_map(fn($i) => "q$i", range(1, 12)), 
+                array_fill(0, 12, 'required|integer|min:1|max:5')
             )
         ));
 
@@ -126,7 +126,7 @@ class StudentFeedbackController extends Controller
 
         // Calculate rating if not provided
         if (empty($validated['rating'])) {
-            $qValues = array_map(fn($i) => $validated["q$i"], range(1, 10));
+            $qValues = array_map(fn($i) => $validated["q$i"], range(1, 12));
             $validated['rating'] = round(array_sum($qValues) / count($qValues));
         }
 

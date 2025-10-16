@@ -67,7 +67,7 @@ class StudentManagementController extends Controller
                 'email',
                 'max:255',
                 'unique:users',
-                'regex:/^[\w\-\.]+@lccdo\.edu\.ph$/'  // Only allow @lccdo.edu.ph domain
+                'regex:/^[\w\-\.]+@lccdo\.edu\.ph$/'  // Only allow @lccdo.edu.ph domain hehe
             ],
             'password'        => 'required|string|min:8|confirmed',
 

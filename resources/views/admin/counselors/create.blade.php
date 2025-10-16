@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <form action="{{ route('admin.counselors.store') }}" method="POST" class="space-y-8">
+                    <form action="{{ route('admin.counselors.store') }}" method="POST" class="space-y-8" novalidate>
                         @csrf
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -123,9 +123,11 @@
                             <x-secondary-button type="button" onclick="history.back()">
                                 {{ __('Cancel') }}
                             </x-secondary-button>
-                            <x-primary-button>
+
+                            <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
                                 {{ __('Create Counselor') }}
-                            </x-primary-button>
+                            </button>
                         </div>
                     </form>
                 </div>

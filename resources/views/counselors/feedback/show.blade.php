@@ -38,7 +38,7 @@
                             </div>
                         @endif
 
-                        <!-- Detailed Ratings -->
+                        <!-- Detailed Ratings (q1–q12 all as star ratings) -->
                         <div class="space-y-4 mb-6">
                             @php $questions = config('counseling.feedback_questions'); @endphp
 
@@ -54,26 +54,21 @@
                                             {{ $questionText }}
                                         </div>
 
-                                        @if($i <= 10)
-                                            <div class="flex items-center">
-                                                <div class="flex text-yellow-400">
-                                                    @for($j = 1; $j <= 5; $j++)
-                                                        <i class="fas fa-star {{ $j <= $feedback->$key ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                                    @endfor
-                                                </div>
-                                                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    ({{ $feedback->$key }}/5)
-                                                </span>
+                                        <div class="flex items-center">
+                                            <div class="flex text-yellow-400">
+                                                @for($j = 1; $j <= 5; $j++)
+                                                    <i class="fas fa-star {{ $j <= $feedback->$key ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                                                @endfor
                                             </div>
-                                        @else
-                                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-gray-700 dark:text-gray-300">
-                                                {{ $feedback->$key }}
-                                            </div>
-                                        @endif
+                                            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                                ({{ $feedback->$key }}/5)
+                                            </span>
+                                        </div>
                                     </div>
                                 @endif
                             @endfor
                         </div>
+
 
                         <!-- Likes -->
                         @if($feedback->likes)

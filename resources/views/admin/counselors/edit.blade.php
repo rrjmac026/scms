@@ -120,9 +120,11 @@
                             <x-secondary-button type="button" onclick="history.back()">
                                 {{ __('Cancel') }}
                             </x-secondary-button>
-                            <x-primary-button>
+
+                            <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
                                 {{ __('Update Counselor') }}
-                            </x-primary-button>
+                            </button>
                         </div>
                     </form>
                 </div>
