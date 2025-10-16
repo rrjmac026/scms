@@ -231,58 +231,6 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center gap-3">
-                                                @if($appointment->status === 'pending')
-                                                    <!-- Approve Form -->
-                                                    <form action="{{ route('admin.appointments.approve', $appointment) }}" method="POST">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" 
-                                                                class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
-                                                                title="Approve and auto-assign counselor">
-                                                            <i class="fas fa-check mr-1"></i> Approve
-                                                        </button>
-                                                    </form>
-
-                                                    <!-- Decline Form (for pending) -->
-                                                    <form action="{{ route('admin.appointments.decline', $appointment) }}" method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to decline this pending appointment?');">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" 
-                                                                class="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
-                                                                title="Decline pending appointment">
-                                                            <i class="fas fa-times-circle mr-1"></i> Decline
-                                                        </button>
-                                                    </form>
-                                                @endif
-
-                                                @if($appointment->status === 'approved')
-                                                    <!-- Decline Form (for approved) -->
-                                                    <form action="{{ route('admin.appointments.decline', $appointment) }}" method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to decline this approved appointment?');">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" 
-                                                                class="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
-                                                                title="Decline approved appointment">
-                                                            <i class="fas fa-times-circle mr-1"></i> Decline
-                                                        </button>
-                                                    </form>
-                                                @endif
-
-                                                @if($appointment->status === 'accepted')
-                                                    <!-- Reject Form (only for accepted) -->
-                                                    <form action="{{ route('admin.appointments.reject', $appointment) }}" method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to reject this accepted appointment?');">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" 
-                                                                class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
-                                                                title="Reject accepted appointment">
-                                                            <i class="fas fa-ban mr-1"></i> Reject
-                                                        </button>
-                                                    </form>
-                                                @endif
 
                                                 <!-- View Details -->
                                                 <a href="{{ route('admin.appointments.show', $appointment) }}" 
@@ -301,17 +249,20 @@
                                                 @endif
 
                                                 <!-- Delete -->
-                                                <form action="{{ route('admin.appointments.destroy', $appointment) }}" 
-                                                    method="POST" 
-                                                    onsubmit="return confirm('Are you sure you want to delete this appointment?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" 
-                                                            class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
-                                                            title="Delete">
+                                                @if ($appointment->status !== 'approved')
+                                                    <form action="{{ route('admin.appointments.destroy', $appointment->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this appointment?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-800">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <!-- Disabled delete icon -->
+                                                    <button type="button" class="text-gray-400 cursor-not-allowed" title="Cannot delete approved appointments" disabled>
                                                         <i class="fas fa-trash"></i>
                                                     </button>
-                                                </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

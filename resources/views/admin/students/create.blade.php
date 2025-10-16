@@ -34,10 +34,10 @@
                                 <!-- Middle Name -->
                                 <div>
                                     <x-input-label for="middle_name">
-                                        {{ __('Middle Name') }} <span class="text-red-500">*</span>
+                                        {{ __('Middle Name') }} <span class="text-blackgi-500">(Optional)</span>
                                     </x-input-label>
                                     <x-text-input id="middle_name" name="middle_name" type="text" class="mt-1 block w-full" 
-                                        :value="old('middle_name')" required />
+                                        :value="old('middle_name')"/>
                                     <x-input-error class="mt-2" :messages="$errors->get('middle_name')" />
                                 </div>
 
@@ -317,31 +317,31 @@
                                 <!-- Guardian Name -->
                                 <div>
                                     <x-input-label for="guardian_name">
-                                        {{ __('Full Name') }} <span class="text-red-500">*</span>
+                                        {{ __('Full Name') }} <span class="text-red-500"></span>
                                     </x-input-label>
                                     <x-text-input id="guardian_name" name="guardian_name" type="text" 
-                                        class="mt-1 block w-full" :value="old('guardian_name')" required />
+                                        class="mt-1 block w-full" :value="old('guardian_name')"/>
                                     <x-input-error class="mt-2" :messages="$errors->get('guardian_name')" />
                                 </div>
 
                                 <!-- Guardian Contact -->
                                 <div>
                                     <x-input-label for="guardian_contact">
-                                        {{ __('Contact Number') }} <span class="text-red-500">*</span>
+                                        {{ __('Contact Number') }} <span class="text-red-500"></span>
                                     </x-input-label>
                                     <x-text-input id="guardian_contact" name="guardian_contact" type="text" 
-                                        class="mt-1 block w-full" :value="old('guardian_contact')" required />
+                                        class="mt-1 block w-full" :value="old('guardian_contact')"/>
                                     <x-input-error class="mt-2" :messages="$errors->get('guardian_contact')" />
                                 </div>
 
                                 <!-- Guardian Relationship -->
                                 <div>
                                     <x-input-label for="guardian_relationship">
-                                        {{ __('Relationship') }} <span class="text-red-500">*</span>
+                                        {{ __('Relationship') }} <span class="text-red-500"></span>
                                     </x-input-label>
                                     <x-text-input id="guardian_relationship" name="guardian_relationship" type="text" 
                                         class="mt-1 block w-full" :value="old('guardian_relationship')" 
-                                        placeholder="e.g., Aunt, Uncle, Grandparent" required />
+                                        placeholder="e.g., Aunt, Uncle, Grandparent"/>
                                     <x-input-error class="mt-2" :messages="$errors->get('guardian_relationship')" />
                                 </div>
                             </div>

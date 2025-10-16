@@ -155,7 +155,8 @@ class CounselorManagementController extends Controller
         ]);
 
         return redirect()->route('admin.counselors.index')
-            ->with('success', 'Counselor updated successfully.');
+            ->with('error', 'Something went wrong while creating the counselor.');
+
     }
 
     /**

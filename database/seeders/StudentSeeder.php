@@ -20,11 +20,11 @@ class StudentSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
         $studentUser1 = User::updateOrCreate(
-            ['email' => 'jam@lccdo.edu.ph'],
+            ['email' => 'jerome.morales@lccdo.edu.ph'],
             [
-                'first_name'        => 'Jam',
+                'first_name'        => 'Jerome',
                 'middle_name'       => 'Main',
-                'last_name'         => 'Mac',
+                'last_name'         => 'Morales',
                 'role'              => 'student',
                 'contact_number'    => '09123456789',
                 'address'           => 'Brgy. San Miguel, Cityville',

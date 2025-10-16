@@ -82,8 +82,8 @@ class AppointmentController extends Controller
      * Store a newly created appointment (Admin privilege - can directly approve and assign)
      */
     /**
- * Store a newly created appointment (Admin privilege - can directly approve and assign)
- */
+     * Store a newly created appointment (Admin privilege - can directly approve and assign)
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([

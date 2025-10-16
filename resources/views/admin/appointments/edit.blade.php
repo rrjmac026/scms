@@ -144,15 +144,106 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="flex items-center justify-end gap-4 mt-6">
-                            <x-secondary-button type="button" onclick="history.back()">
-                                {{ __('Cancel') }}
-                            </x-secondary-button>
-                            <x-primary-button type="submit">
-                                {{ __('Update Appointment') }}
-                            </x-primary-button>
+                        <div class="flex items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <div>
+                                <x-secondary-button type="button" onclick="history.back()">
+                                    <i class="fas fa-arrow-left mr-2"></i>{{ __('Cancel') }}
+                                </x-secondary-button>
+                            </div>
+                            <div class="flex gap-3">
+                                <!-- Update Button -->
+                                <x-primary-button type="submit">
+                                    <i class="fas fa-save mr-2"></i>{{ __('Update Appointment') }}
+                                </x-primary-button>
+                            </div>
                         </div>
                     </form>
+
+                    <!-- Status Action Buttons Section (Outside main form) -->
+                    <div class="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mt-6">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                            <i class="fas fa-tasks mr-2 text-pink-500"></i>Status Actions
+                        </h3>
+                        <div class="flex flex-wrap gap-3">
+                            @if($appointment->status === 'pending')
+                                <!-- Approve Button -->
+                                <form action="{{ route('admin.appointments.approve', $appointment) }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" 
+                                            class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                            title="Approve and auto-assign counselor">
+                                        <i class="fas fa-check mr-2"></i> Approve
+                                    </button>
+                                </form>
+
+                                <!-- Decline Button (for pending) -->
+                                <form action="{{ route('admin.appointments.decline', $appointment) }}" method="POST" 
+                                      class="inline"
+                                      onsubmit="return confirm('Are you sure you want to decline this pending appointment?');">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" 
+                                            class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                            title="Decline pending appointment">
+                                        <i class="fas fa-times-circle mr-2"></i> Decline
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if($appointment->status === 'approved')
+                                <!-- Decline Button (for approved) -->
+                                <form action="{{ route('admin.appointments.decline', $appointment) }}" method="POST" 
+                                      class="inline"
+                                      onsubmit="return confirm('Are you sure you want to decline this approved appointment?');">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" 
+                                            class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                            title="Decline approved appointment">
+                                        <i class="fas fa-times-circle mr-2"></i> Decline
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if($appointment->status === 'accepted')
+                                <!-- Reject Button (only for accepted) -->
+                                <form action="{{ route('admin.appointments.reject', $appointment) }}" method="POST" 
+                                      class="inline"
+                                      onsubmit="return confirm('Are you sure you want to reject this accepted appointment?');">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" 
+                                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                            title="Reject accepted appointment">
+                                        <i class="fas fa-ban mr-2"></i> Reject
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if(!in_array($appointment->status, ['pending', 'approved', 'accepted']))
+                                <div class="text-sm text-gray-500 dark:text-gray-400 py-2">
+                                    No status actions available for {{ ucfirst($appointment->status) }} appointments.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Delete Button Section (Outside main form) -->
+                    @if ($appointment->status !== 'approved')
+                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <form action="{{ route('admin.appointments.destroy', $appointment->id) }}" method="POST" 
+                                  onsubmit="return confirm('Are you sure you want to delete this appointment? This action cannot be undone.')"
+                                  class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" 
+                                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors">
+                                    <i class="fas fa-trash mr-2"></i>{{ __('Delete Appointment') }}
+                                </button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

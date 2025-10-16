@@ -20,7 +20,7 @@ class AppointmentRejected extends Notification
 
     public function via($notifiable)
     {
-        return ['mail']; // or add 'database', 'broadcast', etc.
+        return ['mail'];
     }
 
     public function toMail($notifiable)
