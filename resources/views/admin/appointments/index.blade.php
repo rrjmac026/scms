@@ -249,20 +249,20 @@
                                                 @endif
 
                                                 <!-- Delete -->
-                                                @if ($appointment->status !== 'approved')
-                                                    <form action="{{ route('admin.appointments.destroy', $appointment->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this appointment?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-800">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <!-- Disabled delete icon -->
-                                                    <button type="button" class="text-gray-400 cursor-not-allowed" title="Cannot delete approved appointments" disabled>
+                                                @if (!in_array($appointment->status, ['approved', 'accepted']))
+                                                <form action="{{ route('admin.appointments.destroy', $appointment->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this appointment?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-800">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
-                                                @endif
+                                                </form>
+                                            @else
+                                                <!-- Disabled delete icon -->
+                                                <button type="button" class="text-gray-400 cursor-not-allowed" title="Cannot delete approved or accepted appointments" disabled>
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endif
                                             </div>
                                         </td>
                                     </tr>
