@@ -16,13 +16,23 @@ class CounselorGenerateReportController extends Controller
     // Display the report generation form
     public function index(Request $request)
     {
+        $user = auth()->user();
+
         $filters = [
             'start_date' => $request->input('start_date', now()->startOfMonth()->format('Y-m-d')),
             'end_date' => $request->input('end_date', now()->endOfMonth()->format('Y-m-d')),
             'counselor_id' => $request->input('counselor_id', '')
         ];
 
+        // Default: all counselors (for admin)
         $counselors = Counselor::with('user')->get();
+
+        // Restrict if logged in as counselor
+        if ($user->counselor) {
+            $counselors = collect([$user->counselor]);
+            // Force the counselor_id filter to their own ID
+            $filters['counselor_id'] = $user->counselor->id;
+        }
 
         return view('counselors.reports.index', compact('filters', 'counselors'));
     }

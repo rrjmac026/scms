@@ -74,18 +74,37 @@
                             <!-- Counselor Filter -->
                             <div>
                                 <x-input-label for="counselor_id" value="{{ __('Counselor (Optional)') }}" />
-                                <select 
-                                    name="counselor_id" 
-                                    id="counselor_id"
-                                    class="w-full mt-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                >
-                                    <option value="">All Counselors</option>
-                                    @foreach($counselors as $counselor)
-                                        <option value="{{ $counselor->id }}" @selected(old('counselor_id', $filters['counselor_id']) == $counselor->id)>
-                                            {{ $counselor->user->name }}
+
+                                @if(auth()->user()->counselor)
+                                    {{-- Counselor user: show only their name, disabled --}}
+                                    <select 
+                                        name="counselor_id"
+                                        id="counselor_id"
+                                        class="w-full mt-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm"
+                                        disabled
+                                    >
+                                        <option value="{{ auth()->user()->counselor->id }}">
+                                            {{ auth()->user()->name }}
                                         </option>
-                                    @endforeach
-                                </select>
+                                    </select>
+
+                                    {{-- Hidden input so their ID still gets submitted --}}
+                                    <input type="hidden" name="counselor_id" value="{{ auth()->user()->counselor->id }}">
+                                @else
+                                    {{-- Admin: can view all counselors --}}
+                                    <select 
+                                        name="counselor_id"
+                                        id="counselor_id"
+                                        class="w-full mt-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm"
+                                    >
+                                        <option value="">All Counselors</option>
+                                        @foreach($counselors as $counselor)
+                                            <option value="{{ $counselor->id }}" @selected(old('counselor_id', $filters['counselor_id']) == $counselor->id)>
+                                                {{ $counselor->user->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                @endif
                             </div>
                         </div>
 
