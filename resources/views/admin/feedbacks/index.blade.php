@@ -9,31 +9,36 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- Total Feedback -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Feedback</div>
                     <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
                         {{ number_format($totalFeedbacks) }}
                     </div>
                 </div>
+
+                <!-- Average Overall Rating -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Average Overall Rating</div>
                     <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
-                        {{ number_format($averageRating, 1) }}/5
+                        {{ number_format($averageRating, 2) }}/5
                     </div>
                     <div class="flex text-yellow-400 mt-2">
                         @for ($i = 1; $i <= 5; $i++)
-                            <i class="fas fa-star {{ $i <= round($averageRating) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                            <i class="fas fa-star {{ $i <= $averageRating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
                         @endfor
                     </div>
                 </div>
+
+                <!-- Detailed Questions Average -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Detailed Questions Average</div>
                     <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
-                        {{ number_format($detailedAverage, 1) }}/5
+                        {{ number_format($detailedAverage, 2) }}/5
                     </div>
                     <div class="flex text-yellow-400 mt-2">
                         @for ($i = 1; $i <= 5; $i++)
-                            <i class="fas fa-star {{ $i <= round($detailedAverage) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                            <i class="fas fa-star {{ $i <= $detailedAverage ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
                         @endfor
                     </div>
                 </div>
@@ -79,14 +84,13 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
                                                 <span class="text-lg font-semibold text-gray-900 dark:text-gray-100 mr-2">
-                                                    {{ number_format($feedback->detailed_average ?? 0, 1) }}/5
+                                                    {{ number_format($feedback->detailed_average ?? 0, 2) }}/5
                                                 </span>
                                                 <div class="flex text-yellow-400">
                                                     @for ($i = 1; $i <= 5; $i++)
-                                                        <i class="fas fa-star {{ $i <= round($feedback->detailed_average ?? 0) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                                                        <i class="fas fa-star {{ $i <= ($feedback->detailed_average ?? 0) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
                                                     @endfor
                                                 </div>
-
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">

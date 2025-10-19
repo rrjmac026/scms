@@ -69,6 +69,6 @@ class AdminFeedbackController extends Controller
             }
         }
 
-        return $ratingCount > 0 ? round($totalRatings / $ratingCount, 2) : 0;
+        return $ratingCount > 0 ? $totalRatings / $ratingCount : 0;
     }
 }
