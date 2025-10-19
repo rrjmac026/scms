@@ -9,6 +9,34 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            {{-- ✅ Global Error Alert (auto shows when validation fails) --}}
+            @if ($errors->any())
+                <div x-data="{ open: true }" x-show="open"
+                    class="relative mb-6 p-4 rounded-md bg-red-100 border border-red-400 text-red-700 dark:bg-red-900 dark:text-red-100 dark:border-red-700 shadow-md">
+                    <button type="button" @click="open = false"
+                        class="absolute top-2 right-2 text-red-700 dark:text-red-200 font-bold text-xl leading-none">
+                        &times;
+                    </button>
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-5 h-5 text-red-600 dark:text-red-300" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-.01-10a9 9 0 100 18 9 9 0 000-18z" />
+                        </svg>
+                        <strong class="font-semibold">There were some problems with your submission:</strong>
+                    </div>
+                    <ul class="list-disc list-inside space-y-1 ml-4">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <form action="{{ route('admin.students.store') }}" method="POST" class="space-y-8" novalidate>
@@ -143,7 +171,7 @@
                                 <!-- Special Needs -->
                                 <div class="md:col-span-2">
                                     <x-input-label for="special_needs">
-                                        {{ __('Special Needs/Considerations') }} <span class="text-red-500">*</span>
+                                        {{ __('Special Needs/Considerations') }} 
                                     </x-input-label>
                                     <textarea id="special_needs" name="special_needs" 
                                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
@@ -245,7 +273,7 @@
                                 <!-- Father Name -->
                                 <div>
                                     <x-input-label for="father_name">
-                                        {{ __('Full Name') }} <span class="text-red-500">*</span>
+                                        {{ __('Full Name') }} 
                                     </x-input-label>
                                     <x-text-input id="father_name" name="father_name" type="text" 
                                         class="mt-1 block w-full" :value="old('father_name')" required />
@@ -255,7 +283,7 @@
                                 <!-- Father Contact -->
                                 <div>
                                     <x-input-label for="father_contact">
-                                        {{ __('Contact Number') }} <span class="text-red-500">*</span>
+                                        {{ __('Contact Number') }} 
                                     </x-input-label>
                                     <x-text-input id="father_contact" name="father_contact" type="text" 
                                         class="mt-1 block w-full" :value="old('father_contact')" required />
@@ -265,7 +293,7 @@
                                 <!-- Father Occupation -->
                                 <div>
                                     <x-input-label for="father_occupation">
-                                        {{ __('Occupation') }} <span class="text-red-500">*</span>
+                                        {{ __('Occupation') }} 
                                     </x-input-label>
                                     <x-text-input id="father_occupation" name="father_occupation" type="text" 
                                         class="mt-1 block w-full" :value="old('father_occupation')" required />
@@ -281,7 +309,7 @@
                                 <!-- Mother Name -->
                                 <div>
                                     <x-input-label for="mother_name">
-                                        {{ __('Full Name') }} <span class="text-red-500">*</span>
+                                        {{ __('Full Name') }} 
                                     </x-input-label>
                                     <x-text-input id="mother_name" name="mother_name" type="text" 
                                         class="mt-1 block w-full" :value="old('mother_name')" required />
@@ -291,7 +319,7 @@
                                 <!-- Mother Contact -->
                                 <div>
                                     <x-input-label for="mother_contact">
-                                        {{ __('Contact Number') }} <span class="text-red-500">*</span>
+                                        {{ __('Contact Number') }} 
                                     </x-input-label>
                                     <x-text-input id="mother_contact" name="mother_contact" type="text" 
                                         class="mt-1 block w-full" :value="old('mother_contact')" required />
@@ -301,7 +329,7 @@
                                 <!-- Mother Occupation -->
                                 <div>
                                     <x-input-label for="mother_occupation">
-                                        {{ __('Occupation') }} <span class="text-red-500">*</span>
+                                        {{ __('Occupation') }} 
                                     </x-input-label>
                                     <x-text-input id="mother_occupation" name="mother_occupation" type="text" 
                                         class="mt-1 block w-full" :value="old('mother_occupation')" required />
@@ -361,4 +389,6 @@
             </div>
         </div>
     </div>
+
+
 </x-app-layout>

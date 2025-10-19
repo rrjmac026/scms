@@ -76,7 +76,7 @@ class StudentManagementController extends Controller
             'lrn'             => 'required|string|max:50',
             'strand'          => 'required|string|max:255',
             'grade_level'     => 'required|string|max:50',
-            'special_needs'   => 'required|string|max:500',
+            'special_needs'   => 'nullable|string|max:500',
 
             // Personal Info
             'birthdate'       => 'required|date',
@@ -88,15 +88,15 @@ class StudentManagementController extends Controller
             'religion'        => 'required|string|max:100',
 
             // Parent/Guardian Info
-            'father_name'     => 'required|string|max:255',
-            'father_contact'  => 'required|string|max:50',
-            'father_occupation' => 'required|string|max:255',
-            'mother_name'     => 'required|string|max:255',
-            'mother_contact'  => 'required|string|max:50',
-            'mother_occupation' => 'required|string|max:255',
-            'guardian_name'   => 'required|string|max:255',
-            'guardian_contact' => 'required|string|max:50',
-            'guardian_relationship' => 'required|string|max:100',
+            'father_name'     => 'nullable|string|max:255',
+            'father_contact'  => 'nullable|string|max:50',
+            'father_occupation' => 'nullable|string|max:255',
+            'mother_name'     => 'nullable|string|max:255',
+            'mother_contact'  => 'nullable|string|max:50',
+            'mother_occupation' => 'nullable|string|max:255',
+            'guardian_name'   => 'nullable|string|max:255',
+            'guardian_contact' => 'nullable|string|max:50',
+            'guardian_relationship' => 'nullable|string|max:100',
         ], [
             // Custom error messages
             'email.regex' => 'The email must be a valid @lccdo.edu.ph email address.',
@@ -178,7 +178,7 @@ class StudentManagementController extends Controller
             'lrn'            => 'required|string|max:50',
             'strand'         => 'required|string|max:255',
             'grade_level'    => 'required|string|max:50',
-            'special_needs'  => 'required|string|max:500',
+            'special_needs'  => 'nullable|string|max:500',
 
             // Email validation for updates (if you allow email updates)
             'email'          => [
@@ -201,15 +201,15 @@ class StudentManagementController extends Controller
             'religion'       => 'required|string|max:100',
 
             // Parent/Guardian Info
-            'father_name'    => 'required|string|max:255',
-            'father_contact' => 'required|string|max:50',
-            'father_occupation' => 'required|string|max:255',
-            'mother_name'    => 'required|string|max:255',
-            'mother_contact' => 'required|string|max:50',
-            'mother_occupation' => 'required|string|max:255',
-            'guardian_name'  => 'required|string|max:255',
-            'guardian_contact' => 'required|string|max:50',
-            'guardian_relationship' => 'required|string|max:100',
+            'father_name'    => 'nullable|string|max:255',
+            'father_contact' => 'nullable|string|max:50',
+            'father_occupation' => 'nullable|string|max:255',
+            'mother_name'    => 'nullable|string|max:255',
+            'mother_contact' => 'nullable|string|max:50',
+            'mother_occupation' => 'nullable|string|max:255',
+            'guardian_name'  => 'nullable|string|max:255',
+            'guardian_contact' => 'nullable|string|max:50',
+            'guardian_relationship' => 'nullable|string|max:100',
         ], [
             // Custom error messages
             'email.regex' => 'The email must be a valid @lccdo.edu.ph email address.',

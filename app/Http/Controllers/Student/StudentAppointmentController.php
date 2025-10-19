@@ -155,32 +155,57 @@ class StudentAppointmentController extends Controller
      */
     public function cancel(Request $request, Appointment $appointment)
     {
-        $student = auth()->user()->student;
+        try {
+            $student = auth()->user()->student;
 
-        if ($appointment->student_id !== $student->id) {
-            abort(403, 'Unauthorized action.');
+            if ($appointment->student_id !== $student->id) {
+                abort(403, 'Unauthorized action.');
+            }
+
+            if (in_array($appointment->status, ['completed', 'cancelled', 'rejected', 'declined'])) {
+                return back()->with('error', 'This appointment can no longer be cancelled.');
+            }
+
+            $request->validate([
+                'cancelled_reason' => 'required|string|max:1000',
+            ]);
+
+            // ✅ Check if appointment is within 24 hours
+            $date = $appointment->preferred_date instanceof Carbon
+                ? $appointment->preferred_date->format('Y-m-d')
+                : $appointment->preferred_date;
+
+            $time = substr($appointment->preferred_time, 0, 5);
+            $appointmentDateTime = Carbon::createFromFormat('Y-m-d H:i', "$date $time");
+
+            if ($appointmentDateTime->isBefore(now()->addDay())) {
+                return back()->with('error', 'You can only cancel at least 24 hours before the appointment.');
+            }
+
+            $appointment->update([
+                'status' => 'cancelled',
+                'cancelled_reason' => $request->cancelled_reason,
+            ]);
+
+            // 🔄 Google Calendar Sync
+            app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
+
+            return redirect()
+                ->route('student.appointments.index')
+                ->with('success', 'Appointment cancelled successfully.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->validator)->withInput();
+        } catch (\Throwable $e) {
+            Log::error('Appointment cancellation failed', [
+                'appointment_id' => $appointment->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'An unexpected error occurred while cancelling the appointment. Please try again later.');
         }
-
-        if (in_array($appointment->status, ['completed', 'cancelled', 'rejected', 'declined'])) {
-            return back()->with('error', 'This appointment can no longer be cancelled.');
-        }
-
-        $request->validate([
-            'cancelled_reason' => 'required|string|max:1000',
-        ]);
-
-        $appointment->update([
-            'status' => 'cancelled',
-            'cancelled_reason' => $request->cancelled_reason,
-        ]);
-
-        // 🔄 Google Calendar Sync
-        app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
-
-        return redirect()
-            ->route('student.appointments.index')
-            ->with('success', 'Appointment cancelled successfully.');
     }
+
 
     /**
      * Display appointments on student calendar view.

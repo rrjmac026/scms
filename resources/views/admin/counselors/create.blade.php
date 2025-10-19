@@ -7,18 +7,47 @@
         </div>
     </x-slot>
 
+    {{-- ❌ Session Error --}}
     @if(session('error'))
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
             <div class="bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:border-red-500 dark:text-red-300 px-4 py-3 rounded-xl relative" role="alert">
-                <span class="block sm:inline"><i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}</span>
+                <span class="block sm:inline">
+                    <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
+                </span>
             </div>
         </div>
     @endif
 
+    {{-- ✅ Validation Errors (auto shows when validation fails) --}}
+    @if ($errors->any())
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            <div x-data="{ open: true }" x-show="open"
+                class="relative bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:border-red-500 dark:text-red-300 px-4 py-3 rounded-xl shadow-md"
+                role="alert">
+                <button type="button" @click="open = false"
+                    class="absolute top-2 right-3 text-red-700 dark:text-red-300 text-xl font-bold leading-none">
+                    &times;
+                </button>
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-300"></i>
+                    <strong class="font-semibold">There were some problems with your submission:</strong>
+                </div>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    @endif
+
+    {{-- ✅ Session Success --}}
     @if(session('success'))
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
             <div class="bg-green-100 border border-green-400 text-green-700 dark:bg-green-900/50 dark:border-green-500 dark:text-green-300 px-4 py-3 rounded-xl relative" role="alert">
-                <span class="block sm:inline"><i class="fas fa-check-circle mr-2"></i>{{ session('success') }}</span>
+                <span class="block sm:inline">
+                    <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+                </span>
             </div>
         </div>
     @endif
@@ -54,9 +83,7 @@
                                     </x-input-label>
                                     <x-text-input id="middle_name" name="middle_name" type="text" 
                                         class="mt-1 block w-full" :value="old('middle_name')" />
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        Optional
-                                    </p>
+                    
                                     <x-input-error class="mt-2" :messages="$errors->get('middle_name')" />
                                 </div>
 

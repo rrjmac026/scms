@@ -12,7 +12,19 @@
                 <div class="p-6">
                     <form action="{{ route('student.appointments.store') }}" method="POST" class="space-y-6">
                         @csrf
-
+ <!-- Display all errors at the top -->
+    <div class="mb-6">
+        @if ($errors->any())
+            <div class="p-4 mb-4 text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800">
+                <strong>{{ __('Please fix the following errors:') }}</strong>
+                <ul class="mt-2 list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+    </div>
                         <!-- Preferred Date -->
                         <div>
                             <x-input-label for="preferred_date" :value="__('Preferred Date')" />
@@ -192,19 +204,19 @@
 
         /* Selected slot - Bold Purple/Indigo for better contrast */
         .time-slot.selected {
-            border-color: #8b5cf6;
+            border-color: #3b82f6;
             background-color: #ede9fe;
             border-width: 3px;
         }
 
         .dark .time-slot.selected {
-            background-color: #4c1d95;
-            border-color: #a78bfa;
+            background-color: #3b82f6;
+            border-color: #1e3a8a;
             border-width: 3px;
         }
 
         .time-slot.selected .time {
-            color: #6d28d9;
+            color: #3b82f6;
             font-weight: 700;
         }
 
@@ -215,7 +227,7 @@
 
         .time-slot.selected .status::after {
             content: '(Selected)';
-            color: #7c3aed;
+            color: #1e3a8a;
             font-weight: 600;
         }
 

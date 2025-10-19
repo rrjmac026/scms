@@ -67,7 +67,7 @@
                 <form class="flex flex-wrap gap-4">
                     <div class="flex-1 min-w-[200px]">
                         <input type="text" name="search" value="{{ $search ?? '' }}"
-                               class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                               class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900"
                                placeholder="Search by name or student number...">
                     </div>
                     <select name="grade_level" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
@@ -83,7 +83,7 @@
                         <option value="GAS">GAS</option>
                         <option value="TVL">TVL</option>
                     </select>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                    <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-white-700 transition-colors duration-200">
                         <i class="fas fa-search mr-2"></i>Search
                     </button>
                 </form>

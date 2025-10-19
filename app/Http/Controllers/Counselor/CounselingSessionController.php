@@ -9,14 +9,28 @@ use Illuminate\Http\Request;
 
 class CounselingSessionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $counselor = auth()->user()->counselor;
 
-        $sessions = $counselor->counselingSessions()
-                            ->with('student.user')
-                            ->latest()
-                            ->paginate(10);
+        $query = $counselor->counselingSessions()
+                    ->with('student.user');
+
+        // Apply date filters
+        if ($request->filled('date_from')) {
+            $query->whereDate('started_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('started_at', '<=', $request->date_to);
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $sessions = $query->latest()->paginate(10);
 
         return view('counselors.counseling-sessions.index', compact('sessions'));
     }

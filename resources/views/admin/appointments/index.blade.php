@@ -18,9 +18,10 @@
                     </div>
                 </div>
                 <a href="{{ route('admin.appointments.create') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-400 to-pink-500 text-white rounded-xl hover:from-pink-500 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg">
-                    <i class="fas fa-plus mr-2"></i>{{ __('New Appointment') }}
-                </a>
+   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg">
+    <i class="fas fa-plus mr-2"></i>{{ __('New Appointment') }}
+</a>
+
             </div>
         </div>
     </x-slot>

@@ -61,11 +61,8 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 dark:border-gray-700">
                 <form action="{{ route('admin.appointments.store') }}" method="POST" class="p-6" id="appointmentForm">
                     @csrf
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Student Selection -->
-                        {{-- Replace the Student Selection div with this enhanced searchable version --}}
 
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Student Selection with Search -->
                         <div>
                             <x-input-label for="student_id" value="{{ __('Student') }}" />
@@ -96,7 +93,9 @@
                                 <select name="student_id" id="student_id" class="hidden" required>
                                     <option value="">Select Student</option>
                                     @foreach($students as $student)
-                                        <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
+                                        <option value="{{ $student->id }}" 
+                                            data-grade="{{ $student->grade_level ?? 'N/A' }}"
+                                            {{ old('student_id') == $student->id ? 'selected' : '' }}>
                                             {{ $student->user->name }} ({{ $student->student_number }})
                                         </option>
                                     @endforeach
@@ -114,12 +113,13 @@
                                                 data-id="{{ $student->id }}"
                                                 data-name="{{ strtolower($student->user->name) }}"
                                                 data-number="{{ strtolower($student->student_number) }}"
+                                                data-grade="{{ $student->grade_level ?? 'N/A' }}"
                                             >
                                                 <div class="font-medium text-gray-900 dark:text-gray-100">
                                                     {{ $student->user->name }}
                                                 </div>
                                                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ $student->student_number }}
+                                                    {{ $student->student_number }} - Grade {{ $student->grade_level ?? 'N/A' }}
                                                 </div>
                                             </div>
                                         @endforeach
@@ -212,7 +212,7 @@
                             <x-input-error :messages="$errors->get('counseling_category_id')" class="mt-2" />
                         </div>
 
-                        <!-- Time Slot Selection with Visual Cards -->
+                        <!-- Time Slot Selection -->
                         <div class="md:col-span-2">
                             <x-input-label for="preferred_time" :value="__('Preferred Time')" />
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-3">
@@ -272,12 +272,6 @@
                             </div>
                             
                             <x-input-error :messages="$errors->get('preferred_time')" class="mt-2" />
-                            
-                            <!-- Time selection error message -->
-                            <div id="time-error" class="hidden mt-2 text-sm text-red-600 dark:text-red-400">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span id="time-error-message"></span>
-                            </div>
                         </div>
 
                         <!-- Status -->
@@ -296,11 +290,12 @@
 
                         <!-- Concern/Notes -->
                         <div class="md:col-span-2">
-                            <x-input-label for="concern" value="{{ __('Concern/Notes') }}" />
+                            <x-input-label for="concern" value="{{ __('Reason for Appointment') }}" />
                             <textarea id="concern" name="concern" rows="4" 
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500" 
                                 required 
-                                maxlength="500">{{ old('concern') }}</textarea>
+                                maxlength="500"
+                                placeholder="Please briefly describe the reason for this appointment...">{{ old('concern') }}</textarea>
                             <div class="flex justify-between mt-1">
                                 <x-input-error :messages="$errors->get('concern')" />
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
@@ -362,15 +357,15 @@
             opacity: 0.6;
         }
 
-        /* Available slots */
+        /* Available slots - Lighter green */
         .time-slot.available {
-            border-color: #10b981;
+            border-color: #22c55e;
             background-color: #f0fdf4;
         }
 
         .dark .time-slot.available {
-            background-color: #064e3b;
-            border-color: #10b981;
+            background-color: #052e16;
+            border-color: #22c55e;
         }
 
         .time-slot.available:hover {
@@ -380,10 +375,10 @@
         }
 
         .dark .time-slot.available:hover {
-            background-color: #065f46;
+            background-color: #14532d;
         }
 
-        /* Booked slots */
+        /* Booked slots - Red */
         .time-slot.booked {
             border-color: #ef4444;
             background-color: #fef2f2;
@@ -398,19 +393,37 @@
             content: '(Booked)';
         }
 
-        /* Selected slot */
+        /* Selected slot - Bold Blue */
         .time-slot.selected {
             border-color: #3b82f6;
-            background-color: #dbeafe;
+            background-color: #ede9fe;
+            border-width: 3px;
         }
 
         .dark .time-slot.selected {
-            background-color: #1e3a8a;
-            border-color: #3b82f6;
+            background-color: #3b82f6;
+            border-color: #1e3a8a;
+            border-width: 3px;
+        }
+
+        .time-slot.selected .time {
+            color: #3b82f6;
+            font-weight: 700;
+        }
+
+        .dark .time-slot.selected .time {
+            color: #e9d5ff;
+            font-weight: 700;
         }
 
         .time-slot.selected .status::after {
             content: '(Selected)';
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+
+        .dark .time-slot.selected .status::after {
+            color: #c4b5fd;
         }
     </style>
 
@@ -424,10 +437,17 @@
             const charCount = document.getElementById('char-count');
             const submitBtn = document.getElementById('submitBtn');
             const submitBtnText = document.getElementById('submitBtnText');
-            const timeError = document.getElementById('time-error');
-            const timeErrorMessage = document.getElementById('time-error-message');
 
-            const bookedSlots = @json($bookedSlots ?? []);
+            // Parse booked slots - ensure it's properly converted
+            const bookedSlots = {!! json_encode($bookedSlots ?? []) !!};
+            
+            // Debug: Log booked slots to console
+            console.log('=== BOOKED SLOTS DATA ===');
+            console.log('Type:', typeof bookedSlots);
+            console.log('Is Array:', Array.isArray(bookedSlots));
+            console.log('Length:', bookedSlots.length);
+            console.log('Data:', bookedSlots);
+            console.log('========================');
 
             // Character counter
             concernTextarea.addEventListener('input', function() {
@@ -439,29 +459,17 @@
 
             // Handle date change
             dateInput.addEventListener('change', function () {
-                try {
-                    const selectedDate = this.value;
-                    if (!selectedDate) {
-                        showTimeError('Please select a date');
-                        return;
-                    }
+                const selectedDate = new Date(this.value);
+                const day = selectedDate.getDay();
 
-                    const dateObj = new Date(selectedDate + 'T00:00:00');
-                    const day = dateObj.getDay();
-
-                    if (day === 0 || day === 6) {
-                        showTimeError('Appointments can only be booked on weekdays (Monday to Friday)');
-                        this.value = '';
-                        disableAllTimeSlots();
-                        return;
-                    }
-
-                    hideTimeError();
-                    updateTimeSlots(selectedDate);
-                } catch (error) {
-                    console.error('Date validation error:', error);
-                    showTimeError('Invalid date selected');
+                if (day === 0 || day === 6) {
+                    alert('Appointments can only be booked on weekdays (Monday to Friday).');
+                    this.value = '';
+                    disableAllTimeSlots();
+                    return;
                 }
+
+                updateTimeSlots(this.value);
             });
 
             // Handle time slot selection
@@ -472,7 +480,7 @@
                     }
 
                     if (!dateInput.value) {
-                        showTimeError('Please select a date first');
+                        alert('Please select a date first');
                         return;
                     }
 
@@ -484,8 +492,6 @@
 
                     // Update hidden input
                     timeHiddenInput.value = this.dataset.time;
-                    
-                    hideTimeError();
                 });
             });
 
@@ -503,7 +509,6 @@
                 // Check if time is selected
                 if (!timeHiddenInput.value) {
                     errors.push('Please select a time slot');
-                    showTimeError('Please select a time slot');
                     isValid = false;
                 }
 
@@ -511,6 +516,14 @@
                 const studentSelect = document.getElementById('student_id');
                 if (!studentSelect.value) {
                     errors.push('Please select a student');
+                    isValid = false;
+                }
+
+                // Check if counselor or auto-assign is selected
+                const autoAssign = document.getElementById('auto_assign');
+                const counselorSelect = document.getElementById('counselor_id');
+                if (!autoAssign.checked && !counselorSelect.value) {
+                    errors.push('Please select a counselor or enable auto-assign');
                     isValid = false;
                 }
 
@@ -523,24 +536,13 @@
 
                 // Check if concern is filled
                 if (!concernTextarea.value.trim()) {
-                    errors.push('Please provide concern/notes');
+                    errors.push('Please provide a reason for the appointment');
                     isValid = false;
                 }
 
                 if (!isValid) {
                     e.preventDefault();
-                    
-                    // Show errors at the top
-                    if (errors.length > 0) {
-                        alert('Please fix the following errors:\n\n• ' + errors.join('\n• '));
-                    }
-                    
-                    // Scroll to first error
-                    const firstError = document.querySelector('.text-red-600, #time-error:not(.hidden)');
-                    if (firstError) {
-                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                    
+                    alert('Please fix the following errors:\n\n• ' + errors.join('\n• '));
                     return false;
                 }
 
@@ -550,45 +552,45 @@
             });
 
             function updateTimeSlots(selectedDate) {
+                console.log('=== UPDATE TIME SLOTS ===');
                 console.log('Selected date:', selectedDate);
-                console.log('Booked slots:', bookedSlots);
+                console.log('Total booked slots:', bookedSlots.length);
                 
-                let hasAvailableSlots = false;
-
                 timeSlotButtons.forEach(button => {
-                    const time = button.dataset.time;
+                    const time = button.dataset.time; // e.g., "09:00" or "14:00"
                     
+                    console.log(`Checking slot: ${selectedDate} ${time}`);
+                    
+                    // Check if this time slot is booked
                     const isBooked = bookedSlots.some(slot => {
-                        const slotMatches = slot.preferred_date === selectedDate && slot.preferred_time === time;
-                        if (slotMatches) {
-                            console.log('Found booked slot:', slot);
+                        const dateMatches = slot.preferred_date === selectedDate;
+                        const timeMatches = slot.preferred_time === time;
+                        const matches = dateMatches && timeMatches;
+                        
+                        if (matches) {
+                            console.log(`✓ BOOKED: ${selectedDate} ${time}`, slot);
                         }
-                        return slotMatches;
+                        
+                        return matches;
                     });
 
-                    // Reset classes
+                    // Reset all classes first
                     button.classList.remove('available', 'booked', 'selected');
                     button.disabled = false;
 
                     if (isBooked) {
                         button.classList.add('booked');
                         button.disabled = true;
-                        console.log('Marking as booked:', time);
+                        console.log(`→ Marking as BOOKED: ${time}`);
                     } else {
                         button.classList.add('available');
-                        hasAvailableSlots = true;
+                        console.log(`→ Marking as AVAILABLE: ${time}`);
                     }
                 });
 
-                // Clear selection
+                // Clear any previous selection
                 timeHiddenInput.value = '';
-
-                // Show message if no slots available
-                if (!hasAvailableSlots) {
-                    showTimeError('No available time slots for this date. Please choose another date.');
-                } else {
-                    hideTimeError();
-                }
+                console.log('========================');
             }
 
             function disableAllTimeSlots() {
@@ -597,15 +599,6 @@
                     button.disabled = true;
                 });
                 timeHiddenInput.value = '';
-            }
-
-            function showTimeError(message) {
-                timeErrorMessage.textContent = message;
-                timeError.classList.remove('hidden');
-            }
-
-            function hideTimeError() {
-                timeError.classList.add('hidden');
             }
 
             // Restore old time selection if validation fails
@@ -628,9 +621,7 @@
                 }
             @endif
         });
-    </script>
 
-    <script>
         // Student search functionality
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('student_search');
@@ -713,15 +704,29 @@
 
             // Close dropdown when clicking outside
             document.addEventListener('click', (e) => {
-                if (!e.target.closest('.relative') && !dropdown.classList.contains('hidden')) {
+                if (!e.target.closest('#student_search') && 
+                    !e.target.closest('#student_dropdown') && 
+                    !dropdown.classList.contains('hidden')) {
                     dropdown.classList.add('hidden');
                 }
             });
-        });
-    </script>
 
-    <script>
-        // Add this at the end of your existing scripts
+            // Restore selected student if validation fails
+            @if(old('student_id'))
+                const selectedOption = hiddenSelect.options[hiddenSelect.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const studentText = selectedOption.textContent.trim();
+                    const namePart = studentText.split('(')[0].trim();
+                    const numberPart = studentText.match(/\(([^)]+)\)/)?.[1] || '';
+                    
+                    selectedName.textContent = namePart;
+                    selectedNumber.textContent = numberPart;
+                    selectedStudent.classList.remove('hidden');
+                }
+            @endif
+        });
+
+        // Auto-assign functionality
         document.addEventListener('DOMContentLoaded', function() {
             const autoAssignCheckbox = document.getElementById('auto_assign');
             const counselorSelect = document.getElementById('counselor_id');

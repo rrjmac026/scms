@@ -11,6 +11,30 @@
         </div>
     </x-slot>
 
+    @if(session('success'))
+    <div class="mb-4 p-4 text-sm text-green-800 bg-green-100 border border-green-300 rounded-lg dark:bg-green-900/30 dark:text-green-300">
+        <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+    </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-4 p-4 text-sm text-red-800 bg-red-100 border border-red-300 rounded-lg dark:bg-red-900/30 dark:text-red-300">
+            <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="mb-4 p-4 text-sm text-red-800 bg-red-100 border border-red-300 rounded-lg dark:bg-red-900/30 dark:text-red-300">
+            <i class="fas fa-times-circle mr-2"></i> <strong>There were some issues:</strong>
+            <ul class="mt-2 list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+
     <div class="py-12" x-data="{ showCancelModal: false, cancelUrl: '', appointmentId: null }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
