@@ -686,19 +686,23 @@
             // Initialize time slots on page load with current date and counselor
             const currentDate = dateInput.value;
             const initialCounselorId = counselorSelect.value ? parseInt(counselorSelect.value) : null;
+            const initialTime = "{{ $appointment->preferred_time }}"; // Get the appointment's current time
             
             if (currentDate && initialCounselorId) {
                 setTimeout(() => {
                     updateTimeSlots(currentDate, initialCounselorId);
                     
-                    const currentTime = timeHiddenInput.value;
-                    if (currentTime) {
-                        timeSlotButtons.forEach(btn => {
-                            if (btn.dataset.time === currentTime) {
-                                btn.classList.add('selected');
-                            }
-                        });
-                    }
+                    // Find and highlight the previously selected time slot
+                    timeSlotButtons.forEach(btn => {
+                        const btnTime = btn.dataset.time;
+                        const formattedInitialTime = initialTime.substring(0, 5); // Format HH:mm from HH:mm:ss
+                        
+                        if (btnTime === formattedInitialTime) {
+                            btn.classList.add('selected');
+                            timeHiddenInput.value = btnTime;
+                            console.log('Restored previous time selection:', btnTime);
+                        }
+                    });
                 }, 100);
             }
 
