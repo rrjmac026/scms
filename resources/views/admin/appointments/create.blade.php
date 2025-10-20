@@ -65,8 +65,9 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Student Selection with Search -->
                         <div>
-                            <x-input-label for="student_id" value="{{ __('Student') }}" />
-                            
+                            <x-input-label for="student_id">
+                                {{ __('Student') }} <span class="text-red-500">*</span>
+                            </x-input-label>
                             <div class="relative mt-1">
                                 <!-- Search Input -->
                                 <div class="relative">
