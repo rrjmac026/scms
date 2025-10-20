@@ -73,15 +73,16 @@ class AppointmentController extends Controller
     /**
      * Show the form for creating a new appointment.
      */
-     public function create()
+    public function create()
     {
         try {
             $categories = CounselingCategory::where('status', 'active')->get();
             $students = Student::with('user')->get();
             $counselors = Counselor::with('user')->where('status', 'active')->get();
 
-            // Get all booked slots WITH counselor_id for time slot availability
-            $bookedSlots = Appointment::whereIn('status', ['pending', 'approved', 'accepted', 'completed'])
+            // Get all booked slots WITH counselor_id AND student/counselor names for time slot availability
+            $bookedSlots = Appointment::with(['student.user', 'counselor.user'])
+                ->whereIn('status', ['pending', 'approved', 'accepted', 'completed'])
                 ->get()
                 ->map(function ($appointment) {
                     // Handle both Carbon instances and string dates
@@ -99,7 +100,12 @@ class AppointmentController extends Controller
                     return [
                         'preferred_date' => $date,
                         'preferred_time' => $time,
-                        'counselor_id' => $appointment->counselor_id, // IMPORTANT: Include counselor_id
+                        'counselor_id' => $appointment->counselor_id,
+                        'student_id' => $appointment->student_id,
+                        // Add the names for display
+                        'student_name' => $appointment->student->user->name ?? 'Unknown Student',
+                        'counselor_name' => $appointment->counselor->user->name ?? 'Unknown Counselor',
+                        'student_number' => $appointment->student->student_number ?? 'N/A',
                     ];
                 })
                 ->values()
