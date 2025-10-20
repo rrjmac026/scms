@@ -23,11 +23,6 @@
                     <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
                         {{ number_format($averageRating, 2) }}/5
                     </div>
-                    <div class="flex text-yellow-400 mt-2">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <i class="fas fa-star {{ $i <= $averageRating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                        @endfor
-                    </div>
                 </div>
 
                 <!-- Detailed Questions Average -->
@@ -35,11 +30,6 @@
                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Detailed Questions Average</div>
                     <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
                         {{ number_format($detailedAverage, 2) }}/5
-                    </div>
-                    <div class="flex text-yellow-400 mt-2">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <i class="fas fa-star {{ $i <= $detailedAverage ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                        @endfor
                     </div>
                 </div>
             </div>
@@ -83,14 +73,9 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <span class="text-lg font-semibold text-gray-900 dark:text-gray-100 mr-2">
+                                                <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                                     {{ number_format($feedback->detailed_average ?? 0, 2) }}/5
                                                 </span>
-                                                <div class="flex text-yellow-400">
-                                                    @for ($i = 1; $i <= 5; $i++)
-                                                        <i class="fas fa-star {{ $i <= ($feedback->detailed_average ?? 0) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                                    @endfor
-                                                </div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">

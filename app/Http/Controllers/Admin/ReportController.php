@@ -12,6 +12,7 @@ use App\Models\Offense;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use FPDF;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -47,7 +48,7 @@ class ReportController extends Controller
                 'total_sessions' => (clone $sessions)->count(),
                 'total_students_counseled' => (clone $sessions)->distinct('student_id')->count('student_id'),
                 'active_counselors' => Counselor::count(),
-                'average_feedback_rating' => round($feedbacks->avg('rating') ?? 0, 2),
+                'average_feedback_rating' => round((clone $feedbacks)->avg('rating') ?? 0, 2),
             ],
             'charts' => [
                 'sessionsPerMonth' => [
@@ -55,7 +56,7 @@ class ReportController extends Controller
                     'data' => $this->getMonthlySessionCounts($startDate->year)
                 ],
                 'appointmentsByStatus' => [
-                    'labels' => ['Completed', 'Pending', 'Cancelled'],
+                    'labels' => ['Completed', 'Pending', 'Canceled'],
                     'data' => [
                         (clone $appointments)->where('status', 'completed')->count(),
                         (clone $appointments)->where('status', 'pending')->count(),
@@ -197,8 +198,8 @@ class ReportController extends Controller
             ->get();
 
         return [
-            'labels' => $sessions->pluck('month'),
-            'data' => $sessions->pluck('count'),
+            'labels' => $sessions->pluck('month')->toArray(), // FIXED: Added ->toArray()
+            'data' => $sessions->pluck('count')->toArray(),   // FIXED: Added ->toArray()
         ];
     }
 
@@ -210,8 +211,8 @@ class ReportController extends Controller
             ->get();
 
         return [
-            'labels' => $statuses->pluck('status'),
-            'data' => $statuses->pluck('count'),
+            'labels' => $statuses->pluck('status')->map(fn($s) => ucfirst($s))->toArray(), // FIXED: Added ->toArray()
+            'data' => $statuses->pluck('count')->toArray(),   // FIXED: Added ->toArray()
         ];
     }
 
@@ -224,8 +225,8 @@ class ReportController extends Controller
             ->get();
 
         return [
-            'labels' => $feedback->pluck('month'),
-            'data' => $feedback->pluck('average'),
+            'labels' => $feedback->pluck('month')->toArray(),           // FIXED: Added ->toArray()
+            'data' => $feedback->pluck('average')->map(fn($avg) => round($avg, 2))->toArray(), // FIXED: Added ->toArray()
         ];
     }
 
@@ -239,8 +240,8 @@ class ReportController extends Controller
             ->get();
 
         return [
-            'labels' => $categories->pluck('category'),
-            'data' => $categories->pluck('count'),
+            'labels' => $categories->pluck('category')->toArray(), // FIXED: Added ->toArray()
+            'data' => $categories->pluck('count')->toArray(),      // FIXED: Added ->toArray()
         ];
     }
 
@@ -255,8 +256,8 @@ class ReportController extends Controller
             ->get();
 
         return [
-            'labels' => $offenses->pluck('offense'),
-            'data' => $offenses->pluck('count'),
+            'labels' => $offenses->pluck('offense')->toArray(), // FIXED: Added ->toArray()
+            'data' => $offenses->pluck('count')->toArray(),     // FIXED: Added ->toArray()
         ];
     }
 
@@ -271,8 +272,8 @@ class ReportController extends Controller
             ->get();
 
         return [
-            'labels' => $workload->map(fn($item) => $item->counselor->user->name ?? 'Unknown'),
-            'data' => $workload->pluck('count'),
+            'labels' => $workload->map(fn($item) => $item->counselor->user->name ?? 'Unknown')->toArray(), // FIXED: Added ->toArray()
+            'data' => $workload->pluck('count')->toArray(), // FIXED: Added ->toArray()
         ];
     }
 
@@ -284,7 +285,7 @@ class ReportController extends Controller
         return response()->json($analytics);
     }
 
-    // Add these helper methods to the class
+    // FIXED: Helper methods - all return plain arrays now
     private function getMonthlySessionCounts($year)
     {
         $counts = [];
@@ -310,9 +311,10 @@ class ReportController extends Controller
         $data = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $data[] = Feedback::whereYear('created_at', $month->year)
+            $avg = Feedback::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
-                ->avg('rating') ?? 0;
+                ->avg('rating');
+            $data[] = $avg ? round($avg, 2) : 0; // FIXED: Round and handle null
         }
         return $data;
     }
@@ -343,7 +345,7 @@ class ReportController extends Controller
 
     private function getTopOffenseCounts()
     {
-        return Offense::select(\DB::raw('COUNT(*) as count'))
+        return Offense::select(DB::raw('COUNT(*) as count'))
             ->whereBetween('created_at', [now()->startOfYear(), now()->endOfYear()])
             ->groupBy('offense')
             ->orderByRaw('COUNT(*) DESC')

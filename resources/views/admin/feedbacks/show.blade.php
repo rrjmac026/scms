@@ -29,11 +29,6 @@
                                     <span class="text-2xl font-bold text-gray-900 dark:text-gray-100 mr-3">
                                         {{ number_format($detailedAvg, 2) }}/5
                                     </span>
-                                    <div class="flex text-xl text-yellow-400">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            <i class="fas fa-star {{ $i <= round($detailedAvg) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                        @endfor
-                                    </div>
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Calculated from {{ $answeredQuestionsCount }} answered questions</p>
                             </div>
@@ -59,12 +54,7 @@
 
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center">
-                                                <div class="flex text-yellow-400 text-lg">
-                                                    @for($j = 1; $j <= 5; $j++)
-                                                        <i class="fas fa-star {{ $j <= $rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                                    @endfor
-                                                </div>
-                                                <span class="ml-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                                     {{ number_format($rating, 1) }}/5
                                                 </span>
                                             </div>

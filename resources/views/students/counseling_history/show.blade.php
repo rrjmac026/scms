@@ -81,11 +81,6 @@
                                 </h3>
                                 <div class="space-y-4">
                                     <div class="flex items-center">
-                                        <div class="flex space-x-1">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                <i class="fas fa-star {{ $i <= $session->feedback->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                            @endfor
-                                        </div>
                                         <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
                                             {{ $session->feedback->rating }}/5
                                         </span>

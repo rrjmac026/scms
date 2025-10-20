@@ -52,14 +52,9 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <span class="text-lg font-semibold text-gray-900 dark:text-gray-100 mr-2">
+                                                <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                                     {{ $feedback->rating }}/5
                                                 </span>
-                                                <div class="flex text-yellow-400">
-                                                    @for ($i = 1; $i <= 5; $i++)
-                                                        <i class="fas fa-star {{ $i <= $feedback->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                                    @endfor
-                                                </div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">

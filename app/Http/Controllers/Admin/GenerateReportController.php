@@ -16,15 +16,191 @@ class GenerateReportController extends Controller
     // Display the report generation form
     public function index(Request $request)
     {
-        $filters = [
-            'start_date' => $request->input('start_date', now()->startOfMonth()->format('F j, Y')),
-            'end_date' => $request->input('end_date', now()->endOfMonth()->format('F j, Y')),
-            'counselor_id' => $request->input('counselor_id', '')
+        $startDate = $request->start_date 
+            ? Carbon::parse($request->start_date)->startOfDay()
+            : now()->startOfMonth();
+        $endDate = $request->end_date
+            ? Carbon::parse($request->end_date)->endOfDay()
+            : now()->endOfMonth();
+
+        // Check if there's any data in the selected range
+        $hasData = Appointment::whereBetween('created_at', [$startDate, $endDate])->exists();
+
+        if (!$hasData && $request->has('start_date')) {
+            return back()->with('error', 'No data available for the selected date range.');
+        }
+
+        // Prepare chart data with FIXED structure
+        $analytics = [
+            'kpis' => [
+                'total_appointments' => Appointment::whereBetween('created_at', [$startDate, $endDate])->count(),
+                'completed_appointments' => Appointment::whereBetween('created_at', [$startDate, $endDate])->where('status', 'completed')->count(),
+                'canceled_appointments' => Appointment::whereBetween('created_at', [$startDate, $endDate])->where('status', 'canceled')->count(),
+                'total_sessions' => CounselingSession::whereBetween('created_at', [$startDate, $endDate])->count(),
+                'total_students_counseled' => CounselingSession::whereBetween('created_at', [$startDate, $endDate])->distinct('student_id')->count('student_id'),
+                'active_counselors' => Counselor::count(),
+                'average_feedback_rating' => round(Feedback::whereBetween('created_at', [$startDate, $endDate])->avg('rating') ?? 0, 2),
+            ],
+            'charts' => [
+                'sessionsPerMonth' => $this->getSessionsPerMonth($startDate, $endDate),
+                'appointmentsByStatus' => $this->getAppointmentsByStatus($startDate, $endDate),
+                'feedbackTrends' => $this->getFeedbackTrends($startDate, $endDate),
+                'topOffenses' => $this->getTopOffenses($startDate, $endDate),
+                'counselorWorkload' => $this->getCounselorWorkload($startDate, $endDate),
+                'categoryDistribution' => $this->getCategoryDistribution($startDate, $endDate),
+            ]
         ];
 
         $counselors = Counselor::with('user')->get();
+        $categories = CounselingCategory::all();
 
-        return view('admin.reports.generate', compact('filters', 'counselors'));
+        $filters = [
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate->format('Y-m-d'),
+            'counselor_id' => $request->counselor_id,
+            'category' => $request->category,
+        ];
+
+        // For debugging
+        \Log::info('Analytics Data:', $analytics);
+
+        return view('admin.reports.index', compact('analytics', 'filters', 'counselors', 'categories'));
+    }
+
+    // FIXED: Updated all chart methods to return proper data structure
+    protected function getSessionsPerMonth($startDate, $endDate)
+    {
+        $sessions = CounselingSession::select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $labels = [];
+        $data = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+            $labels[] = $monthNames[$i - 1];
+            $session = $sessions->where('month', $i)->first();
+            $data[] = $session ? $session->count : 0;
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data
+        ];
+    }
+
+    protected function getAppointmentsByStatus($startDate, $endDate)
+    {
+        $statuses = Appointment::select(
+                'status',
+                DB::raw('COUNT(*) as count')
+            )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('status')
+            ->get();
+
+        $labels = $statuses->pluck('status')->map(function($status) {
+            return ucfirst($status);
+        })->toArray();
+
+        $data = $statuses->pluck('count')->toArray();
+
+        return [
+            'labels' => $labels,
+            'data' => $data
+        ];
+    }
+
+    protected function getFeedbackTrends($startDate, $endDate)
+    {
+        $feedbacks = Feedback::select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('AVG(rating) as average')
+            )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $labels = [];
+        $data = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+            $labels[] = $monthNames[$i - 1];
+            $feedback = $feedbacks->where('month', $i)->first();
+            $data[] = $feedback ? round($feedback->average, 2) : 0;
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data
+        ];
+    }
+
+    protected function getTopOffenses($startDate, $endDate)
+    {
+        $offenses = Offense::select(
+                'offense',
+                DB::raw('COUNT(*) as count')
+            )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('offense')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get();
+
+        return [
+            'labels' => $offenses->pluck('offense')->toArray(),
+            'data' => $offenses->pluck('count')->toArray()
+        ];
+    }
+
+    protected function getCounselorWorkload($startDate, $endDate)
+    {
+        $workload = CounselingSession::with('counselor.user')
+            ->select(
+                'counselor_id',
+                DB::raw('COUNT(*) as count')
+            )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('counselor_id')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
+        $labels = $workload->map(function($item) {
+            return $item->counselor->user->name ?? 'Unknown';
+        })->toArray();
+
+        $data = $workload->pluck('count')->toArray();
+
+        return [
+            'labels' => $labels,
+            'data' => $data
+        ];
+    }
+
+    protected function getCategoryDistribution($startDate, $endDate)
+    {
+        $categories = CounselingCategory::withCount([
+            'appointments' => function($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }
+        ])
+        ->orderByDesc('appointments_count')
+        ->get();
+
+        return [
+            'labels' => $categories->pluck('name')->toArray(),
+            'data' => $categories->pluck('appointments_count')->toArray()
+        ];
     }
 
     // Generate detailed report view
@@ -212,7 +388,6 @@ class GenerateReportController extends Controller
     }
 
     // Export Excel using existing export class
-    // Export Excel using existing export class
     public function exportExcel(Request $request)
     {
         // Parse dates properly
@@ -220,11 +395,14 @@ class GenerateReportController extends Controller
         $endDate = Carbon::parse($request->input('end_date', now()->endOfMonth()))->endOfDay();
         $counselorId = $request->input('counselor_id', '');
 
-        // Format filters for display
+        // Get counselor name for display - ADD THIS LINE
+        $counselorName = $counselorId ? Counselor::find($counselorId)->user->name : 'All Counselors';
+
+        // Format filters for display - UPDATE THIS ARRAY
         $filters = [
             'start_date' => $startDate->format('F j, Y'),
             'end_date' => $endDate->format('F j, Y'),
-            'counselor_id' => $counselorId
+            'counselor_name' => $counselorName // ADD THIS LINE
         ];
 
         $appointments = Appointment::whereBetween('preferred_date', [$startDate, $endDate])
@@ -271,7 +449,10 @@ class GenerateReportController extends Controller
 
         $filename = 'counseling_report_' . $startDate->format('Y-m-d') . '_to_' . $endDate->format('Y-m-d') . '.xlsx';
 
-        return (new \App\Exports\CounselingReportExport($analytics, $filters))
-            ->download($filename);
+        // Use Excel facade to export - UPDATE THIS LINE
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\CounselingReportExport($analytics, $filters), 
+            $filename
+        );
     }
 }

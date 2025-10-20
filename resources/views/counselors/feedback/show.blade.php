@@ -26,19 +26,14 @@
                             <div class="mb-6">
                                 <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Overall Rating</div>
                                 <div class="flex items-center">
-                                    <span class="text-3xl font-bold text-gray-900 dark:text-gray-100 mr-3">
+                                    <span class="text-3xl font-bold text-gray-900 dark:text-gray-100">
                                         {{ number_format($feedback->rating, 1) }}/5
                                     </span>
-                                    <div class="flex text-2xl text-yellow-400">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            <i class="fas fa-star {{ $i <= $feedback->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                        @endfor
-                                    </div>
                                 </div>
                             </div>
                         @endif
 
-                        <!-- Detailed Ratings (q1–q12 all as star ratings) -->
+                        <!-- Detailed Ratings (q1–q12 all as number ratings) -->
                         <div class="space-y-4 mb-6">
                             @php $questions = config('counseling.feedback_questions'); @endphp
 
@@ -55,13 +50,8 @@
                                         </div>
 
                                         <div class="flex items-center">
-                                            <div class="flex text-yellow-400">
-                                                @for($j = 1; $j <= 5; $j++)
-                                                    <i class="fas fa-star {{ $j <= $feedback->$key ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}"></i>
-                                                @endfor
-                                            </div>
-                                            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                                                ({{ $feedback->$key }}/5)
+                                            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                                {{ $feedback->$key }}/5
                                             </span>
                                         </div>
                                     </div>

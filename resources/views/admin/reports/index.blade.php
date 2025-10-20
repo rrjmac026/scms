@@ -109,8 +109,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Average Rating -->
+                <!-- Average Rating with Chart Line Icon -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border-l-4 border-yellow-500">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
@@ -123,12 +122,12 @@
                                 </div>
                                 <small class="text-gray-500 dark:text-gray-400">
                                     @for($i = 1; $i <= 5; $i++)
-                                        <i class="fas fa-star {{ $i <= round($analytics['kpis']['average_feedback_rating']) ? 'text-yellow-400' : 'text-gray-300' }}"></i>
+                                        <i class="fas fa-chart-line {{ $i <= round($analytics['kpis']['average_feedback_rating']) ? 'text-green-400' : 'text-gray-300' }}"></i>
                                     @endfor
                                 </small>
                             </div>
                             <div>
-                                <i class="fas fa-star fa-2x text-gray-300"></i>
+                                <i class="fas fa-chart-line fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -144,20 +143,8 @@
                             <i class="fas fa-chart-bar mr-2"></i>Sessions Per Month
                         </h3>
                     </div>
-                    <div class="p-6">
-                        <canvas id="sessionsPerMonthChart" height="300"></canvas>
-                    </div>
-                </div>
-
-                <!-- Appointments by Status Chart -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-4 bg-cyan-600 text-white">
-                        <h3 class="text-lg font-semibold">
-                            <i class="fas fa-chart-pie mr-2"></i>Appointments by Status
-                        </h3>
-                    </div>
-                    <div class="p-6">
-                        <canvas id="appointmentStatusChart" height="300"></canvas>
+                    <div class="p-6" style="height: 350px;">
+                        <canvas id="sessionsPerMonthChart"></canvas>
                     </div>
                 </div>
 
@@ -168,20 +155,8 @@
                             <i class="fas fa-chart-line mr-2"></i>Feedback Rating Trends
                         </h3>
                     </div>
-                    <div class="p-6">
-                        <canvas id="feedbackTrendsChart" height="300"></canvas>
-                    </div>
-                </div>
-
-                <!-- Top Offenses Chart -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-4 bg-red-600 text-white">
-                        <h3 class="text-lg font-semibold">
-                            <i class="fas fa-exclamation-triangle mr-2"></i>Top Offenses/Issues
-                        </h3>
-                    </div>
-                    <div class="p-6">
-                        <canvas id="topOffensesChart" height="300"></canvas>
+                    <div class="p-6" style="height: 350px;">
+                        <canvas id="feedbackTrendsChart"></canvas>
                     </div>
                 </div>
 
@@ -192,8 +167,8 @@
                             <i class="fas fa-user-tie mr-2"></i>Counselor Workload
                         </h3>
                     </div>
-                    <div class="p-6">
-                        <canvas id="counselorWorkloadChart" height="300"></canvas>
+                    <div class="p-6" style="height: 350px;">
+                        <canvas id="counselorWorkloadChart"></canvas>
                     </div>
                 </div>
 
@@ -204,18 +179,29 @@
                             <i class="fas fa-sitemap mr-2"></i>Category Distribution
                         </h3>
                     </div>
-                    <div class="p-6">
-                        <canvas id="categoryDistributionChart" height="300"></canvas>
+                    <div class="p-6" style="height: 350px;">
+                        <canvas id="categoryDistributionChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+    console.log('=== CHART DEBUG START ===');
+    
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Content Loaded');
+        
+        // Check if Chart.js is loaded
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js is NOT loaded!');
+            alert('Chart.js failed to load. Check your internet connection.');
+            return;
+        }
+        console.log('✓ Chart.js is loaded:', Chart.version);
+
         // Auto-submit form on filter change
         const filterForm = document.getElementById('filterForm');
         if (filterForm) {
@@ -229,23 +215,13 @@
 
         // Chart data from backend
         const chartData = @json($analytics['charts']);
-        console.log('Chart Data:', chartData);
+        console.log('Chart Data received:', chartData);
 
-        // Verify all required elements exist
-        const requiredCharts = [
-            'sessionsPerMonthChart',
-            'appointmentStatusChart',
-            'feedbackTrendsChart',
-            'topOffensesChart',
-            'counselorWorkloadChart',
-            'categoryDistributionChart'
-        ];
-
-        requiredCharts.forEach(chartId => {
-            if (!document.getElementById(chartId)) {
-                console.error(`Canvas element ${chartId} not found!`);
-            }
-        });
+        // Check if data exists
+        if (!chartData) {
+            console.error('No chart data available!');
+            return;
+        }
 
         // Helper function to generate colors
         const generateColors = (count) => {
@@ -262,15 +238,40 @@
             return colors.slice(0, count);
         };
 
+        // Function to safely create charts
+        const createChart = (canvasId, config) => {
+            console.log(`Creating chart: ${canvasId}`);
+            const canvas = document.getElementById(canvasId);
+            
+            if (!canvas) {
+                console.error(`❌ Canvas element ${canvasId} not found!`);
+                return null;
+            }
+            
+            console.log(`✓ Canvas found: ${canvasId}`);
+            
+            try {
+                const ctx = canvas.getContext('2d');
+                const chart = new Chart(ctx, config);
+                console.log(`✓ Chart created successfully: ${canvasId}`);
+                return chart;
+            } catch (error) {
+                console.error(`❌ Error creating chart ${canvasId}:`, error);
+                return null;
+            }
+        };
+
         // Sessions Per Month Chart (Bar)
-        if (chartData.sessionsPerMonth && document.getElementById('sessionsPerMonthChart')) {
-            new Chart(document.getElementById('sessionsPerMonthChart'), {
+        console.log('Creating Sessions Per Month Chart...');
+        if (chartData.sessionsPerMonth && chartData.sessionsPerMonth.labels && chartData.sessionsPerMonth.data) {
+            console.log('Data:', chartData.sessionsPerMonth);
+            createChart('sessionsPerMonthChart', {
                 type: 'bar',
                 data: {
-                    labels: chartData.sessionsPerMonth.labels || [],
+                    labels: chartData.sessionsPerMonth.labels,
                     datasets: [{
                         label: 'Sessions',
-                        data: chartData.sessionsPerMonth.data || [],
+                        data: chartData.sessionsPerMonth.data,
                         backgroundColor: 'rgba(59, 130, 246, 0.8)',
                         borderColor: 'rgba(59, 130, 246, 1)',
                         borderWidth: 2
@@ -290,17 +291,21 @@
                     }
                 }
             });
+        } else {
+            console.warn('❌ Sessions Per Month data missing or invalid');
         }
 
         // Appointments by Status Chart (Pie)
-        if (chartData.appointmentsByStatus && document.getElementById('appointmentStatusChart')) {
-            new Chart(document.getElementById('appointmentStatusChart'), {
+        console.log('Creating Appointments by Status Chart...');
+        if (chartData.appointmentsByStatus && chartData.appointmentsByStatus.labels && chartData.appointmentsByStatus.data) {
+            console.log('Data:', chartData.appointmentsByStatus);
+            createChart('appointmentStatusChart', {
                 type: 'pie',
                 data: {
-                    labels: chartData.appointmentsByStatus.labels || [],
+                    labels: chartData.appointmentsByStatus.labels,
                     datasets: [{
-                        data: chartData.appointmentsByStatus.data || [],
-                        backgroundColor: generateColors(chartData.appointmentsByStatus.labels?.length || 3),
+                        data: chartData.appointmentsByStatus.data,
+                        backgroundColor: generateColors(chartData.appointmentsByStatus.labels.length),
                         borderWidth: 2,
                         borderColor: '#fff'
                     }]
@@ -313,17 +318,21 @@
                     }
                 }
             });
+        } else {
+            console.warn('❌ Appointments by Status data missing or invalid');
         }
 
         // Feedback Trends Chart (Line)
-        if (chartData.feedbackTrends && document.getElementById('feedbackTrendsChart')) {
-            new Chart(document.getElementById('feedbackTrendsChart'), {
+        console.log('Creating Feedback Trends Chart...');
+        if (chartData.feedbackTrends && chartData.feedbackTrends.labels && chartData.feedbackTrends.data) {
+            console.log('Data:', chartData.feedbackTrends);
+            createChart('feedbackTrendsChart', {
                 type: 'line',
                 data: {
-                    labels: chartData.feedbackTrends.labels || [],
+                    labels: chartData.feedbackTrends.labels,
                     datasets: [{
                         label: 'Average Rating',
-                        data: chartData.feedbackTrends.data || [],
+                        data: chartData.feedbackTrends.data,
                         backgroundColor: 'rgba(234, 179, 8, 0.2)',
                         borderColor: 'rgba(234, 179, 8, 1)',
                         borderWidth: 3,
@@ -346,17 +355,21 @@
                     }
                 }
             });
+        } else {
+            console.warn('❌ Feedback Trends data missing or invalid');
         }
 
         // Top Offenses Chart (Doughnut)
-        if (chartData.topOffenses && document.getElementById('topOffensesChart')) {
-            new Chart(document.getElementById('topOffensesChart'), {
+        console.log('Creating Top Offenses Chart...');
+        if (chartData.topOffenses && chartData.topOffenses.labels && chartData.topOffenses.data) {
+            console.log('Data:', chartData.topOffenses);
+            createChart('topOffensesChart', {
                 type: 'doughnut',
                 data: {
-                    labels: chartData.topOffenses.labels || [],
+                    labels: chartData.topOffenses.labels,
                     datasets: [{
-                        data: chartData.topOffenses.data || [],
-                        backgroundColor: generateColors(chartData.topOffenses.labels?.length || 5),
+                        data: chartData.topOffenses.data,
+                        backgroundColor: generateColors(chartData.topOffenses.labels.length),
                         borderWidth: 2,
                         borderColor: '#fff'
                     }]
@@ -369,17 +382,21 @@
                     }
                 }
             });
+        } else {
+            console.warn('❌ Top Offenses data missing or invalid');
         }
 
         // Counselor Workload Chart (Horizontal Bar)
-        if (chartData.counselorWorkload && document.getElementById('counselorWorkloadChart')) {
-            new Chart(document.getElementById('counselorWorkloadChart'), {
+        console.log('Creating Counselor Workload Chart...');
+        if (chartData.counselorWorkload && chartData.counselorWorkload.labels && chartData.counselorWorkload.data) {
+            console.log('Data:', chartData.counselorWorkload);
+            createChart('counselorWorkloadChart', {
                 type: 'bar',
                 data: {
-                    labels: chartData.counselorWorkload.labels || [],
+                    labels: chartData.counselorWorkload.labels,
                     datasets: [{
                         label: 'Sessions',
-                        data: chartData.counselorWorkload.data || [],
+                        data: chartData.counselorWorkload.data,
                         backgroundColor: 'rgba(34, 197, 94, 0.8)',
                         borderColor: 'rgba(34, 197, 94, 1)',
                         borderWidth: 2
@@ -400,17 +417,21 @@
                     }
                 }
             });
+        } else {
+            console.warn('❌ Counselor Workload data missing or invalid');
         }
 
         // Category Distribution Chart (Bar)
-        if (chartData.categoryDistribution && document.getElementById('categoryDistributionChart')) {
-            new Chart(document.getElementById('categoryDistributionChart'), {
+        console.log('Creating Category Distribution Chart...');
+        if (chartData.categoryDistribution && chartData.categoryDistribution.labels && chartData.categoryDistribution.data) {
+            console.log('Data:', chartData.categoryDistribution);
+            createChart('categoryDistributionChart', {
                 type: 'bar',
                 data: {
-                    labels: chartData.categoryDistribution.labels || [],
+                    labels: chartData.categoryDistribution.labels,
                     datasets: [{
-                        label: 'Sessions',
-                        data: chartData.categoryDistribution.data || [],
+                        label: 'Appointments',
+                        data: chartData.categoryDistribution.data,
                         backgroundColor: 'rgba(168, 85, 247, 0.8)',
                         borderColor: 'rgba(168, 85, 247, 1)',
                         borderWidth: 2
@@ -430,8 +451,11 @@
                     }
                 }
             });
+        } else {
+            console.warn('❌ Category Distribution data missing or invalid');
         }
+
+        console.log('=== CHART DEBUG END ===');
     });
 </script>
-@endpush
 </x-app-layout>
