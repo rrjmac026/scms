@@ -10,7 +10,10 @@ return new class extends Migration
     {
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+
+            // allow null so we can log events that happen before authentication (failed login attempts)
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+
             $table->string('action');
             $table->text('description')->nullable();
             $table->ipAddress('ip_address')->nullable();

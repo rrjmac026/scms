@@ -12,9 +12,28 @@ class AuditLogController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $search = $request->get('search');
+
+        $query = AuditLog::with('user')->latest();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('action', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('ip_address', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($u) use ($search) {
+                      $u->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $logs = $query->paginate(15)->withQueryString();
+
+        return view('admin.audit-logs.index', compact('logs', 'search'));
     }
 
     /**
@@ -38,7 +57,8 @@ class AuditLogController extends Controller
      */
     public function show(AuditLog $auditLog)
     {
-        //
+        $auditLog->load('user');
+        return view('admin.audit-logs.show', compact('auditLog'));
     }
 
     /**

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminOffenseController;
 use App\Http\Controllers\Admin\AdminCounselingCategoryController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\GenerateReportController;
+use App\Http\Controllers\Admin\AuditLogController; // <-- added import
 //Counselor ni siya na Routes
 use App\Http\Controllers\Counselor\CounselorAppointmentController;
 use App\Http\Controllers\Counselor\CounselorFeedbackController;
@@ -148,6 +149,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
          ->name('feedback.index');
     Route::get('feedback/{feedback}', [AdminFeedbackController::class, 'show'])
          ->name('feedback.show'); 
+
+    // Audit Logs (system)
+    Route::resource('audit-logs', AuditLogController::class)->only(['index', 'show']);
 
     // Reports Routes
     Route::prefix('reports')->name('reports.')->group(function () {

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\AuditLogHelper;
 
 class StudentAppointmentController extends Controller
 {
@@ -24,6 +25,12 @@ class StudentAppointmentController extends Controller
             ->where('student_id', $student->id)
             ->latest()
             ->paginate(10);
+
+        // Audit: student viewed their appointments list
+        AuditLogHelper::log(
+            'student_appointments_list_viewed',
+            "Student {$student->id} viewed their appointments list. count={$appointments->total()}"
+        );
 
         return view('students.appointments.index', compact('appointments'));
     }
@@ -48,6 +55,10 @@ class StudentAppointmentController extends Controller
         $counselors = Counselor::with('user')
             ->where('status', 'active')
             ->get();
+
+        // Audit: student opened create appointment form
+        $student = auth()->user()->student;
+        AuditLogHelper::log('appointment_create_form_opened', "Student {$student->id} opened appointment creation form");
 
         return view('students.appointments.create', compact('categories', 'counselors', 'bookedSlots'));
     }
@@ -89,6 +100,13 @@ class StudentAppointmentController extends Controller
         // 🔄 Optional Google Calendar Sync
         app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
 
+        // Audit: student created an appointment request
+        $studentId = auth()->user()->student->id;
+        AuditLogHelper::log(
+            'appointment_requested',
+            "Student {$studentId} requested appointment ID {$appointment->id} on {$appointment->preferred_date} at {$appointment->preferred_time}"
+        );
+
         return redirect()
             ->route('student.appointments.index')
             ->with('success', 'Appointment booked successfully.');
@@ -106,6 +124,9 @@ class StudentAppointmentController extends Controller
         }
 
         $appointment->load(['counselor.user', 'student.user', 'counselingSession.feedback', 'category']);
+
+        // Audit: student viewed appointment details
+        AuditLogHelper::log('appointment_viewed_by_student', "Student {$student->id} viewed appointment ID {$appointment->id}");
 
         return view('students.appointments.show', compact('appointment'));
     }
@@ -144,6 +165,9 @@ class StudentAppointmentController extends Controller
 
         // 🔄 Google Calendar Sync
         app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
+
+        // Audit: student cancelled appointment (without separate reason endpoint)
+        AuditLogHelper::log('appointment_cancelled', "Student {$student->id} cancelled appointment ID {$appointment->id}");
 
         return redirect()
             ->route('student.appointments.index')
@@ -189,6 +213,12 @@ class StudentAppointmentController extends Controller
 
             // 🔄 Google Calendar Sync
             app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
+
+            // Audit: student cancelled with reason
+            AuditLogHelper::log(
+                'appointment_cancelled_with_reason',
+                "Student {$student->id} cancelled appointment ID {$appointment->id}. Reason: " . substr($request->cancelled_reason, 0, 250)
+            );
 
             return redirect()
                 ->route('student.appointments.index')
@@ -250,6 +280,9 @@ class StudentAppointmentController extends Controller
                     ],
                 ];
             });
+
+        // Audit: student opened calendar view
+        AuditLogHelper::log('student_calendar_viewed', "Student {$student->id} viewed calendar");
 
         return view('students.calendar.index', compact('appointments'));
     }

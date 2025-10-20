@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CounselingSession;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use App\Helpers\AuditLogHelper;
 
 class CounselingSessionController extends Controller
 {
@@ -32,6 +33,12 @@ class CounselingSessionController extends Controller
 
         $sessions = $query->latest()->paginate(10);
 
+        // Audit: counselor viewed sessions list
+        AuditLogHelper::log(
+            'counselor_sessions_list_viewed',
+            "Counselor {$counselor->id} viewed counseling sessions list. count={$sessions->total()}"
+        );
+
         return view('counselors.counseling-sessions.index', compact('sessions'));
     }
 
@@ -50,7 +57,13 @@ class CounselingSessionController extends Controller
         $data['ended_at'] = null;
         $data['duration'] = null;
 
-        CounselingSession::create($data);
+        $session = CounselingSession::create($data);
+
+        // Audit: counseling session created
+        AuditLogHelper::log(
+            'counseling_session_created',
+            "Created counseling session ID {$session->id} by counselor {$session->counselor_id} for student {$session->student_id}"
+        );
 
         return redirect()->route('counselor.counseling-sessions.index')
                         ->with('success', 'Counseling session created successfully.');
@@ -60,6 +73,12 @@ class CounselingSessionController extends Controller
     public function show(CounselingSession $counselingSession)
     {
         $counselingSession->load(['student.user', 'counselor.user', 'category']);
+
+        // Audit: viewed counseling session
+        AuditLogHelper::log(
+            'counseling_session_viewed',
+            "Counseling session ID {$counselingSession->id} viewed by user " . (auth()->id() ?? 'system')
+        );
 
         return view('counselors.counseling-sessions.show', compact('counselingSession'));
     }
@@ -110,6 +129,12 @@ class CounselingSessionController extends Controller
 
         $counselingSession->update($data);
 
+        // Audit: counseling session updated
+        AuditLogHelper::log(
+            'counseling_session_updated',
+            "Updated counseling session ID {$counselingSession->id}: status={$counselingSession->status}, duration=" . ($counselingSession->duration ?? 'N/A')
+        );
+
         return redirect()
             ->route('counselor.counseling-sessions.show', $counselingSession)
             ->with('success', 'Session updated successfully.');
@@ -117,7 +142,14 @@ class CounselingSessionController extends Controller
 
     public function destroy(CounselingSession $counselingSession)
     {
+        $id = $counselingSession->id;
         $counselingSession->delete();
+
+        // Audit: counseling session deleted
+        AuditLogHelper::log(
+            'counseling_session_deleted',
+            "Deleted counseling session ID {$id} by user " . (auth()->id() ?? 'system')
+        );
 
         return redirect()->route('counselors.counseling-sessions.index')
                          ->with('success', 'Session deleted successfully.');

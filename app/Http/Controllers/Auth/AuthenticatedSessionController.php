@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Helpers\AuditLogHelper; // <-- added import
 
 class AuthenticatedSessionController extends Controller
 {
@@ -35,6 +36,8 @@ class AuthenticatedSessionController extends Controller
         $user = \App\Models\User::where('email', $credentials['email'])->first();
 
         if (!$user) {
+            // Audit: failed login - user not found
+            AuditLogHelper::log('login_failed', "Failed login attempt for email {$credentials['email']} (user not found)");
             return back()->withErrors([
                 'email' => 'No account found for this email.',
             ]);
@@ -42,6 +45,8 @@ class AuthenticatedSessionController extends Controller
 
         // 🚫 Block inactive users
         if ($user->status === 'inactive') {
+            // Audit: failed login - account inactive
+            AuditLogHelper::log('login_failed', "Failed login attempt for user_id {$user->id} (account inactive)");
             return back()->withErrors([
                 'email' => 'Your account has been deactivated. Please contact the administrator.',
             ]);
@@ -49,6 +54,8 @@ class AuthenticatedSessionController extends Controller
 
         // Try to authenticate
         if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+            // Audit: failed login - invalid credentials
+            AuditLogHelper::log('login_failed', "Failed login attempt for email {$credentials['email']} (invalid credentials)");
             return back()->withErrors([
                 'email' => 'Invalid credentials. Please try again.',
             ]);
@@ -62,6 +69,9 @@ class AuthenticatedSessionController extends Controller
 
         // ✅ Two-factor check
         if ($user->two_factor_secret && !session('auth.two_factor.authenticated')) {
+            // Audit: 2FA required / initiation
+            AuditLogHelper::log('login_2fa_initiated', "Login requires 2FA for user_id {$user->id}");
+
             Auth::logout(); // Logout temporarily
             
             // Store user ID for verification
@@ -78,6 +88,9 @@ class AuthenticatedSessionController extends Controller
             'last_login_at' => now(),
         ]);
 
+        // Audit: successful login (non-2FA)
+        AuditLogHelper::log('login_success', "User {$user->id} logged in");
+
         // ✅ Redirect based on role
         return match($user->role) {
             'admin' => redirect()->intended('admin/dashboard'),
@@ -93,6 +106,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Capture current user for audit before logout
+        $user = Auth::user();
+        if ($user) {
+            AuditLogHelper::log('logout', "User {$user->id} logged out");
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
@@ -109,7 +128,11 @@ class AuthenticatedSessionController extends Controller
         if (!session('auth.two_factor.user_id')) {
             return redirect()->route('login');
         }
-        
+
+        // Audit: 2FA challenge viewed
+        $uid = session('auth.two_factor.user_id');
+        AuditLogHelper::log('2fa_challenge_viewed', "2FA challenge viewed for user_id {$uid}");
+
         return view('auth.two-factor-challenge');
     }
 
@@ -142,6 +165,8 @@ class AuthenticatedSessionController extends Controller
         }
 
         if (!$isValid) {
+            // Audit: failed 2FA attempt
+            AuditLogHelper::log('login_2fa_failed', "Failed 2FA attempt for user_id {$user->id}");
             return back()->withErrors([
                 'code' => 'The provided authentication code was invalid.',
             ]);
@@ -159,8 +184,8 @@ class AuthenticatedSessionController extends Controller
         // Update last login
         $user->update(['last_login_at' => now()]);
         
-        // Log successful 2FA login (optional)
-        // $this->logLoginActivity($user, 'login_success_2fa', $request);
+        // Audit: successful 2FA login
+        AuditLogHelper::log('login_success_2fa', "User {$user->id} logged in via 2FA");
 
         return redirect()->intended(match($user->role) {
             'admin' => 'admin/dashboard',

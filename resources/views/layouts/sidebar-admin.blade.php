@@ -150,46 +150,15 @@
                     @endif
                 </x-nav-link>
 
-
-                <x-nav-link :href="route('admin.counseling-categories.index')" :active="request()->routeIs('admin.counseling-categories.*')"
-                    class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('admin.counseling-categories.*') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
-                    style="{{ request()->routeIs('admin.counseling-categories.*') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
-                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('admin.counseling-categories.*') ? 'bg-white/20' : 'bg-teal-50 dark:bg-teal-900/20 group-hover:bg-teal-100 dark:group-hover:bg-teal-900/30' }}">
-                        <i class="fas fa-tags text-lg {{ request()->routeIs('admin.counseling-categories.*') ? 'text-white' : 'text-teal-500' }}"></i>
+                <!-- Audit Logs link -->
+                <x-nav-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')"
+                    class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('admin.audit-logs.*') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
+                    style="{{ request()->routeIs('admin.audit-logs.*') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
+                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('admin.audit-logs.*') ? 'bg-white/20' : 'bg-gray-50 dark:bg-gray-900/20 group-hover:bg-gray-100 dark:group-hover:bg-gray-900/30' }}">
+                        <i class="fas fa-shield-alt text-lg {{ request()->routeIs('admin.audit-logs.*') ? 'text-white' : 'text-gray-600' }}"></i>
                     </div>
-                    <span class="flex-1">{{ __('Counseling Categories') }}</span>
-                    @if(request()->routeIs('admin.counseling-categories.*'))
-                        <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
-                    @else
-                        <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>
-                    @endif
-                </x-nav-link>
-
-                <x-nav-link :href="route('admin.counseling-sessions.index')" 
-                        :active="request()->routeIs('admin.counseling-sessions.*')"
-                        class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('admin.counseling-sessions.*') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
-                        style="{{ request()->routeIs('admin.counseling-sessions.*') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
-                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('admin.counseling-sessions.*') ? 'bg-white/20' : 'bg-pink-50 dark:bg-pink-900/20 group-hover:bg-pink-100 dark:group-hover:bg-pink-900/30' }}">
-                        <i class="fas fa-comments text-lg {{ request()->routeIs('admin.counseling-sessions.*') ? 'text-white' : 'text-pink-500' }}"></i>
-                    </div>
-                    <span class="flex-1">{{ __('Counseling Sessions') }}</span>
-                    @if(request()->routeIs('admin.counseling-sessions.*'))
-                        <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
-                    @else
-                        <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>
-                    @endif
-                </x-nav-link>
-
-                <!-- Add Reports Link Here -->
-                <x-nav-link :href="route('admin.reports.index')" 
-                        :active="request()->routeIs('admin.reports.*')"
-                        class="group relative flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-out {{ request()->routeIs('admin.reports.*') ? 'text-white shadow-lg transform translate-x-1' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1' }}"
-                        style="{{ request()->routeIs('admin.reports.*') ? 'background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%); box-shadow: 0 10px 25px -5px rgba(255, 146, 194, 0.25);' : '' }}">
-                    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg {{ request()->routeIs('admin.reports.*') ? 'bg-white/20' : 'bg-cyan-50 dark:bg-cyan-900/20 group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/30' }}">
-                        <i class="fas fa-chart-bar text-lg {{ request()->routeIs('admin.reports.*') ? 'text-white' : 'text-cyan-500' }}"></i>
-                    </div>
-                    <span class="flex-1">{{ __('Reports & Analytics') }}</span>
-                    @if(request()->routeIs('admin.reports.*'))
+                    <span class="flex-1">{{ __('Audit Logs') }}</span>
+                    @if(request()->routeIs('admin.audit-logs.*'))
                         <div class="w-2 h-2 bg-white rounded-full opacity-75"></div>
                     @else
                         <i class="fas fa-chevron-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></i>

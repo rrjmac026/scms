@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\AuditLogHelper;
 
 class CounselorAppointmentController extends Controller
 {
@@ -41,6 +42,12 @@ class CounselorAppointmentController extends Controller
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // Audit: counselor viewed appointments list
+        AuditLogHelper::log(
+            'counselor_appointments_list_viewed',
+            "Counselor {$counselor->id} viewed appointments list. own_count={$appointments->total()}, unassigned_count=" . $unassignedAppointments->count()
+        );
 
         return view('counselors.appointments.index', compact('appointments', 'unassignedAppointments'));
     }
@@ -88,6 +95,12 @@ class CounselorAppointmentController extends Controller
             ]);
         }
 
+        // Audit: counselor accepted appointment
+        AuditLogHelper::log(
+            'appointment_accepted_by_counselor',
+            "Counselor {$counselor->id} accepted appointment ID {$appointment->id}"
+        );
+
         return back()->with('success', 'Appointment accepted successfully. Student has been notified via email and calendar updated.');
     }
 
@@ -126,6 +139,12 @@ class CounselorAppointmentController extends Controller
         // Send rejection notification to student
         $appointment->student->user->notify(new \App\Notifications\AppointmentRejected($appointment));
 
+        // Audit: counselor rejected appointment with reason
+        AuditLogHelper::log(
+            'appointment_rejected_by_counselor',
+            "Counselor {$counselor->id} rejected appointment ID {$appointment->id}. Reason: " . substr($validated['rejection_reason'], 0, 250)
+        );
+
         return back()->with('success', 'Appointment rejected. Student has been notified via email and event removed from calendars.');
     }
 
@@ -157,6 +176,12 @@ class CounselorAppointmentController extends Controller
             Log::error("Failed to sync calendar after complete: " . $e->getMessage());
         }
 
+        // Audit: counselor marked appointment completed
+        AuditLogHelper::log(
+            'appointment_completed_by_counselor',
+            "Counselor {$counselor->id} marked appointment ID {$appointment->id} as completed"
+        );
+
         // Redirect back with success message
         return redirect()
             ->route('counselor.appointments.index')
@@ -177,6 +202,12 @@ class CounselorAppointmentController extends Controller
 
         $appointment->load(['student.user', 'category', 'counselingSession.feedback']);
         
+        // Audit: counselor viewed appointment details
+        AuditLogHelper::log(
+            'appointment_viewed_by_counselor',
+            "Counselor {$counselor->id} viewed appointment ID {$appointment->id}"
+        );
+
         return view('counselors.appointments.show', compact('appointment'));
     }
 
@@ -227,6 +258,12 @@ class CounselorAppointmentController extends Controller
                     ],
                 ];
             });
+
+        // Audit: counselor opened calendar view
+        AuditLogHelper::log(
+            'counselor_calendar_viewed',
+            "Counselor {$counselor->id} viewed calendar"
+        );
 
         return view('counselors.calendar.index', [
             'appointments' => $appointments,

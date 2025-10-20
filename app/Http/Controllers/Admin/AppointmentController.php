@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use App\Services\AppointmentCalendarSyncService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\AuditLogHelper;
 
 class AppointmentController extends Controller
 {
@@ -63,6 +64,9 @@ class AppointmentController extends Controller
             return $appointment;
         });
 
+        // Audit: admin viewed appointment list / applied filters
+        AuditLogHelper::log('appointments_list_viewed', 'Viewed appointment list' . ($request->filled('status') ? " (status={$request->status})" : '') . ($request->filled('search') ? " (search={$request->search})" : ''));
+
         return view('admin.appointments.index', compact('appointments'));
     }
 
@@ -102,6 +106,9 @@ class AppointmentController extends Controller
 
             // Debug log to check the data
             Log::info('Booked slots being passed to view:', ['slots' => $bookedSlots]);
+
+            // Audit: opened create appointment form
+            AuditLogHelper::log('appointment_create_form_opened', 'Opened appointment creation form');
 
             return view('admin.appointments.create', compact('categories', 'students', 'counselors', 'bookedSlots'));
         } catch (\Exception $e) {
@@ -238,6 +245,10 @@ class AppointmentController extends Controller
 
                 DB::commit();
 
+                // Audit: created appointment
+                $studentName = Student::find($validated['student_id'])->user->name ?? 'Unknown student';
+                AuditLogHelper::log('appointment_created', "Created appointment ID {$appointment->id} for {$studentName} on {$appointment->preferred_date} {$appointment->preferred_time}, assigned_counselor_id={$counselorId}");
+
                 // Get counselor name for success message
                 $counselor = Counselor::with('user')->find($counselorId);
                 $counselorName = $counselor->user->name ?? 'Unknown';
@@ -281,6 +292,9 @@ class AppointmentController extends Controller
                 $availableCounselors = $this->getAvailableCounselors($appointment->preferred_date);
             }
 
+            // Audit: admin viewed a specific appointment
+            AuditLogHelper::log('appointment_viewed', "Viewed appointment ID {$appointment->id}");
+
             return view('admin.appointments.show', compact('appointment', 'availableCounselors'));
         } catch (\Exception $e) {
             Log::error('Error showing appointment: ' . $e->getMessage());
@@ -313,6 +327,9 @@ class AppointmentController extends Controller
                     ];
                 })
                 ->toArray();
+
+            // Audit: opened edit form for specific appointment
+            AuditLogHelper::log('appointment_edit_form_opened', "Opened edit form for appointment ID {$appointment->id}");
 
             return view('admin.appointments.edit', compact('appointment', 'categories', 'students', 'counselors', 'bookedSlots'));
         } catch (\Exception $e) {
@@ -390,6 +407,9 @@ class AppointmentController extends Controller
                 }
 
                 DB::commit();
+
+                // Audit: updated appointment
+                AuditLogHelper::log('appointment_updated', "Updated appointment ID {$appointment->id} — counselor_id={$validated['counselor_id']}, date={$validated['preferred_date']}, time={$validated['preferred_time']}");
 
                 return redirect()->route('admin.appointments.index')
                     ->with('success', 'Appointment updated successfully.' . $syncMessage);
@@ -469,6 +489,9 @@ class AppointmentController extends Controller
 
                 DB::commit();
 
+                // Audit: approved and assigned counselor
+                AuditLogHelper::log('appointment_approved', "Approved appointment ID {$appointment->id} and assigned counselor ID {$counselor->id}");
+
                 return back()->with('success', "Appointment approved and counselor {$counselor->user->name} assigned and notified automatically.");
 
             } catch (\Exception $e) {
@@ -497,6 +520,9 @@ class AppointmentController extends Controller
             // Add notification
             $appointment->student->user->notify(new \App\Notifications\AppointmentRejected($appointment));
 
+            // Audit: rejected appointment
+            AuditLogHelper::log('appointment_rejected', "Rejected appointment ID {$appointment->id}");
+
             return redirect()->back()->with('success', 'Appointment has been rejected.');
         } catch (\Exception $e) {
             Log::error('Error rejecting appointment: ' . $e->getMessage());
@@ -518,6 +544,9 @@ class AppointmentController extends Controller
             
             // Add notification
             $appointment->student->user->notify(new \App\Notifications\AppointmentDeclined($appointment));
+
+            // Audit: declined appointment
+            AuditLogHelper::log('appointment_declined', "Declined appointment ID {$appointment->id}");
 
             return redirect()->back()->with('success', 'Appointment has been declined.');
         } catch (\Exception $e) {
@@ -627,6 +656,9 @@ class AppointmentController extends Controller
                     ];
                 });
 
+            // Audit: admin opened calendar view
+            AuditLogHelper::log('appointments_calendar_viewed', 'Viewed appointments calendar');
+
             return view('admin.calendar.index', [
                 'appointments' => $appointments,
             ]);
@@ -656,9 +688,13 @@ class AppointmentController extends Controller
             }
 
             // Delete the appointment
+            $appointmentId = $appointment->id;
             $appointment->delete();
 
             DB::commit();
+
+            // Audit: deleted appointment
+            AuditLogHelper::log('appointment_deleted', "Deleted appointment ID {$appointmentId}");
 
             return redirect()->route('admin.appointments.index')
                 ->with('success', 'Appointment deleted successfully.');
