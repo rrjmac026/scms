@@ -7,10 +7,10 @@
                     <i class="fas fa-shield-alt text-white"></i>
                 </div>
                 <div>
-                    <h2 class="font-semibold text-xl text-white leading-tight">
+                    <h2 class="font-semibold text-xl text-gray-900 dark:text-gray-100">
                         <?php echo e(__('Audit Logs')); ?>
                     </h2>
-                    <p class="text-xs text-white/75">System activity and security events</p>
+                    <p class="font-medium text-gray-900 dark:text-gray-100">System activity and security events</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
