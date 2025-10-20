@@ -212,17 +212,20 @@ class GenerateReportController extends Controller
     }
 
     // Export Excel using existing export class
+    // Export Excel using existing export class
     public function exportExcel(Request $request)
     {
-        $filters = [
-            'start_date' => $request->input('start_date', now()->startOfMonth()->format('F j, Y')),
-            'end_date' => $request->input('end_date', now()->endOfMonth()->format('F j, Y')),
-            'counselor_id' => $request->input('counselor_id', '')
-        ];
+        // Parse dates properly
+        $startDate = Carbon::parse($request->input('start_date', now()->startOfMonth()))->startOfDay();
+        $endDate = Carbon::parse($request->input('end_date', now()->endOfMonth()))->endOfDay();
+        $counselorId = $request->input('counselor_id', '');
 
-        $startDate = Carbon::parse($filters['start_date'])->startOfDay();
-        $endDate = Carbon::parse($filters['end_date'])->endOfDay();
-        $counselorId = $filters['counselor_id'];
+        // Format filters for display
+        $filters = [
+            'start_date' => $startDate->format('F j, Y'),
+            'end_date' => $endDate->format('F j, Y'),
+            'counselor_id' => $counselorId
+        ];
 
         $appointments = Appointment::whereBetween('preferred_date', [$startDate, $endDate])
             ->when($counselorId, fn($q) => $q->where('counselor_id', $counselorId))
@@ -234,7 +237,6 @@ class GenerateReportController extends Controller
             ->with(['student.user', 'counselor.user', 'category'])
             ->get();
 
-        // FIXED: Changed 'session' to 'counselingSession'
         $feedbacks = Feedback::whereBetween('created_at', [$startDate, $endDate])
             ->when($counselorId, fn($q) => $q->whereHas('counselingSession', fn($s) => $s->where('counselor_id', $counselorId)))
             ->with(['counselingSession.counselor.user', 'student.user'])
@@ -267,7 +269,9 @@ class GenerateReportController extends Controller
             ]
         ];
 
+        $filename = 'counseling_report_' . $startDate->format('Y-m-d') . '_to_' . $endDate->format('Y-m-d') . '.xlsx';
+
         return (new \App\Exports\CounselingReportExport($analytics, $filters))
-            ->download('report_'.$startDate->format('F j, Y').'_to_'.$endDate->format('F j, Y').'.xlsx');
+            ->download($filename);
     }
 }

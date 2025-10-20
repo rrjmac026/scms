@@ -12,19 +12,19 @@
                 <div class="p-6">
                     <form action="{{ route('student.appointments.store') }}" method="POST" class="space-y-6">
                         @csrf
- <!-- Display all errors at the top -->
-    <div class="mb-6">
-        @if ($errors->any())
-            <div class="p-4 mb-4 text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800">
-                <strong>{{ __('Please fix the following errors:') }}</strong>
-                <ul class="mt-2 list-disc list-inside">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-    </div>
+                    <!-- Display all errors at the top -->
+                        <div class="mb-6">
+                            @if ($errors->any())
+                                <div class="p-4 mb-4 text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800">
+                                    <strong>{{ __('Please fix the following errors:') }}</strong>
+                                    <ul class="mt-2 list-disc list-inside">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        </div>
                         <!-- Preferred Date -->
                         <div>
                             <x-input-label for="preferred_date" :value="__('Preferred Date')" />

@@ -472,15 +472,21 @@
             const submitBtnText = document.getElementById('submitBtnText');
             const timeError = document.getElementById('time-error');
             const timeErrorMessage = document.getElementById('time-error-message');
+            const counselorSelect = document.getElementById('counselor_id');
 
             const bookedSlots = @json($bookedSlots ?? []);
+            const currentAppointmentId = {{ $appointment->id }};
+            const currentCounselorId = {{ $appointment->counselor_id ?? 'null' }};
+
+            console.log('Current appointment ID:', currentAppointmentId);
+            console.log('Current counselor ID:', currentCounselorId);
+            console.log('Booked slots:', bookedSlots);
 
             // Character counter
             concernTextarea.addEventListener('input', function() {
                 charCount.textContent = this.value.length;
             });
 
-            // Initialize character count
             charCount.textContent = concernTextarea.value.length;
 
             // Handle date change
@@ -503,10 +509,28 @@
                     }
 
                     hideTimeError();
-                    updateTimeSlots(selectedDate);
+                    const counselorId = counselorSelect.value ? parseInt(counselorSelect.value) : null;
+                    if (counselorId) {
+                        updateTimeSlots(selectedDate, counselorId);
+                    } else {
+                        showTimeError('Please select a counselor first');
+                    }
                 } catch (error) {
                     console.error('Date validation error:', error);
                     showTimeError('Invalid date selected');
+                }
+            });
+
+            // Handle counselor change
+            counselorSelect.addEventListener('change', function() {
+                const selectedDate = dateInput.value;
+                const counselorId = this.value ? parseInt(this.value) : null;
+                
+                if (selectedDate && counselorId) {
+                    updateTimeSlots(selectedDate, counselorId);
+                } else if (selectedDate && !counselorId) {
+                    disableAllTimeSlots();
+                    showTimeError('Please select a counselor');
                 }
             });
 
@@ -522,15 +546,14 @@
                         return;
                     }
 
-                    // Remove selected class from all buttons
+                    if (!counselorSelect.value) {
+                        showTimeError('Please select a counselor first');
+                        return;
+                    }
+
                     timeSlotButtons.forEach(btn => btn.classList.remove('selected'));
-
-                    // Add selected class to clicked button
                     this.classList.add('selected');
-
-                    // Update hidden input
                     timeHiddenInput.value = this.dataset.time;
-                    
                     hideTimeError();
                 });
             });
@@ -540,34 +563,34 @@
                 let isValid = true;
                 const errors = [];
 
-                // Check if date is selected
                 if (!dateInput.value) {
                     errors.push('Please select a date');
                     isValid = false;
                 }
 
-                // Check if time is selected
                 if (!timeHiddenInput.value) {
                     errors.push('Please select a time slot');
                     showTimeError('Please select a time slot');
                     isValid = false;
                 }
 
-                // Check if student is selected
                 const studentSelect = document.getElementById('student_id');
                 if (!studentSelect.value) {
                     errors.push('Please select a student');
                     isValid = false;
                 }
 
-                // Check if category is selected
+                if (!counselorSelect.value) {
+                    errors.push('Please select a counselor');
+                    isValid = false;
+                }
+
                 const categorySelect = document.getElementById('counseling_category_id');
                 if (!categorySelect.value) {
                     errors.push('Please select a counseling category');
                     isValid = false;
                 }
 
-                // Check if concern is filled
                 if (!concernTextarea.value.trim()) {
                     errors.push('Please provide concern/notes');
                     isValid = false;
@@ -576,12 +599,10 @@
                 if (!isValid) {
                     e.preventDefault();
                     
-                    // Show errors at the top
                     if (errors.length > 0) {
                         alert('Please fix the following errors:\n\n• ' + errors.join('\n• '));
                     }
                     
-                    // Scroll to first error
                     const firstError = document.querySelector('.text-red-600, #time-error:not(.hidden)');
                     if (firstError) {
                         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -590,13 +611,14 @@
                     return false;
                 }
 
-                // Disable submit button and show loading state
                 submitBtn.disabled = true;
                 submitBtnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
             });
 
-            function updateTimeSlots(selectedDate) {
+            function updateTimeSlots(selectedDate, counselorId) {
+                console.log('=== UPDATE TIME SLOTS ===');
                 console.log('Selected date:', selectedDate);
+                console.log('Selected counselor:', counselorId);
                 console.log('Booked slots:', bookedSlots);
                 
                 let hasAvailableSlots = false;
@@ -604,12 +626,20 @@
                 timeSlotButtons.forEach(button => {
                     const time = button.dataset.time;
                     
+                    console.log(`Checking slot: ${selectedDate} ${time} for counselor ${counselorId}`);
+                    
+                    // Check if THIS COUNSELOR has this time slot booked (excluding current appointment)
                     const isBooked = bookedSlots.some(slot => {
-                        const slotMatches = slot.preferred_date === selectedDate && slot.preferred_time === time;
-                        if (slotMatches) {
-                            console.log('Found booked slot:', slot);
+                        const dateMatches = slot.preferred_date === selectedDate;
+                        const timeMatches = slot.preferred_time === time;
+                        const counselorMatches = parseInt(slot.counselor_id) === parseInt(counselorId);
+                        const matches = dateMatches && timeMatches && counselorMatches;
+                        
+                        if (matches) {
+                            console.log(`✓ BOOKED: ${selectedDate} ${time} for counselor ${counselorId}`, slot);
                         }
-                        return slotMatches;
+                        
+                        return matches;
                     });
 
                     // Reset classes
@@ -619,19 +649,21 @@
                     if (isBooked) {
                         button.classList.add('booked');
                         button.disabled = true;
-                        console.log('Marking as booked:', time);
+                        console.log(`→ Marking as BOOKED: ${time}`);
                     } else {
                         button.classList.add('available');
                         hasAvailableSlots = true;
+                        console.log(`→ Marking as AVAILABLE: ${time}`);
                     }
                 });
 
-                // Show message if no slots available
                 if (!hasAvailableSlots) {
-                    showTimeError('No available time slots for this date. Please choose another date.');
+                    showTimeError('No available time slots for this counselor on this date. Please choose another date or counselor.');
                 } else {
                     hideTimeError();
                 }
+                
+                console.log('========================');
             }
 
             function disableAllTimeSlots() {
@@ -651,13 +683,14 @@
                 timeError.classList.add('hidden');
             }
 
-            // Initialize time slots on page load with current date
+            // Initialize time slots on page load with current date and counselor
             const currentDate = dateInput.value;
-            if (currentDate) {
+            const initialCounselorId = counselorSelect.value ? parseInt(counselorSelect.value) : null;
+            
+            if (currentDate && initialCounselorId) {
                 setTimeout(() => {
-                    updateTimeSlots(currentDate);
+                    updateTimeSlots(currentDate, initialCounselorId);
                     
-                    // Select the current time if it exists
                     const currentTime = timeHiddenInput.value;
                     if (currentTime) {
                         timeSlotButtons.forEach(btn => {
@@ -673,12 +706,12 @@
             @if(old('preferred_time'))
                 const oldTime = "{{ old('preferred_time') }}";
                 const oldDate = "{{ old('preferred_date') }}";
+                const oldCounselorId = "{{ old('counselor_id') }}";
                 
-                if (oldDate) {
+                if (oldDate && oldCounselorId) {
                     setTimeout(() => {
-                        updateTimeSlots(oldDate);
+                        updateTimeSlots(oldDate, parseInt(oldCounselorId));
                         
-                        // Select the old time
                         timeSlotButtons.forEach(btn => {
                             if (btn.dataset.time === oldTime) {
                                 btn.classList.add('selected');

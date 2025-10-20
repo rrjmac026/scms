@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <div class="h-10 w-10 rounded-xl flex items-center justify-center"
-                     style="background: linear-gradient(135deg,#FF92C2 0%,#f97316 100%); box-shadow: 0 8px 20px rgba(249,115,22,0.08);">
+                     style="background: linear-gradient(90deg, #FF92C2 0%, #ff9ec9 50%, #FF92C2 100%); box-shadow: 0 8px 20px rgba(249,115,22,0.08);">
                     <i class="fas fa-shield-alt text-white"></i>
                 </div>
                 <div>

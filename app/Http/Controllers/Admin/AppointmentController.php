@@ -73,14 +73,14 @@ class AppointmentController extends Controller
     /**
      * Show the form for creating a new appointment.
      */
-    public function create()
+     public function create()
     {
         try {
             $categories = CounselingCategory::where('status', 'active')->get();
             $students = Student::with('user')->get();
             $counselors = Counselor::with('user')->where('status', 'active')->get();
 
-            // Get all booked slots for time slot availability
+            // Get all booked slots WITH counselor_id for time slot availability
             $bookedSlots = Appointment::whereIn('status', ['pending', 'approved', 'accepted', 'completed'])
                 ->get()
                 ->map(function ($appointment) {
@@ -99,15 +99,14 @@ class AppointmentController extends Controller
                     return [
                         'preferred_date' => $date,
                         'preferred_time' => $time,
+                        'counselor_id' => $appointment->counselor_id, // IMPORTANT: Include counselor_id
                     ];
                 })
-                ->values() // Reset array keys
+                ->values()
                 ->toArray();
 
-            // Debug log to check the data
             Log::info('Booked slots being passed to view:', ['slots' => $bookedSlots]);
 
-            // Audit: opened create appointment form
             AuditLogHelper::log('appointment_create_form_opened', 'Opened appointment creation form');
 
             return view('admin.appointments.create', compact('categories', 'students', 'counselors', 'bookedSlots'));
@@ -119,7 +118,7 @@ class AppointmentController extends Controller
     }
 
     /**
-     * Store a newly created appointment (Admin privilege - can directly approve and assign)
+     * Store a newly created appointment
      */
     public function store(Request $request)
     {
@@ -168,7 +167,7 @@ class AppointmentController extends Controller
                         ->withErrors(['auto_assign' => 'No counselor available for grade level ' . $gradeLevel . '. Please select manually.']);
                 }
 
-                // Check if counselor is available on the selected date/time
+                // Check if THIS SPECIFIC counselor is available on the selected date/time
                 $hasConflict = Appointment::where('counselor_id', $counselor->id)
                     ->where('preferred_date', $validated['preferred_date'])
                     ->where('preferred_time', $validated['preferred_time'] . ':00')
@@ -206,19 +205,6 @@ class AppointmentController extends Controller
                 }
             }
 
-            // Check if the time slot is already booked by any counselor
-            $isSlotBooked = Appointment::where('preferred_date', $validated['preferred_date'])
-                ->where('preferred_time', $validated['preferred_time'] . ':00')
-                ->where('counselor_id', $counselorId)
-                ->whereIn('status', ['pending', 'approved', 'accepted', 'completed'])
-                ->exists();
-
-            if ($isSlotBooked) {
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['preferred_time' => 'This time slot is already booked. Please select another time.']);
-            }
-
             // Use transaction for data consistency
             DB::beginTransaction();
 
@@ -245,11 +231,9 @@ class AppointmentController extends Controller
 
                 DB::commit();
 
-                // Audit: created appointment
                 $studentName = Student::find($validated['student_id'])->user->name ?? 'Unknown student';
                 AuditLogHelper::log('appointment_created', "Created appointment ID {$appointment->id} for {$studentName} on {$appointment->preferred_date} {$appointment->preferred_time}, assigned_counselor_id={$counselorId}");
 
-                // Get counselor name for success message
                 $counselor = Counselor::with('user')->find($counselorId);
                 $counselorName = $counselor->user->name ?? 'Unknown';
                 
@@ -313,10 +297,9 @@ class AppointmentController extends Controller
             $students = Student::with('user')->get();
             $counselors = Counselor::with('user')->where('status', 'active')->get();
 
-            // Get all booked slots excluding the current appointment
+            // Get all booked slots WITH counselor_id, excluding the current appointment
             $bookedSlots = Appointment::whereIn('status', ['pending', 'approved', 'accepted', 'completed'])
                 ->where('id', '!=', $appointment->id)
-                ->select('preferred_date', 'preferred_time')
                 ->get()
                 ->map(function ($appt) {
                     return [
@@ -324,11 +307,13 @@ class AppointmentController extends Controller
                             ? $appt->preferred_date->format('Y-m-d')
                             : $appt->preferred_date,
                         'preferred_time' => substr($appt->preferred_time, 0, 5),
+                        'counselor_id' => $appt->counselor_id, // IMPORTANT: Include counselor_id
                     ];
                 })
                 ->toArray();
 
-            // Audit: opened edit form for specific appointment
+            Log::info('Booked slots for edit (excluding current):', ['slots' => $bookedSlots]);
+
             AuditLogHelper::log('appointment_edit_form_opened', "Opened edit form for appointment ID {$appointment->id}");
 
             return view('admin.appointments.edit', compact('appointment', 'categories', 'students', 'counselors', 'bookedSlots'));

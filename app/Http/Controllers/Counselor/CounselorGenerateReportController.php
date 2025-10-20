@@ -8,6 +8,7 @@ use App\Models\CounselingSession;
 use App\Models\Feedback;
 use App\Models\Counselor;
 use Carbon\Carbon;
+use App\Exports\CounselorReportExport;
 use Illuminate\Http\Request;
 use FPDF;
 
@@ -186,56 +187,94 @@ class CounselorGenerateReportController extends Controller
         ]);
     }
 
-    // Export Excel using existing export class
     public function exportExcel(Request $request)
     {
+        // Parse dates properly
+        $startDate = Carbon::parse($request->input('start_date', now()->startOfMonth()))->startOfDay();
+        $endDate = Carbon::parse($request->input('end_date', now()->endOfMonth()))->endOfDay();
+        $counselorId = $request->input('counselor_id', '');
+
+        // Get counselor name for display
+        $counselorName = $counselorId ? Counselor::find($counselorId)->user->name : 'All Counselors';
+
+        // Format filters for display
         $filters = [
-            'start_date' => $request->input('start_date', now()->startOfMonth()->format('Y-m-d')),
-            'end_date' => $request->input('end_date', now()->endOfMonth()->format('Y-m-d')),
-            'counselor_id' => $request->input('counselor_id', '')
+            'start_date' => $startDate->format('F j, Y'),
+            'end_date' => $endDate->format('F j, Y'),
+            'counselor_name' => $counselorName
         ];
 
-        $startDate = Carbon::parse($filters['start_date'])->startOfDay();
-        $endDate = Carbon::parse($filters['end_date'])->endOfDay();
-        $counselorId = $filters['counselor_id'];
-
+        // Get appointments data
         $appointments = Appointment::whereBetween('preferred_date', [$startDate, $endDate])
             ->when($counselorId, fn($q) => $q->where('counselor_id', $counselorId))
             ->with(['student.user', 'counselor.user'])
-            ->get();
+            ->get()
+            ->map(function($appointment) {
+                return [
+                    'date' => $appointment->preferred_date->format('Y-m-d'),
+                    'student_name' => $appointment->student->user->name ?? 'N/A',
+                    'counselor_name' => $appointment->counselor->user->name ?? 'N/A',
+                    'status' => ucfirst($appointment->status),
+                    'notes' => $appointment->notes ?? '',
+                ];
+            })->toArray();
 
+        // Get sessions data
         $sessions = CounselingSession::whereBetween('started_at', [$startDate, $endDate])
             ->when($counselorId, fn($q) => $q->where('counselor_id', $counselorId))
             ->with(['student.user', 'counselor.user', 'category'])
-            ->get();
+            ->get()
+            ->map(function($session) {
+                return [
+                    'date' => $session->started_at->format('Y-m-d'),
+                    'student_name' => $session->student->user->name ?? 'N/A',
+                    'counselor_name' => $session->counselor->user->name ?? 'N/A',
+                    'category' => $session->category->name ?? 'N/A',
+                    'duration' => $session->formatted_duration ?? 'N/A',
+                    'notes' => $session->notes ?? '',
+                ];
+            })->toArray();
 
+        // Get feedbacks data
+        $feedbacks = Feedback::whereBetween('created_at', [$startDate, $endDate])
+            ->when($counselorId, fn($q) => $q->whereHas('counselingSession', fn($s) => $s->where('counselor_id', $counselorId)))
+            ->with(['counselingSession.counselor.user', 'student.user'])
+            ->get()
+            ->map(function($feedback) {
+                return [
+                    'date' => $feedback->created_at->format('Y-m-d'),
+                    'student_name' => $feedback->student->user->name ?? 'N/A',
+                    'counselor_name' => $feedback->counselingSession->counselor->user->name ?? 'N/A',
+                    'rating' => $feedback->rating,
+                    'comments' => $feedback->comments ?? '',
+                ];
+            })->toArray();
 
+        // Prepare analytics data
         $analytics = [
             'kpis' => [
-                'total_appointments' => $appointments->count(),
-                'completed_appointments' => $appointments->where('status','completed')->count(),
-                'pending_appointments' => $appointments->where('status','pending')->count(),
-                'cancelled_appointments' => $appointments->where('status','cancelled')->count(),
-                'total_sessions' => $sessions->count(),
-                'unique_students' => $sessions->pluck('student_id')->unique()->count(),
+                'total_appointments' => count($appointments),
+                'completed_appointments' => count(array_filter($appointments, fn($app) => $app['status'] === 'Completed')),
+                'pending_appointments' => count(array_filter($appointments, fn($app) => $app['status'] === 'Pending')),
+                'cancelled_appointments' => count(array_filter($appointments, fn($app) => $app['status'] === 'Cancelled')),
+                'total_sessions' => count($sessions),
+                'unique_students' => count(array_unique(array_column($sessions, 'student_name'))),
+                'average_rating' => count($feedbacks) > 0 ? array_sum(array_column($feedbacks, 'rating')) / count($feedbacks) : 0,
+                'total_feedbacks' => count($feedbacks),
             ],
-            'charts' => [
-                'sessions_per_month' => [
-                    'labels' => $sessions->pluck('started_at')->map->format('F')->unique()->toArray(),
-                    'data' => $sessions->groupBy(fn($s) => $s->started_at->format('F'))->map->count()->values()->toArray()
-                ],
-                'appointments_by_status' => [
-                    'labels' => ['completed','pending','cancelled'],
-                    'data' => [
-                        $appointments->where('status','completed')->count(),
-                        $appointments->where('status','pending')->count(),
-                        $appointments->where('status','cancelled')->count()
-                    ]
-                ]
+            'detailed_data' => [
+                'appointments' => $appointments,
+                'sessions' => $sessions,
+                'feedbacks' => $feedbacks,
             ]
         ];
 
-        return (new \App\Exports\CounselingReportExport($analytics, $filters))
-            ->download('report_'.$startDate->format('Y-m-d').'_to_'.$endDate->format('Y-m-d').'.xlsx');
+        $filename = 'counseling_report_' . $startDate->format('Y-m-d') . '_to_' . $endDate->format('Y-m-d') . '.xlsx';
+
+        // Use Excel facade to export
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\CounselingReportExport($analytics, $filters), 
+            $filename
+        );
     }
 }

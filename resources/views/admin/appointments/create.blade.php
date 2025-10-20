@@ -277,7 +277,9 @@
                         <!-- Status -->
                         <div>
                             <x-input-label for="status" value="{{ __('Status') }}" />
-                            <select name="status" id="status" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500" required>
+                            <select name="status" id="status"
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500"
+                                required disabled>
                                 <option value="pending" {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="approved" {{ old('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                             </select>
@@ -437,17 +439,35 @@
             const charCount = document.getElementById('char-count');
             const submitBtn = document.getElementById('submitBtn');
             const submitBtnText = document.getElementById('submitBtnText');
+            const counselorSelect = document.getElementById('counselor_id');
+            const studentSelect = document.getElementById('student_id');
+            const autoAssignCheckbox = document.getElementById('auto_assign');
 
-            // Parse booked slots - ensure it's properly converted
+            // Parse booked slots with counselor_id
             const bookedSlots = {!! json_encode($bookedSlots ?? []) !!};
             
-            // Debug: Log booked slots to console
             console.log('=== BOOKED SLOTS DATA ===');
             console.log('Type:', typeof bookedSlots);
             console.log('Is Array:', Array.isArray(bookedSlots));
             console.log('Length:', bookedSlots.length);
             console.log('Data:', bookedSlots);
             console.log('========================');
+
+            // Get all counselors data for auto-assignment
+            const counselors = @json($counselors->map(function($c) {
+                return [
+                    'id' => $c->id,
+                    'grade_level' => $c->assigned_grade_level,
+                    'name' => $c->user->name
+                ];
+            }));
+
+            const students = @json($students->map(function($s) {
+                return [
+                    'id' => $s->id,
+                    'grade_level' => $s->grade_level
+                ];
+            }));
 
             // Character counter
             concernTextarea.addEventListener('input', function() {
@@ -456,6 +476,37 @@
 
             // Initialize character count
             charCount.textContent = concernTextarea.value.length;
+
+            // Get the current selected or auto-assigned counselor
+            function getCurrentCounselorId() {
+                if (autoAssignCheckbox.checked) {
+                    // Get student's grade level
+                    const selectedStudentId = parseInt(studentSelect.value);
+                    const student = students.find(s => s.id === selectedStudentId);
+                    
+                    if (student && student.grade_level) {
+                        // Find counselor for this grade level
+                        const counselor = counselors.find(c => c.grade_level === student.grade_level);
+                        return counselor ? counselor.id : null;
+                    }
+                    return null;
+                } else {
+                    return counselorSelect.value ? parseInt(counselorSelect.value) : null;
+                }
+            }
+
+            // Update time slots when date OR counselor changes
+            function refreshTimeSlots() {
+                const selectedDate = dateInput.value;
+                const counselorId = getCurrentCounselorId();
+                
+                if (selectedDate && counselorId) {
+                    updateTimeSlots(selectedDate, counselorId);
+                } else if (selectedDate && !counselorId) {
+                    // Date selected but no counselor - disable all slots
+                    disableAllTimeSlots();
+                }
+            }
 
             // Handle date change
             dateInput.addEventListener('change', function () {
@@ -469,7 +520,26 @@
                     return;
                 }
 
-                updateTimeSlots(this.value);
+                refreshTimeSlots();
+            });
+
+            // Handle counselor selection change
+            counselorSelect.addEventListener('change', refreshTimeSlots);
+
+            // Handle student selection change (for auto-assign)
+            studentSelect.addEventListener('change', function() {
+                if (autoAssignCheckbox.checked) {
+                    refreshTimeSlots();
+                }
+            });
+
+            // Handle auto-assign checkbox
+            autoAssignCheckbox.addEventListener('change', function() {
+                counselorSelect.disabled = this.checked;
+                if (this.checked) {
+                    counselorSelect.value = '';
+                }
+                refreshTimeSlots();
             });
 
             // Handle time slot selection
@@ -481,6 +551,12 @@
 
                     if (!dateInput.value) {
                         alert('Please select a date first');
+                        return;
+                    }
+
+                    const counselorId = getCurrentCounselorId();
+                    if (!counselorId) {
+                        alert('Please select a counselor or enable auto-assign first');
                         return;
                     }
 
@@ -500,41 +576,32 @@
                 let isValid = true;
                 const errors = [];
 
-                // Check if date is selected
                 if (!dateInput.value) {
                     errors.push('Please select a date');
                     isValid = false;
                 }
 
-                // Check if time is selected
                 if (!timeHiddenInput.value) {
                     errors.push('Please select a time slot');
                     isValid = false;
                 }
 
-                // Check if student is selected
-                const studentSelect = document.getElementById('student_id');
                 if (!studentSelect.value) {
                     errors.push('Please select a student');
                     isValid = false;
                 }
 
-                // Check if counselor or auto-assign is selected
-                const autoAssign = document.getElementById('auto_assign');
-                const counselorSelect = document.getElementById('counselor_id');
-                if (!autoAssign.checked && !counselorSelect.value) {
+                if (!autoAssignCheckbox.checked && !counselorSelect.value) {
                     errors.push('Please select a counselor or enable auto-assign');
                     isValid = false;
                 }
 
-                // Check if category is selected
                 const categorySelect = document.getElementById('counseling_category_id');
                 if (!categorySelect.value) {
                     errors.push('Please select a counseling category');
                     isValid = false;
                 }
 
-                // Check if concern is filled
                 if (!concernTextarea.value.trim()) {
                     errors.push('Please provide a reason for the appointment');
                     isValid = false;
@@ -546,29 +613,30 @@
                     return false;
                 }
 
-                // Disable submit button and show loading state
                 submitBtn.disabled = true;
                 submitBtnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
             });
 
-            function updateTimeSlots(selectedDate) {
+            function updateTimeSlots(selectedDate, counselorId) {
                 console.log('=== UPDATE TIME SLOTS ===');
                 console.log('Selected date:', selectedDate);
+                console.log('Selected counselor ID:', counselorId);
                 console.log('Total booked slots:', bookedSlots.length);
                 
                 timeSlotButtons.forEach(button => {
-                    const time = button.dataset.time; // e.g., "09:00" or "14:00"
+                    const time = button.dataset.time;
                     
-                    console.log(`Checking slot: ${selectedDate} ${time}`);
+                    console.log(`Checking slot: ${selectedDate} ${time} for counselor ${counselorId}`);
                     
-                    // Check if this time slot is booked
+                    // Check if THIS COUNSELOR has this time slot booked
                     const isBooked = bookedSlots.some(slot => {
                         const dateMatches = slot.preferred_date === selectedDate;
                         const timeMatches = slot.preferred_time === time;
-                        const matches = dateMatches && timeMatches;
+                        const counselorMatches = parseInt(slot.counselor_id) === parseInt(counselorId);
+                        const matches = dateMatches && timeMatches && counselorMatches;
                         
                         if (matches) {
-                            console.log(`✓ BOOKED: ${selectedDate} ${time}`, slot);
+                            console.log(`✓ BOOKED: ${selectedDate} ${time} for counselor ${counselorId}`, slot);
                         }
                         
                         return matches;
@@ -581,10 +649,10 @@
                     if (isBooked) {
                         button.classList.add('booked');
                         button.disabled = true;
-                        console.log(`→ Marking as BOOKED: ${time}`);
+                        console.log(`→ Marking as BOOKED: ${time} for counselor ${counselorId}`);
                     } else {
                         button.classList.add('available');
-                        console.log(`→ Marking as AVAILABLE: ${time}`);
+                        console.log(`→ Marking as AVAILABLE: ${time} for counselor ${counselorId}`);
                     }
                 });
 
@@ -605,12 +673,12 @@
             @if(old('preferred_time'))
                 const oldTime = "{{ old('preferred_time') }}";
                 const oldDate = "{{ old('preferred_date') }}";
+                const oldCounselorId = "{{ old('counselor_id') }}";
                 
-                if (oldDate) {
+                if (oldDate && oldCounselorId) {
                     setTimeout(() => {
-                        updateTimeSlots(oldDate);
+                        updateTimeSlots(oldDate, parseInt(oldCounselorId));
                         
-                        // Select the old time
                         timeSlotButtons.forEach(btn => {
                             if (btn.dataset.time === oldTime) {
                                 btn.classList.add('selected');

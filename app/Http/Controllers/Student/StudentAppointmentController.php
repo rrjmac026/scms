@@ -35,30 +35,46 @@ class StudentAppointmentController extends Controller
         return view('students.appointments.index', compact('appointments'));
     }
 
-    /**
-     * Show the form for creating a new appointment request.
-     */
     public function create()
     {
         $categories = CounselingCategory::where('status', 'active')->get();
-
-        // Get all booked slots (pending, approved, accepted)
+        
+        // Get the current student's grade level
+        $student = auth()->user()->student;
+        $studentGradeLevel = $student->grade_level;
+        
+        // Get counselor(s) assigned to this student's grade level
+        $assignedCounselors = Counselor::where('status', 'active')
+            ->where('assigned_grade_level', $studentGradeLevel)
+            ->pluck('id')
+            ->toArray();
+        
+        // If no counselors found for this grade level, log warning
+        if (empty($assignedCounselors)) {
+            Log::warning("No counselors assigned to grade level {$studentGradeLevel} for student {$student->id}");
+        }
+        
+        // Only get booked slots for counselors assigned to this student's grade level
         $bookedSlots = Appointment::whereIn('status', ['pending', 'approved', 'accepted'])
-            ->get(['preferred_date', 'preferred_time'])
+            ->when(!empty($assignedCounselors), function ($query) use ($assignedCounselors) {
+                $query->whereIn('counselor_id', $assignedCounselors);
+            })
+            ->get(['preferred_date', 'preferred_time', 'counselor_id'])
             ->map(fn($appointment) => [
                 'preferred_date' => $appointment->preferred_date instanceof Carbon
                     ? $appointment->preferred_date->format('Y-m-d')
                     : $appointment->preferred_date,
-                'preferred_time' => substr($appointment->preferred_time, 0, 5), // HH:MM only
+                'preferred_time' => substr($appointment->preferred_time, 0, 5),
+                'counselor_id' => $appointment->counselor_id,
             ]);
 
         $counselors = Counselor::with('user')
             ->where('status', 'active')
+            ->where('assigned_grade_level', $studentGradeLevel)
             ->get();
 
         // Audit: student opened create appointment form
-        $student = auth()->user()->student;
-        AuditLogHelper::log('appointment_create_form_opened', "Student {$student->id} opened appointment creation form");
+        AuditLogHelper::log('appointment_create_form_opened', "Student {$student->id} (Grade {$studentGradeLevel}) opened appointment creation form");
 
         return view('students.appointments.create', compact('categories', 'counselors', 'bookedSlots'));
     }
@@ -76,10 +92,23 @@ class StudentAppointmentController extends Controller
         ]);
 
         $timeWithSeconds = $request->preferred_time . ':00';
+        
+        // Get student's grade level and assigned counselors
+        $student = auth()->user()->student;
+        $studentGradeLevel = $student->grade_level;
+        
+        $assignedCounselors = Counselor::where('status', 'active')
+            ->where('assigned_grade_level', $studentGradeLevel)
+            ->pluck('id')
+            ->toArray();
 
+        // Check if time slot is already booked for THIS STUDENT'S COUNSELOR(S) only
         $exists = Appointment::where('preferred_date', $request->preferred_date)
             ->where('preferred_time', $timeWithSeconds)
             ->whereIn('status', ['pending', 'approved', 'accepted'])
+            ->when(!empty($assignedCounselors), function ($query) use ($assignedCounselors) {
+                $query->whereIn('counselor_id', $assignedCounselors);
+            })
             ->exists();
 
         if ($exists) {
@@ -89,7 +118,7 @@ class StudentAppointmentController extends Controller
         }
 
         $appointment = Appointment::create([
-            'student_id' => auth()->user()->student->id,
+            'student_id' => $student->id,
             'counseling_category_id' => $request->counseling_category_id,
             'preferred_date' => $request->preferred_date,
             'preferred_time' => $timeWithSeconds,
@@ -101,10 +130,9 @@ class StudentAppointmentController extends Controller
         app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
 
         // Audit: student created an appointment request
-        $studentId = auth()->user()->student->id;
         AuditLogHelper::log(
             'appointment_requested',
-            "Student {$studentId} requested appointment ID {$appointment->id} on {$appointment->preferred_date} at {$appointment->preferred_time}"
+            "Student {$student->id} (Grade {$studentGradeLevel}) requested appointment ID {$appointment->id} on {$appointment->preferred_date} at {$appointment->preferred_time}"
         );
 
         return redirect()
