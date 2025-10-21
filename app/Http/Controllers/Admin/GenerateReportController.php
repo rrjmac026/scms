@@ -262,7 +262,8 @@ class GenerateReportController extends Controller
         $endDate = Carbon::parse($request->input('end_date', now()->endOfMonth()))->endOfDay();
         $counselorId = $request->input('counselor_id');
 
-        $appointments = Appointment::whereBetween('preferred_date', [$startDate, $endDate])
+        // UPDATED: Changed to created_at to match Excel export
+        $appointments = Appointment::whereBetween('created_at', [$startDate, $endDate])
             ->when($counselorId, fn($q) => $q->where('counselor_id', $counselorId))
             ->with(['student.user', 'counselor.user'])
             ->get();
@@ -272,16 +273,20 @@ class GenerateReportController extends Controller
             ->with(['student.user', 'counselor.user', 'category'])
             ->get();
 
-        // FIXED: Changed 'session' to 'counselingSession'
         $feedbacks = Feedback::whereBetween('created_at', [$startDate, $endDate])
             ->when($counselorId, fn($q) => $q->whereHas('counselingSession', fn($s) => $s->where('counselor_id', $counselorId)))
             ->with(['counselingSession.counselor.user', 'student.user'])
             ->get();
 
+        // UPDATED: Added all appointment statuses to match Excel
         $statistics = [
             'Total Appointments' => $appointments->count(),
             'Completed Appointments' => $appointments->where('status','completed')->count(),
             'Pending Appointments' => $appointments->where('status','pending')->count(),
+            'Approved Appointments' => $appointments->where('status','approved')->count(),
+            'Accepted Appointments' => $appointments->where('status','accepted')->count(),
+            'Rejected Appointments' => $appointments->where('status','rejected')->count(),
+            'Declined Appointments' => $appointments->where('status','declined')->count(),
             'Cancelled Appointments' => $appointments->where('status','cancelled')->count(),
             'Total Sessions' => $sessions->count(),
             'Total Students' => $sessions->pluck('student_id')->unique()->count(),
@@ -326,7 +331,8 @@ class GenerateReportController extends Controller
             $pdf->Ln();
             $pdf->SetFont('Arial','',9);
             foreach($appointments as $app) {
-                $pdf->Cell(30,8,$app->preferred_date->format('F j, Y'),1);
+                // UPDATED: Changed to created_at to match Excel
+                $pdf->Cell(30,8,$app->created_at->format('F j, Y'),1);
                 $pdf->Cell(60,8,substr($app->student->user->name ?? 'N/A', 0, 30),1);
                 $pdf->Cell(60,8,substr($app->counselor->user->name ?? 'N/A', 0, 30),1);
                 $pdf->Cell(30,8,ucfirst($app->status),1);
