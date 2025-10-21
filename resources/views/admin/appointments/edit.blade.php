@@ -89,14 +89,14 @@
                         <div>
                             <x-input-label for="counselor_id" value="{{ __('Counselor') }}" />
                             <div class="space-y-2">
-                                <div class="flex items-center gap-2">
+                                <!-- <div class="flex items-center gap-2">
                                     <input type="checkbox" name="auto_assign" id="auto_assign" value="1" 
                                         class="rounded border-gray-300 dark:border-gray-700 text-pink-600"
                                         {{ old('auto_assign') ? 'checked' : '' }}>
                                     <label for="auto_assign" class="text-sm text-gray-600 dark:text-gray-400">
                                         Auto-assign counselor based on student's grade level
                                     </label>
-                                </div>
+                                </div> -->
                                 
                                 <select name="counselor_id" id="counselor_id" 
                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500"
@@ -112,10 +112,10 @@
                                     @endforeach
                                 </select>
                                 
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                <!-- <p class="text-xs text-gray-500 dark:text-gray-400">
                                     <i class="fas fa-info-circle"></i>
                                     Check auto-assign to automatically select counselor based on student's grade level
-                                </p>
+                                </p> -->
                             </div>
                             <x-input-error :messages="$errors->get('counselor_id')" class="mt-2" />
                         </div>
@@ -460,7 +460,7 @@
         }
     </style>
 
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('appointmentForm');
             const dateInput = document.getElementById('preferred_date');
@@ -642,18 +642,55 @@
                         return matches;
                     });
 
-                    // Reset classes
+                    // Reset classes first
                     button.classList.remove('available', 'booked', 'selected');
                     button.disabled = false;
+
+                    // Ensure we have a status element
+                    const statusEl = button.querySelector('.status');
+                    if (statusEl) {
+                        statusEl.innerHTML = ''; // clear previous status text
+                    }
+                    button.removeAttribute('title');
 
                     if (isBooked) {
                         button.classList.add('booked');
                         button.disabled = true;
                         console.log(`→ Marking as BOOKED: ${time}`);
+
+                        // Find the exact booked slot object so we can show details
+                        const slotObj = bookedSlots.find(slot => {
+                            return slot.preferred_date === selectedDate &&
+                                   slot.preferred_time === time &&
+                                   (String(slot.counselor_id) === String(counselorId));
+                        });
+
+                        if (slotObj && statusEl) {
+                            // Use the consistent data structure from controller
+                            const studentName = slotObj.student_name || 'Student';
+                            const counselorName = slotObj.counselor_name || 'Counselor';
+                            const studentNumber = slotObj.student_number || '';
+
+                            // Display student information
+                            const displayText = studentNumber ? 
+                                `${studentName} (${studentNumber})` : 
+                                studentName;
+                            
+                            statusEl.innerHTML = `<span class="text-xs text-red-600 dark:text-red-300">${displayText}</span>`;
+                            button.title = `Booked: ${studentName} with ${counselorName}`;
+                        } else if (statusEl) {
+                            // Generic booked label if details not available
+                            statusEl.textContent = '(Booked)';
+                            button.title = 'Booked';
+                        }
                     } else {
                         button.classList.add('available');
                         hasAvailableSlots = true;
                         console.log(`→ Marking as AVAILABLE: ${time}`);
+                        if (statusEl) {
+                            statusEl.textContent = '';
+                        }
+                        button.title = 'Available';
                     }
                 });
 
