@@ -140,7 +140,8 @@
                                 <thead>
                                     <tr class="bg-gray-50 dark:bg-gray-700/50">
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Student</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Session Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Appointment Date</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Duration</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
@@ -174,6 +175,16 @@
                                                     </div>
                                                 @else
                                                     <span class="text-sm text-gray-500 dark:text-gray-400">Not started</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                @if($session->appointment)
+                                                    <div class="text-sm text-gray-900 dark:text-gray-100">
+                                                        {{ $session->appointment->formattedDateTime ?? 
+                                                        $session->appointment->preferred_date->format('M d, Y') }}
+                                                    </div>
+                                                @else
+                                                    <span class="text-sm text-gray-500 dark:text-gray-400">N/A</span>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">

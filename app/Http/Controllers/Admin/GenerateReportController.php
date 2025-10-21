@@ -387,7 +387,8 @@ class GenerateReportController extends Controller
         ]);
     }
 
-    // Export Excel using existing export class
+
+    
     public function exportExcel(Request $request)
     {
         // Parse dates properly
@@ -395,20 +396,22 @@ class GenerateReportController extends Controller
         $endDate = Carbon::parse($request->input('end_date', now()->endOfMonth()))->endOfDay();
         $counselorId = $request->input('counselor_id', '');
 
-        // Get counselor name for display - ADD THIS LINE
         $counselorName = $counselorId ? Counselor::find($counselorId)->user->name : 'All Counselors';
 
-        // Format filters for display - UPDATE THIS ARRAY
         $filters = [
             'start_date' => $startDate->format('F j, Y'),
             'end_date' => $endDate->format('F j, Y'),
-            'counselor_name' => $counselorName // ADD THIS LINE
+            'counselor_name' => $counselorName 
         ];
 
-        $appointments = Appointment::whereBetween('preferred_date', [$startDate, $endDate])
+        // Fetch appointments using created_at to match the dashboard query
+        $appointments = Appointment::whereBetween('created_at', [$startDate, $endDate])
             ->when($counselorId, fn($q) => $q->where('counselor_id', $counselorId))
             ->with(['student.user', 'counselor.user'])
             ->get();
+        
+        // Debug: Log the statuses to check what we're getting
+        \Log::info('Appointment Statuses:', $appointments->pluck('status')->toArray());
 
         $sessions = CounselingSession::whereBetween('started_at', [$startDate, $endDate])
             ->when($counselorId, fn($q) => $q->where('counselor_id', $counselorId))
@@ -425,31 +428,49 @@ class GenerateReportController extends Controller
                 'total_appointments' => $appointments->count(),
                 'completed_appointments' => $appointments->where('status','completed')->count(),
                 'pending_appointments' => $appointments->where('status','pending')->count(),
+                'approved_appointments' => $appointments->where('status','approved')->count(),
+                'accepted_appointments' => $appointments->where('status','accepted')->count(),
+                'rejected_appointments' => $appointments->where('status','rejected')->count(),
+                'declined_appointments' => $appointments->where('status','declined')->count(),
                 'cancelled_appointments' => $appointments->where('status','cancelled')->count(),
                 'total_sessions' => $sessions->count(),
                 'unique_students' => $sessions->pluck('student_id')->unique()->count(),
                 'average_rating' => $feedbacks->avg('rating') ?? 0,
                 'total_feedbacks' => $feedbacks->count(),
             ],
-            'charts' => [
-                'sessions_per_month' => [
-                    'labels' => $sessions->pluck('started_at')->map->format('F')->unique()->toArray(),
-                    'data' => $sessions->groupBy(fn($s) => $s->started_at->format('F'))->map->count()->values()->toArray()
-                ],
-                'appointments_by_status' => [
-                    'labels' => ['completed','pending','cancelled'],
-                    'data' => [
-                        $appointments->where('status','completed')->count(),
-                        $appointments->where('status','pending')->count(),
-                        $appointments->where('status','cancelled')->count()
-                    ]
-                ]
+            'detailed_data' => [
+                // Matching PDF appointments table structure (4 columns)
+                'appointments' => $appointments->map(function($app) {
+                    return [
+                        $app->created_at->format('F j, Y'),
+                        substr($app->student->user->name ?? 'N/A', 0, 30),
+                        substr($app->counselor->user->name ?? 'N/A', 0, 30),
+                        ucfirst($app->status)
+                    ];
+                })->toArray(),
+                // Matching PDF sessions table structure (4 columns)
+                'sessions' => $sessions->map(function($session) {
+                    return [
+                        $session->started_at->format('F j, Y'),
+                        substr($session->student->user->name ?? 'N/A', 0, 30),
+                        substr($session->counselor->user->name ?? 'N/A', 0, 30),
+                        $session->formatted_duration ?? 'N/A'
+                    ];
+                })->toArray(),
+                // Matching PDF feedbacks table structure (4 columns)
+                'feedbacks' => $feedbacks->map(function($feedback) {
+                    return [
+                        $feedback->created_at->format('F j, Y'),
+                        substr($feedback->student->user->name ?? 'N/A', 0, 30),
+                        $feedback->rating . '/5',
+                        substr($feedback->comments ?? 'No comment', 0, 25)
+                    ];
+                })->toArray()
             ]
         ];
 
-        $filename = 'counseling_report_' . $startDate->format('Y-m-d') . '_to_' . $endDate->format('Y-m-d') . '.xlsx';
+        $filename = 'counseling_report_' . $startDate->format('Ymd') . '_to_' . $endDate->format('Ymd') . '.xlsx';
 
-        // Use Excel facade to export - UPDATE THIS LINE
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\CounselingReportExport($analytics, $filters), 
             $filename

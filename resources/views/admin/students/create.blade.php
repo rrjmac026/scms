@@ -55,14 +55,14 @@
                                         {{ __('First Name') }} <span class="text-red-500">*</span>
                                     </x-input-label>
                                     <x-text-input id="first_name" name="first_name" type="text" class="mt-1 block w-full" 
-                                        :value="old('first_name')" required autofocus />
+                                        :value="old('first_name')" required/>
                                     <x-input-error class="mt-2" :messages="$errors->get('first_name')" />
                                 </div>
 
                                 <!-- Middle Name -->
                                 <div>
                                     <x-input-label for="middle_name">
-                                        {{ __('Middle Name') }} <span class="text-blackgi-500">(Optional)</span>
+                                        {{ __('Middle Name') }}
                                     </x-input-label>
                                     <x-text-input id="middle_name" name="middle_name" type="text" class="mt-1 block w-full" 
                                         :value="old('middle_name')"/>

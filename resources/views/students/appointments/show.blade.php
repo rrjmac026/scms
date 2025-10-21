@@ -10,7 +10,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="{ showCancelModal: false }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
@@ -25,10 +25,12 @@
                                     <div>
                                         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</span>
                                         <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                            {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                               ($appointment->status === 'approved' ? 'bg-green-100 text-green-800' : 
-                                               'bg-red-100 text-red-800') }}">
-                                            {{ ucfirst($appointment->status) }}
+                                            {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500' : 
+                                            ($appointment->status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500' :
+                                            ($appointment->status === 'accepted' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-500' :
+                                            ($appointment->status === 'completed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500' :
+                                            'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-500'))) }}">
+                                            {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
                                         </span>
                                     </div>
                                     <div>
@@ -120,17 +122,47 @@
                     <!-- Actions -->
                     @if(in_array($appointment->status, ['pending', 'approved', 'accepted']))
                         <div class="mt-6 flex justify-end border-t border-gray-200 dark:border-gray-700 pt-6">
-                            <form action="{{ route('student.appointments.cancel', $appointment) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
-                                <x-danger-button onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                    <i class="fas fa-ban mr-2"></i>
-                                    {{ __('Cancel Appointment') }}
-                                </x-danger-button>
-                            </form>
+                            <button 
+                                @click="showCancelModal = true"
+                                class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                                <i class="fas fa-ban mr-2"></i>
+                                {{ __('Cancel Appointment') }}
+                            </button>
                         </div>
                     @endif
                 </div>
+            </div>
+        </div>
+
+        <!-- Cancel Modal -->
+        <div x-show="showCancelModal" x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">
+                    Cancel Appointment
+                </h2>
+                <form action="{{ route('student.appointments.cancel', $appointment) }}" method="POST" class="space-y-4">
+                    @csrf
+                    @method('PATCH')
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Reason for cancellation <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="cancelled_reason" rows="3" required
+                            class="w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button"
+                            @click="showCancelModal = false"
+                            class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                            Close
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+                            Confirm Cancel
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -1,3 +1,4 @@
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -73,25 +74,22 @@
 
                             <!-- Counselor Filter -->
                             <div>
-                                <x-input-label for="counselor_id" value="{{ __('Counselor (Optional)') }}" />
+                                <x-input-label for="counselor_id" value="{{ __('Counselor') }}" />
 
                                 @if(auth()->user()->counselor)
-                                    {{-- Counselor user: show only their name, disabled --}}
-                                    <select 
-                                        name="counselor_id"
-                                        id="counselor_id"
+                                    {{-- Counselor: show their name as readonly text field --}}
+                                    <x-text-input
+                                        id="counselor_name"
+                                        type="text"
                                         class="w-full mt-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm"
+                                        value="{{ auth()->user()->name }}"
                                         disabled
-                                    >
-                                        <option value="{{ auth()->user()->counselor->id }}">
-                                            {{ auth()->user()->name }}
-                                        </option>
-                                    </select>
+                                    />
 
-                                    {{-- Hidden input so their ID still gets submitted --}}
+                                    {{-- Hidden input so the counselor_id is still submitted --}}
                                     <input type="hidden" name="counselor_id" value="{{ auth()->user()->counselor->id }}">
                                 @else
-                                    {{-- Admin: can view all counselors --}}
+                                    {{-- Admin: show dropdown for selecting counselor --}}
                                     <select 
                                         name="counselor_id"
                                         id="counselor_id"
@@ -99,13 +97,17 @@
                                     >
                                         <option value="">All Counselors</option>
                                         @foreach($counselors as $counselor)
-                                            <option value="{{ $counselor->id }}" @selected(old('counselor_id', $filters['counselor_id']) == $counselor->id)>
+                                            <option 
+                                                value="{{ $counselor->id }}" 
+                                                @selected(old('counselor_id', $filters['counselor_id']) == $counselor->id)
+                                            >
                                                 {{ $counselor->user->name }}
                                             </option>
                                         @endforeach
                                     </select>
                                 @endif
                             </div>
+
                         </div>
 
                         <!-- Action Buttons -->

@@ -44,17 +44,33 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center gap-3">
-                                                <a href="{{ route('counselor.counseling-categories.show', $category) }}" 
-                                                   class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
-                                                    <i class="fas fa-eye"></i>
+                                            {{-- View --}}
+                                            <a href="{{ route('counselor.counseling-categories.show', $category) }}" 
+                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+
+                                            {{-- Edit (only if not active) --}}
+                                            @if($category->status !== 'active')
+                                                <a href="{{ route('counselor.counseling-categories.edit', $category) }}" 
+                                                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
+                                                    <i class="fas fa-edit"></i>
                                                 </a>
-                                                @if($category->status !== 'active')
-                                                    <a href="{{ route('counselor.counseling-categories.edit', $category) }}" 
-                                                       class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                @endif
-                                            </div>
+                                            @endif
+
+                                            {{-- Delete --}}
+                                            <form action="{{ route('counselor.counseling-categories.destroy', $category) }}" 
+                                                method="POST" 
+                                                onsubmit="return confirm('Are you sure you want to delete this category? This action cannot be undone.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" 
+                                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+
                                         </td>
                                     </tr>
                                 @endforeach

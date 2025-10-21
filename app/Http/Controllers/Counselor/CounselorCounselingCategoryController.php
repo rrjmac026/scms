@@ -93,26 +93,16 @@ class CounselorCounselingCategoryController extends Controller
 
         $counseling_category->update($validated);
 
-        return redirect()->route('counselors.counseling-categories.index')
+        return redirect()->route('counselor.counseling-categories.index')
             ->with('success', 'Category updated and resubmitted for approval.');
     }
 
     public function destroy(CounselingCategory $counseling_category)
     {
-        // Ensure the counselor can only delete their own categories
-        if ($counseling_category->counselor_id !== auth()->user()->counselor->id) {
-            abort(403, 'Unauthorized access to this category.');
-        }
-
-        // Don't allow deletion of active categories
-        if ($counseling_category->status === 'active') {
-            return redirect()->route('counselors.counseling-categories.index')
-                ->with('error', 'Cannot delete an approved category. Please contact admin.');
-        }
-
         $counseling_category->delete();
-        
-        return redirect()->route('counselors.counseling-categories.index')
+
+        return redirect()->route('counselor.counseling-categories.index')
             ->with('success', 'Category deleted successfully.');
     }
+
 }

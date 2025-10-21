@@ -115,9 +115,9 @@ class SummarySheet implements FromArray, WithTitle, WithStyles, WithColumnWidths
         return [
             1 => ['font' => ['bold' => true, 'size' => 16]],
             5 => ['font' => ['bold' => true, 'size' => 14]],
-            6 => ['font' => ['bold' => true]],
-            11 => ['font' => ['bold' => true, 'size' => 14]],
-            12 => ['font' => ['bold' => true]],
+            6 => ['font' => ['bold' => false]],
+            11 => ['font' => ['bold' => false, 'size' => 10]],
+            12 => ['font' => ['bold' => false, 'size' => 10]],
             17 => ['font' => ['bold' => true, 'size' => 14]],
             18 => ['font' => ['bold' => true]],
         ];

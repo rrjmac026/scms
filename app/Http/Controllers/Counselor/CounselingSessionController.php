@@ -15,7 +15,7 @@ class CounselingSessionController extends Controller
         $counselor = auth()->user()->counselor;
 
         $query = $counselor->counselingSessions()
-                    ->with('student.user');
+                    ->with('student.user','appointment');
 
         // Apply date filters
         if ($request->filled('date_from')) {
