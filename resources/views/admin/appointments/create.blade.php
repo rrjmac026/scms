@@ -157,7 +157,9 @@
 
                         <!-- Counselor Selection -->
                         <div>
-                            <x-input-label for="counselor_id" value="{{ __('Counselor') }}" />
+                            <x-input-label for="counselor_id" value="" />
+                                {{ __('Counselor') }} <span class="text-red-500">*</span>
+                            </xi-input-label>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" name="auto_assign" id="auto_assign" value="1" 

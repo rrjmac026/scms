@@ -303,22 +303,22 @@ class AppointmentController extends Controller
             $students = Student::with('user')->get();
             $counselors = Counselor::with('user')->where('status', 'active')->get();
 
-            // Get all booked slots WITH counselor_id AND student/counselor names, excluding the current appointment
+            
             $bookedSlots = Appointment::with(['student.user', 'counselor.user'])
                 ->whereIn('status', ['pending', 'approved', 'accepted', 'completed'])
                 ->where('id', '!=', $appointment->id)
                 ->get()
                 ->map(function ($appt) {
-                    // Handle both Carbon instances and string dates
+                    
                     $date = $appt->preferred_date;
                     if ($date instanceof \Carbon\Carbon) {
                         $date = $date->format('Y-m-d');
                     }
                     
-                    // Handle time format - ensure it's HH:MM
+
                     $time = $appt->preferred_time;
                     if (strlen($time) > 5) {
-                        $time = substr($time, 0, 5); // Remove seconds if present
+                        $time = substr($time, 0, 5); 
                     }
                     
                     return [
@@ -326,7 +326,7 @@ class AppointmentController extends Controller
                         'preferred_time' => $time,
                         'counselor_id' => $appt->counselor_id,
                         'student_id' => $appt->student_id,
-                        // Add the names for display
+                        
                         'student_name' => $appt->student->user->name ?? 'Unknown Student',
                         'counselor_name' => $appt->counselor->user->name ?? 'Unknown Counselor',
                         'student_number' => $appt->student->student_number ?? 'N/A',
@@ -685,7 +685,7 @@ class AppointmentController extends Controller
         try {
             DB::beginTransaction();
 
-            // Change status to cancelled to trigger Google Calendar deletion
+            
             $appointment->update(['status' => 'cancelled']);
             
             // Sync to remove from Google Calendar

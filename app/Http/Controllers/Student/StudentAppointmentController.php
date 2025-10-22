@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Helpers\AuditLogHelper;
 
 class StudentAppointmentController extends Controller
@@ -80,64 +81,120 @@ class StudentAppointmentController extends Controller
     }
 
     /**
-     * Store a newly created appointment request.
+     * Store a newly created appointment request with auto-assignment.
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'preferred_date' => 'required|date',
-            'preferred_time' => 'required',
-            'concern' => 'required|string|max:1000',
-            'counseling_category_id' => 'required|exists:counseling_categories,id',
-        ]);
+        try {
+            $request->validate([
+                'preferred_date' => [
+                    'required',
+                    'date',
+                    'after_or_equal:today',
+                    function ($attribute, $value, $fail) {
+                        $day = Carbon::parse($value)->dayOfWeek;
+                        if ($day === 0 || $day === 6) {
+                            $fail('Appointments cannot be scheduled on weekends.');
+                        }
+                    }
+                ],
+                'preferred_time' => 'required|date_format:H:i',
+                'concern' => 'required|string|max:1000',
+                'counseling_category_id' => 'required|exists:counseling_categories,id',
+            ]);
 
-        $timeWithSeconds = $request->preferred_time . ':00';
-        
-        // Get student's grade level and assigned counselors
-        $student = auth()->user()->student;
-        $studentGradeLevel = $student->grade_level;
-        
-        $assignedCounselors = Counselor::where('status', 'active')
-            ->where('assigned_grade_level', $studentGradeLevel)
-            ->pluck('id')
-            ->toArray();
+            $timeWithSeconds = $request->preferred_time . ':00';
+            
+            // Get student's grade level
+            $student = auth()->user()->student;
+            $studentGradeLevel = $student->grade_level;
+            
+            if (!$studentGradeLevel) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'Your grade level is not set. Please contact the administrator.');
+            }
 
-        // Check if time slot is already booked for THIS STUDENT'S COUNSELOR(S) only
-        $exists = Appointment::where('preferred_date', $request->preferred_date)
-            ->where('preferred_time', $timeWithSeconds)
-            ->whereIn('status', ['pending', 'approved', 'accepted'])
-            ->when(!empty($assignedCounselors), function ($query) use ($assignedCounselors) {
-                $query->whereIn('counselor_id', $assignedCounselors);
-            })
-            ->exists();
+            // Find counselor by assigned grade level (auto-assignment)
+            $counselor = Counselor::where('assigned_grade_level', $studentGradeLevel)
+                ->where('status', 'active')
+                ->first();
 
-        if ($exists) {
+            if (!$counselor) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'No counselor is available for your grade level. Please contact the administrator.');
+            }
+
+            // Check if the assigned counselor is available at the selected date/time
+            $hasConflict = Appointment::where('counselor_id', $counselor->id)
+                ->where('preferred_date', $request->preferred_date)
+                ->where('preferred_time', $timeWithSeconds)
+                ->whereIn('status', ['pending', 'approved', 'accepted', 'completed'])
+                ->exists();
+
+            if ($hasConflict) {
+                return back()
+                    ->withErrors(['preferred_time' => 'The counselor assigned to your grade level is not available at this time. Please choose another time slot.'])
+                    ->withInput();
+            }
+
+            // Use transaction for data consistency
+            DB::beginTransaction();
+
+            try {
+                // Create appointment with auto-assigned counselor
+                $appointment = Appointment::create([
+                    'student_id' => $student->id,
+                    'counselor_id' => $counselor->id,
+                    'counseling_category_id' => $request->counseling_category_id,
+                    'preferred_date' => $request->preferred_date,
+                    'preferred_time' => $timeWithSeconds,
+                    'concern' => $request->concern,
+                    'status' => 'pending',
+                ]);
+
+                // Google Calendar Sync
+                try {
+                    app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
+                    $syncMessage = ' Google Calendar synced successfully.';
+                } catch (\Exception $e) {
+                    Log::error("Sync failed for appointment {$appointment->id}: " . $e->getMessage());
+                    $syncMessage = '';
+                }
+
+                DB::commit();
+
+                // Audit: student created an appointment request with auto-assigned counselor
+                AuditLogHelper::log(
+                    'appointment_requested',
+                    "Student {$student->id} (Grade {$studentGradeLevel}) requested appointment ID {$appointment->id} on {$appointment->preferred_date} at {$appointment->preferred_time}. Auto-assigned to counselor ID {$counselor->id}"
+                );
+
+                $counselorName = $counselor->user->name ?? 'Unknown';
+                
+                return redirect()
+                    ->route('student.appointments.index')
+                    ->with('success', "Appointment booked successfully and assigned to {$counselorName}.{$syncMessage}");
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return back()
-                ->withErrors(['preferred_time' => 'This time slot is already booked.'])
-                ->withInput();
+                ->withInput()
+                ->withErrors($e->errors());
+        } catch (\Exception $e) {
+            Log::error('Error creating student appointment: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()
+                ->withInput()
+                ->with('error', 'An error occurred while booking the appointment. Please try again.');
         }
-
-        $appointment = Appointment::create([
-            'student_id' => $student->id,
-            'counseling_category_id' => $request->counseling_category_id,
-            'preferred_date' => $request->preferred_date,
-            'preferred_time' => $timeWithSeconds,
-            'concern' => $request->concern,
-            'status' => 'pending',
-        ]);
-
-        // 🔄 Optional Google Calendar Sync
-        app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
-
-        // Audit: student created an appointment request
-        AuditLogHelper::log(
-            'appointment_requested',
-            "Student {$student->id} (Grade {$studentGradeLevel}) requested appointment ID {$appointment->id} on {$appointment->preferred_date} at {$appointment->preferred_time}"
-        );
-
-        return redirect()
-            ->route('student.appointments.index')
-            ->with('success', 'Appointment booked successfully.');
     }
 
     /**
@@ -191,10 +248,10 @@ class StudentAppointmentController extends Controller
 
         $appointment->update(['status' => 'cancelled']);
 
-        // 🔄 Google Calendar Sync
+        // Google Calendar Sync
         app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
 
-        // Audit: student cancelled appointment (without separate reason endpoint)
+        // Audit: student cancelled appointment
         AuditLogHelper::log('appointment_cancelled', "Student {$student->id} cancelled appointment ID {$appointment->id}");
 
         return redirect()
@@ -222,7 +279,7 @@ class StudentAppointmentController extends Controller
                 'cancelled_reason' => 'required|string|max:1000',
             ]);
 
-            // ✅ Check if appointment is within 24 hours
+            // Check if appointment is within 24 hours
             $date = $appointment->preferred_date instanceof Carbon
                 ? $appointment->preferred_date->format('Y-m-d')
                 : $appointment->preferred_date;
@@ -239,7 +296,7 @@ class StudentAppointmentController extends Controller
                 'cancelled_reason' => $request->cancelled_reason,
             ]);
 
-            // 🔄 Google Calendar Sync
+            // Google Calendar Sync
             app(\App\Services\AppointmentCalendarSyncService::class)->sync($appointment);
 
             // Audit: student cancelled with reason
@@ -263,7 +320,6 @@ class StudentAppointmentController extends Controller
             return back()->with('error', 'An unexpected error occurred while cancelling the appointment. Please try again later.');
         }
     }
-
 
     /**
      * Display appointments on student calendar view.
@@ -304,7 +360,7 @@ class StudentAppointmentController extends Controller
                         'category' => $appointment->category->name ?? 'General',
                         'status' => $appointment->status,
                         'description' => Str::limit($appointment->concern ?? '', 50),
-                        'google_event_id' => $appointment->google_event_id, // ← ADD THIS LINE!
+                        'google_event_id' => $appointment->google_event_id,
                     ],
                 ];
             });
