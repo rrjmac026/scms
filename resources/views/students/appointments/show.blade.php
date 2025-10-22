@@ -119,6 +119,18 @@
                         </div>
                     @endif
 
+                    <!-- Declined Reason -->
+                    @if($appointment->status === 'declined' && $appointment->declined_reason)
+                        <div class="mt-6 bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-2 flex items-center">
+                                <i class="fas fa-times-circle mr-2"></i>Decline Reason
+                            </h4>
+                            <p class="text-sm text-gray-700 dark:text-gray-200">
+                                {{ $appointment->declined_reason }}
+                            </p>
+                        </div>
+                    @endif
+
                     <!-- Actions -->
                     @if(in_array($appointment->status, ['pending', 'approved', 'accepted']))
                         <div class="mt-6 flex justify-end border-t border-gray-200 dark:border-gray-700 pt-6">

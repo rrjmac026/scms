@@ -327,6 +327,16 @@
                                 </div>
                             @endif
 
+                            @if($appointment->status === 'declined' && $appointment->declined_reason)
+                                <div class="mt-6 bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500 p-4 rounded-lg">
+                                    <h4 class="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-1">
+                                        <i class="fas fa-times-circle mr-2"></i>Decline Reason
+                                    </h4>
+                                    <p class="mt-1 text-xl text-gray-900 dark:text-gray-100">
+                                        "{{ $appointment->declined_reason }}"
+                                    </p>
+                                </div>
+                            @endif
 
                             @if($appointment->status === 'cancelled')
                                 <div class="mt-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-lg">

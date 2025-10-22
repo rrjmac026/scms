@@ -22,6 +22,7 @@ class Appointment extends Model
         'status',
         'concern',
         'cancelled_reason',
+        'declined_reason',
         'google_event_id',
         'rejection_reason',
     ];
@@ -65,20 +66,7 @@ class Appointment extends Model
     }
 
 
-    public function getStatusColorAttribute(): string
-    {
-        return match($this->status) {
-            'pending' => 'warning',
-            'approved' => 'primary',
-            'accepted' => 'purple',
-            'completed' => 'success',
-            'rejected', 'declined' => 'danger',
-            'cancelled_by_student', 'cancelled_by_counselor' => 'secondary',
-            'reschedule_requested_by_counselor', 'reschedule_requested_by_student' => 'info',
-            'reschedule_declined' => 'danger',
-            default => 'secondary',
-        };
-    }
+    
 
     public function getStatusLabelAttribute(): string
     {

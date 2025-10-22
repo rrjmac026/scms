@@ -38,6 +38,7 @@ return new class extends Migration
                 'cancelled'
             ])->default('pending');
             $table->text('rejection_reason')->nullable();
+             $table->text('declined_reason')->nullable();
             $table->text('cancelled_reason')->nullable();        
             // Concerns and reasons
             $table->text('concern')->nullable();

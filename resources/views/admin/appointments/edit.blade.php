@@ -88,16 +88,7 @@
                         <!-- Counselor Selection -->
                         <div>
                             <x-input-label for="counselor_id" value="{{ __('Counselor') }}" />
-                            <div class="space-y-2">
-                                <!-- <div class="flex items-center gap-2">
-                                    <input type="checkbox" name="auto_assign" id="auto_assign" value="1" 
-                                        class="rounded border-gray-300 dark:border-gray-700 text-pink-600"
-                                        {{ old('auto_assign') ? 'checked' : '' }}>
-                                    <label for="auto_assign" class="text-sm text-gray-600 dark:text-gray-400">
-                                        Auto-assign counselor based on student's grade level
-                                    </label>
-                                </div> -->
-                                
+                            <div class="space-y-2">                              
                                 <select name="counselor_id" id="counselor_id" 
                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500"
                                     {{ old('auto_assign') ? 'disabled' : '' }}>
@@ -230,26 +221,6 @@
                             </p>
                         </div>
 
-                        <!-- Current Status Display -->
-                        <!-- <div>
-                            <x-input-label value="{{ __('Current Status') }}" />
-                            <div class="mt-1 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-info-circle text-blue-500"></i>
-                                    <div>
-                                        <div class="text-sm font-semibold text-blue-800 dark:text-blue-200 uppercase">
-                                            {{ str_replace('_', ' ', $appointment->status) }}
-                                        </div>
-                                        @if($appointment->google_event_id)
-                                            <div class="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                                                <i class="fas fa-check-circle"></i> Synced with Google Calendar
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-
                         <!-- Concern/Notes -->
                         <div class="md:col-span-2">
                             <x-input-label for="concern" value="{{ __('Reason for Appointments') }}" />
@@ -278,6 +249,67 @@
                 </form>
             </div>
 
+            <!-- Decline Reason Modal -->
+            <div id="declineModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white dark:bg-gray-800">
+                    <div class="mt-3">
+                        <!-- Modal Header -->
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                <i class="fas fa-times-circle text-orange-500 mr-2"></i>
+                                Decline Appointment
+                            </h3>
+                            <button onclick="closeDeclineModal()" class="text-gray-400 hover:text-gray-500">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <form id="declineForm" method="POST">
+                            @csrf
+                            @method('PATCH')
+                            
+                            <div class="mb-4">
+                                <label for="declined_reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Reason for Declining <span class="text-red-500">*</span>
+                                </label>
+                                <textarea 
+                                    id="declined_reason" 
+                                    name="declined_reason" 
+                                    rows="4"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-orange-500 focus:border-orange-500"
+                                    placeholder="Please provide a reason for declining this appointment..."
+                                    required
+                                    maxlength="500"></textarea>
+                                <div class="flex justify-between mt-1">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        This reason will be sent to the student
+                                    </p>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">
+                                        <span id="decline-char-count">0</span>/500
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Modal Footer -->
+                            <div class="flex justify-end gap-3 mt-6">
+                                <button 
+                                    type="button" 
+                                    onclick="closeDeclineModal()"
+                                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm transition-colors">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors">
+                                    <i class="fas fa-times-circle mr-2"></i>Decline Appointment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <!-- Status Action Buttons Section -->
             <div class="mt-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 dark:border-gray-700">
                 <div class="p-6">
@@ -298,39 +330,28 @@
                             </form>
 
                             <!-- Decline Button (for pending) -->
-                            <form action="{{ route('admin.appointments.decline', $appointment) }}" method="POST" 
-                                  class="inline"
-                                  onsubmit="return confirm('Are you sure you want to decline this pending appointment?');">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" 
-                                        class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
-                                        title="Decline pending appointment">
-                                    <i class="fas fa-times-circle mr-2"></i> Decline
-                                </button>
-                            </form>
+                            <button type="button"
+                                    onclick="openDeclineModal('{{ route('admin.appointments.decline', $appointment) }}')"
+                                    class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                    title="Decline pending appointment">
+                                <i class="fas fa-times-circle mr-2"></i> Decline
+                            </button>
                         @endif
 
                         @if($appointment->status === 'approved')
                             <!-- Decline Button (for approved) -->
-                            <form action="{{ route('admin.appointments.decline', $appointment) }}" method="POST" 
-                                  class="inline"
-                                  onsubmit="return confirm('Are you sure you want to decline this approved appointment?');">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" 
-                                        class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
-                                        title="Decline approved appointment">
-                                    <i class="fas fa-times-circle mr-2"></i> Decline
-                                </button>
-                            </form>
+                            <button type="button"
+                                    onclick="openDeclineModal('{{ route('admin.appointments.decline', $appointment) }}')"
+                                    class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                                    title="Decline approved appointment">
+                                <i class="fas fa-times-circle mr-2"></i> Decline
+                            </button>
                         @endif
 
                         @if($appointment->status === 'accepted')
                             <!-- Reject Button (only for accepted) -->
                             <form action="{{ route('admin.appointments.reject', $appointment) }}" method="POST" 
-                                  class="inline"
-                                  onsubmit="return confirm('Are you sure you want to reject this accepted appointment?');">
+                                  class="inline"">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" 
@@ -355,7 +376,6 @@
                 <div class="mt-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 dark:border-gray-700">
                     <div class="p-6">
                         <form action="{{ route('admin.appointments.destroy', $appointment->id) }}" method="POST" 
-                              onsubmit="return confirm('Are you sure you want to delete this appointment? This action cannot be undone.')"
                               class="inline">
                             @csrf
                             @method('DELETE')
@@ -458,38 +478,145 @@
         .time-slot.selected .status::after {
             content: '(Selected)';
         }
+
+        {
+        animation: fadeIn 0.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        #declineModal > div {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 
 <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('appointmentForm');
-            const dateInput = document.getElementById('preferred_date');
-            const timeHiddenInput = document.getElementById('preferred_time');
-            const timeSlotButtons = document.querySelectorAll('.time-slot');
-            const concernTextarea = document.getElementById('concern');
-            const charCount = document.getElementById('char-count');
-            const submitBtn = document.getElementById('submitBtn');
-            const submitBtnText = document.getElementById('submitBtnText');
-            const timeError = document.getElementById('time-error');
-            const timeErrorMessage = document.getElementById('time-error-message');
-            const counselorSelect = document.getElementById('counselor_id');
+    // ===================================================================
+    // GLOBAL FUNCTIONS - Must be defined first for onclick handlers
+    // ===================================================================
+    function openDeclineModal(actionUrl) {
+        const modal = document.getElementById('declineModal');
+        const form = document.getElementById('declineForm');
+        const textarea = document.getElementById('declined_reason');
+        
+        if (!modal || !form || !textarea) {
+            console.error('Modal elements not found');
+            return;
+        }
+        
+        // Set form action
+        form.action = actionUrl;
+        
+        // Clear previous input
+        textarea.value = '';
+        const charCount = document.getElementById('decline-char-count');
+        if (charCount) {
+            charCount.textContent = '0';
+        }
+        
+        // Show modal
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        
+        // Focus on textarea
+        setTimeout(() => textarea.focus(), 100);
+    }
 
-            const bookedSlots = @json($bookedSlots ?? []);
-            const currentAppointmentId = {{ $appointment->id }};
-            const currentCounselorId = {{ $appointment->counselor_id ?? 'null' }};
+    function closeDeclineModal() {
+        const modal = document.getElementById('declineModal');
+        if (!modal) return;
+        
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
 
-            console.log('Current appointment ID:', currentAppointmentId);
-            console.log('Current counselor ID:', currentCounselorId);
-            console.log('Booked slots:', bookedSlots);
+    // ===================================================================
+    // DOM READY EVENT LISTENERS
+    // ===================================================================
+    document.addEventListener('DOMContentLoaded', function () {
+        // Form elements
+        const form = document.getElementById('appointmentForm');
+        const dateInput = document.getElementById('preferred_date');
+        const timeHiddenInput = document.getElementById('preferred_time');
+        const timeSlotButtons = document.querySelectorAll('.time-slot');
+        const concernTextarea = document.getElementById('concern');
+        const charCount = document.getElementById('char-count');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const timeError = document.getElementById('time-error');
+        const timeErrorMessage = document.getElementById('time-error-message');
+        const counselorSelect = document.getElementById('counselor_id');
 
-            // Character counter
+        // Data from backend
+        const bookedSlots = @json($bookedSlots ?? []);
+        const currentAppointmentId = {{ $appointment->id }};
+        const currentCounselorId = {{ $appointment->counselor_id ?? 'null' }};
+
+        console.log('Current appointment ID:', currentAppointmentId);
+        console.log('Current counselor ID:', currentCounselorId);
+        console.log('Booked slots:', bookedSlots);
+
+        // ===================================================================
+        // DECLINE MODAL EVENT LISTENERS
+        // ===================================================================
+        const declineTextarea = document.getElementById('declined_reason');
+        const declineCharCount = document.getElementById('decline-char-count');
+        const declineModal = document.getElementById('declineModal');
+        
+        if (declineTextarea && declineCharCount) {
+            declineTextarea.addEventListener('input', function() {
+                declineCharCount.textContent = this.value.length;
+            });
+        }
+
+        // Close modal when clicking outside
+        if (declineModal) {
+            declineModal.addEventListener('click', function(e) {
+                if (e.target === declineModal) {
+                    closeDeclineModal();
+                }
+            });
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && declineModal && !declineModal.classList.contains('hidden')) {
+                closeDeclineModal();
+            }
+        });
+
+        // ===================================================================
+        // CONCERN TEXTAREA CHARACTER COUNTER
+        // ===================================================================
+        if (concernTextarea && charCount) {
             concernTextarea.addEventListener('input', function() {
                 charCount.textContent = this.value.length;
             });
-
             charCount.textContent = concernTextarea.value.length;
+        }
 
-            // Handle date change
+        // ===================================================================
+        // DATE CHANGE HANDLER
+        // ===================================================================
+        if (dateInput) {
             dateInput.addEventListener('change', function () {
                 try {
                     const selectedDate = this.value;
@@ -520,8 +647,12 @@
                     showTimeError('Invalid date selected');
                 }
             });
+        }
 
-            // Handle counselor change
+        // ===================================================================
+        // COUNSELOR CHANGE HANDLER
+        // ===================================================================
+        if (counselorSelect) {
             counselorSelect.addEventListener('change', function() {
                 const selectedDate = dateInput.value;
                 const counselorId = this.value ? parseInt(this.value) : null;
@@ -533,32 +664,38 @@
                     showTimeError('Please select a counselor');
                 }
             });
+        }
 
-            // Handle time slot selection
-            timeSlotButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    if (this.classList.contains('booked') || this.disabled) {
-                        return;
-                    }
+        // ===================================================================
+        // TIME SLOT SELECTION HANDLER
+        // ===================================================================
+        timeSlotButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                if (this.classList.contains('booked') || this.disabled) {
+                    return;
+                }
 
-                    if (!dateInput.value) {
-                        showTimeError('Please select a date first');
-                        return;
-                    }
+                if (!dateInput.value) {
+                    showTimeError('Please select a date first');
+                    return;
+                }
 
-                    if (!counselorSelect.value) {
-                        showTimeError('Please select a counselor first');
-                        return;
-                    }
+                if (!counselorSelect.value) {
+                    showTimeError('Please select a counselor first');
+                    return;
+                }
 
-                    timeSlotButtons.forEach(btn => btn.classList.remove('selected'));
-                    this.classList.add('selected');
-                    timeHiddenInput.value = this.dataset.time;
-                    hideTimeError();
-                });
+                timeSlotButtons.forEach(btn => btn.classList.remove('selected'));
+                this.classList.add('selected');
+                timeHiddenInput.value = this.dataset.time;
+                hideTimeError();
             });
+        });
 
-            // Form submission validation
+        // ===================================================================
+        // FORM SUBMISSION VALIDATION
+        // ===================================================================
+        if (form) {
             form.addEventListener('submit', function(e) {
                 let isValid = true;
                 const errors = [];
@@ -614,156 +751,158 @@
                 submitBtn.disabled = true;
                 submitBtnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
             });
+        }
 
-            function updateTimeSlots(selectedDate, counselorId) {
-                console.log('=== UPDATE TIME SLOTS ===');
-                console.log('Selected date:', selectedDate);
-                console.log('Selected counselor:', counselorId);
-                console.log('Booked slots:', bookedSlots);
+        // ===================================================================
+        // HELPER FUNCTIONS
+        // ===================================================================
+        function updateTimeSlots(selectedDate, counselorId) {
+            console.log('=== UPDATE TIME SLOTS ===');
+            console.log('Selected date:', selectedDate);
+            console.log('Selected counselor:', counselorId);
+            console.log('Booked slots:', bookedSlots);
+            
+            let hasAvailableSlots = false;
+
+            timeSlotButtons.forEach(button => {
+                const time = button.dataset.time;
                 
-                let hasAvailableSlots = false;
+                console.log(`Checking slot: ${selectedDate} ${time} for counselor ${counselorId}`);
+                
+                const isBooked = bookedSlots.some(slot => {
+                    const dateMatches = slot.preferred_date === selectedDate;
+                    const timeMatches = slot.preferred_time === time;
+                    const counselorMatches = parseInt(slot.counselor_id) === parseInt(counselorId);
+                    const matches = dateMatches && timeMatches && counselorMatches;
+                    
+                    if (matches) {
+                        console.log(`✓ BOOKED: ${selectedDate} ${time} for counselor ${counselorId}`, slot);
+                    }
+                    
+                    return matches;
+                });
 
-                timeSlotButtons.forEach(button => {
-                    const time = button.dataset.time;
-                    
-                    console.log(`Checking slot: ${selectedDate} ${time} for counselor ${counselorId}`);
-                    
-                    // Check if THIS COUNSELOR has this time slot booked (excluding current appointment)
-                    const isBooked = bookedSlots.some(slot => {
-                        const dateMatches = slot.preferred_date === selectedDate;
-                        const timeMatches = slot.preferred_time === time;
-                        const counselorMatches = parseInt(slot.counselor_id) === parseInt(counselorId);
-                        const matches = dateMatches && timeMatches && counselorMatches;
-                        
-                        if (matches) {
-                            console.log(`✓ BOOKED: ${selectedDate} ${time} for counselor ${counselorId}`, slot);
-                        }
-                        
-                        return matches;
+                button.classList.remove('available', 'booked', 'selected');
+                button.disabled = false;
+
+                const statusEl = button.querySelector('.status');
+                if (statusEl) {
+                    statusEl.innerHTML = '';
+                }
+                button.removeAttribute('title');
+
+                if (isBooked) {
+                    button.classList.add('booked');
+                    button.disabled = true;
+                    console.log(`→ Marking as BOOKED: ${time}`);
+
+                    const slotObj = bookedSlots.find(slot => {
+                        return slot.preferred_date === selectedDate &&
+                               slot.preferred_time === time &&
+                               (String(slot.counselor_id) === String(counselorId));
                     });
 
-                    // Reset classes first
-                    button.classList.remove('available', 'booked', 'selected');
-                    button.disabled = false;
+                    if (slotObj && statusEl) {
+                        const studentName = slotObj.student_name || 'Student';
+                        const counselorName = slotObj.counselor_name || 'Counselor';
+                        const studentNumber = slotObj.student_number || '';
 
-                    // Ensure we have a status element
-                    const statusEl = button.querySelector('.status');
-                    if (statusEl) {
-                        statusEl.innerHTML = ''; // clear previous status text
+                        const displayText = studentNumber ? 
+                            `${studentName} (${studentNumber})` : 
+                            studentName;
+                        
+                        statusEl.innerHTML = `<span class="text-xs text-red-600 dark:text-red-300">${displayText}</span>`;
+                        button.title = `Booked: ${studentName} with ${counselorName}`;
+                    } else if (statusEl) {
+                        statusEl.textContent = '(Booked)';
+                        button.title = 'Booked';
                     }
-                    button.removeAttribute('title');
-
-                    if (isBooked) {
-                        button.classList.add('booked');
-                        button.disabled = true;
-                        console.log(`→ Marking as BOOKED: ${time}`);
-
-                        // Find the exact booked slot object so we can show details
-                        const slotObj = bookedSlots.find(slot => {
-                            return slot.preferred_date === selectedDate &&
-                                   slot.preferred_time === time &&
-                                   (String(slot.counselor_id) === String(counselorId));
-                        });
-
-                        if (slotObj && statusEl) {
-                            // Use the consistent data structure from controller
-                            const studentName = slotObj.student_name || 'Student';
-                            const counselorName = slotObj.counselor_name || 'Counselor';
-                            const studentNumber = slotObj.student_number || '';
-
-                            // Display student information
-                            const displayText = studentNumber ? 
-                                `${studentName} (${studentNumber})` : 
-                                studentName;
-                            
-                            statusEl.innerHTML = `<span class="text-xs text-red-600 dark:text-red-300">${displayText}</span>`;
-                            button.title = `Booked: ${studentName} with ${counselorName}`;
-                        } else if (statusEl) {
-                            // Generic booked label if details not available
-                            statusEl.textContent = '(Booked)';
-                            button.title = 'Booked';
-                        }
-                    } else {
-                        button.classList.add('available');
-                        hasAvailableSlots = true;
-                        console.log(`→ Marking as AVAILABLE: ${time}`);
-                        if (statusEl) {
-                            statusEl.textContent = '';
-                        }
-                        button.title = 'Available';
-                    }
-                });
-
-                if (!hasAvailableSlots) {
-                    showTimeError('No available time slots for this counselor on this date. Please choose another date or counselor.');
                 } else {
-                    hideTimeError();
+                    button.classList.add('available');
+                    hasAvailableSlots = true;
+                    console.log(`→ Marking as AVAILABLE: ${time}`);
+                    if (statusEl) {
+                        statusEl.textContent = '';
+                    }
+                    button.title = 'Available';
                 }
-                
-                console.log('========================');
-            }
+            });
 
-            function disableAllTimeSlots() {
-                timeSlotButtons.forEach(button => {
-                    button.classList.remove('available', 'booked', 'selected');
-                    button.disabled = true;
-                });
-                timeHiddenInput.value = '';
+            if (!hasAvailableSlots) {
+                showTimeError('No available time slots for this counselor on this date. Please choose another date or counselor.');
+            } else {
+                hideTimeError();
             }
+            
+            console.log('========================');
+        }
 
-            function showTimeError(message) {
+        function disableAllTimeSlots() {
+            timeSlotButtons.forEach(button => {
+                button.classList.remove('available', 'booked', 'selected');
+                button.disabled = true;
+            });
+            timeHiddenInput.value = '';
+        }
+
+        function showTimeError(message) {
+            if (timeErrorMessage && timeError) {
                 timeErrorMessage.textContent = message;
                 timeError.classList.remove('hidden');
             }
+        }
 
-            function hideTimeError() {
+        function hideTimeError() {
+            if (timeError) {
                 timeError.classList.add('hidden');
             }
+        }
 
-            // Initialize time slots on page load with current date and counselor
-            const currentDate = dateInput.value;
-            const initialCounselorId = counselorSelect.value ? parseInt(counselorSelect.value) : null;
-            const initialTime = "{{ $appointment->preferred_time }}"; // Get the appointment's current time
-            
-            if (currentDate && initialCounselorId) {
-                setTimeout(() => {
-                    updateTimeSlots(currentDate, initialCounselorId);
+        // ===================================================================
+        // INITIALIZE TIME SLOTS ON PAGE LOAD
+        // ===================================================================
+        const currentDate = dateInput.value;
+        const initialCounselorId = counselorSelect.value ? parseInt(counselorSelect.value) : null;
+        const initialTime = "{{ $appointment->preferred_time }}";
+        
+        if (currentDate && initialCounselorId) {
+            setTimeout(() => {
+                updateTimeSlots(currentDate, initialCounselorId);
+                
+                timeSlotButtons.forEach(btn => {
+                    const btnTime = btn.dataset.time;
+                    const formattedInitialTime = initialTime.substring(0, 5);
                     
-                    // Find and highlight the previously selected time slot
+                    if (btnTime === formattedInitialTime) {
+                        btn.classList.add('selected');
+                        timeHiddenInput.value = btnTime;
+                        console.log('Restored previous time selection:', btnTime);
+                    }
+                });
+            }, 100);
+        }
+
+        // Restore old time selection if validation fails
+        @if(old('preferred_time'))
+            const oldTime = "{{ old('preferred_time') }}";
+            const oldDate = "{{ old('preferred_date') }}";
+            const oldCounselorId = "{{ old('counselor_id') }}";
+            
+            if (oldDate && oldCounselorId) {
+                setTimeout(() => {
+                    updateTimeSlots(oldDate, parseInt(oldCounselorId));
+                    
                     timeSlotButtons.forEach(btn => {
-                        const btnTime = btn.dataset.time;
-                        const formattedInitialTime = initialTime.substring(0, 5); // Format HH:mm from HH:mm:ss
-                        
-                        if (btnTime === formattedInitialTime) {
+                        if (btn.dataset.time === oldTime) {
                             btn.classList.add('selected');
-                            timeHiddenInput.value = btnTime;
-                            console.log('Restored previous time selection:', btnTime);
+                            timeHiddenInput.value = oldTime;
                         }
                     });
                 }, 100);
             }
-
-            // Restore old time selection if validation fails
-            @if(old('preferred_time'))
-                const oldTime = "{{ old('preferred_time') }}";
-                const oldDate = "{{ old('preferred_date') }}";
-                const oldCounselorId = "{{ old('counselor_id') }}";
-                
-                if (oldDate && oldCounselorId) {
-                    setTimeout(() => {
-                        updateTimeSlots(oldDate, parseInt(oldCounselorId));
-                        
-                        timeSlotButtons.forEach(btn => {
-                            if (btn.dataset.time === oldTime) {
-                                btn.classList.add('selected');
-                                timeHiddenInput.value = oldTime;
-                            }
-                        });
-                    }, 100);
-                }
-            @endif
-        });
-    </script>
+        @endif
+    });
+</script>
 
     <script>
         // Auto-assign checkbox functionality

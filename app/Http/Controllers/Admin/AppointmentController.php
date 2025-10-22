@@ -541,20 +541,29 @@ class AppointmentController extends Controller
     /**
      * Decline appointment
      */
-    public function decline(Appointment $appointment)
+    public function decline(Appointment $appointment, Request $request)
     {
         try {
             if (!in_array($appointment->status, ['pending', 'approved'])) {
                 return redirect()->back()->with('error', 'Only pending or approved appointments can be declined.');
             }
 
-            $appointment->update(['status' => 'declined']);
+            // Validate decline reason
+            $request->validate([
+                'declined_reason' => 'required|string|max:500',
+            ]);
+
+            // Update both status and decline_reason
+            $appointment->update([
+                'status' => 'declined',
+                'declined_reason' => $request->declined_reason,
+            ]);
             
             // Add notification
             $appointment->student->user->notify(new \App\Notifications\AppointmentDeclined($appointment));
 
             // Audit: declined appointment
-            AuditLogHelper::log('appointment_declined', "Declined appointment ID {$appointment->id}");
+            AuditLogHelper::log('appointment_declined', "Declined appointment ID {$appointment->id} - Reason: {$request->decline_reason}");
 
             return redirect()->back()->with('success', 'Appointment has been declined.');
         } catch (\Exception $e) {
