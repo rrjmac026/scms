@@ -27,7 +27,9 @@
                         </div>
                         <!-- Preferred Date -->
                         <div>
-                            <x-input-label for="preferred_date" :value="__('Preferred Date')" />
+                            <label for="preferred_date" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('Preferred Date') }} <span class="text-red-500">*</span>
+                            </label>
                             <x-text-input id="preferred_date" name="preferred_date" type="date" 
                                 class="mt-1 block w-full" required min="{{ date('Y-m-d') }}" />
                             <x-input-error :messages="$errors->get('preferred_date')" class="mt-2" />
@@ -35,7 +37,7 @@
 
                         <div class="mb-4">
                             <label for="counseling_category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Counseling Category
+                                Counseling Category <span class="text-red-500">*</span>
                             </label>
                             <select name="counseling_category_id" id="counseling_category_id" 
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm">
@@ -48,7 +50,9 @@
 
                         <!-- Time Slot Selection with Visual Cards -->
                         <div>
-                            <x-input-label for="preferred_time" :value="__('Preferred Time')" />
+                            <label for="preferred_time" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('Preferred Time') }} <span class="text-red-500">*</span>
+                            </label>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-3">Select a date first to see available time slots</p>
                             
                             <!-- Hidden input to store selected time -->
@@ -107,7 +111,9 @@
 
                         <!-- Concern/Reason -->
                         <div>
-                            <x-input-label for="concern" :value="__('Reason for Appointment')" />
+                            <label for="concern" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('Reason for Appointment') }} <span class="text-red-500">*</span>
+                            </label>
                             <textarea id="concern" name="concern" rows="4" required
                                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 dark:focus:ring-pink-800"
                                 placeholder="Please briefly describe your reason for seeking counseling..."></textarea>

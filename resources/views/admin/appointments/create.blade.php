@@ -157,9 +157,9 @@
 
                         <!-- Counselor Selection -->
                         <div>
-                            <x-input-label for="counselor_id" value="" />
+                            <label for="counselor_id" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
                                 {{ __('Counselor') }} <span class="text-red-500">*</span>
-                            </xi-input-label>
+                            </label>
                             <div class="space-y-2">
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" name="auto_assign" id="auto_assign" value="1" 
@@ -194,7 +194,9 @@
 
                         <!-- Date -->
                         <div>
-                            <x-input-label for="preferred_date" value="{{ __('Date') }}" />
+                            <label for="preferred_date" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('Date') }} <span class="text-red-500">*</span>
+                            </label>
                             <x-text-input id="preferred_date" type="date" name="preferred_date" class="mt-1 block w-full"
                                 :value="old('preferred_date')" required min="{{ date('Y-m-d') }}" />
                             <x-input-error :messages="$errors->get('preferred_date')" class="mt-2" />
@@ -202,7 +204,9 @@
 
                         <!-- Category -->
                         <div>
-                            <x-input-label for="counseling_category_id" value="{{ __('Category') }}" />
+                            <label for="counseling_category_id" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('Category') }} <span class="text-red-500">*</span>
+                            </label>
                             <select name="counseling_category_id" id="counseling_category_id"
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500" required>
                                 <option value="">Select Category</option>
@@ -217,7 +221,9 @@
 
                         <!-- Time Slot Selection -->
                         <div class="md:col-span-2">
-                            <x-input-label for="preferred_time" :value="__('Preferred Time')" />
+                            <label for="preferred_time" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('Preferred Time') }} <span class="text-red-500">*</span>
+                            </label>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-3">
                                 <i class="fas fa-info-circle"></i>
                                 Select a date first to see available time slots
@@ -279,7 +285,9 @@
 
                         <!-- Status -->
                         <div>
-                            <x-input-label for="status" value="{{ __('Status') }}" />
+                            <label for="status" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('Status') }} <span class="text-red-500">*</span>
+                            </label>
                             <select name="status" id="status"
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500"
                                 required disabled>
@@ -295,7 +303,9 @@
 
                         <!-- Concern/Notes -->
                         <div class="md:col-span-2">
-                            <x-input-label for="concern" value="{{ __('Reason for Appointment') }}" />
+                            <label for="concern" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('Reason for Appointment') }} <span class="text-red-500">*</span>
+                            </label>
                             <textarea id="concern" name="concern" rows="4" 
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-pink-500 focus:border-pink-500" 
                                 required 
