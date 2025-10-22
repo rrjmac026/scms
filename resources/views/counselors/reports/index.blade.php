@@ -1,4 +1,3 @@
-
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -36,8 +35,7 @@
                 </div>
 
                 <div class="p-6">
-                    <form method="POST" action="{{ route('counselor.reports.generate') }}" id="generateReportForm">
-                        @csrf
+                    <form method="GET" id="reportForm">
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             <!-- Start Date -->
@@ -79,7 +77,7 @@
                                 @if(auth()->user()->counselor)
                                     {{-- Counselor: show their name as readonly text field --}}
                                     <x-text-input
-                                        id="counselor_name"
+                                        id="counselor_name_display"
                                         type="text"
                                         class="w-full mt-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm"
                                         value="{{ auth()->user()->name }}"
@@ -87,7 +85,7 @@
                                     />
 
                                     {{-- Hidden input so the counselor_id is still submitted --}}
-                                    <input type="hidden" name="counselor_id" value="{{ auth()->user()->counselor->id }}">
+                                    <input type="hidden" name="counselor_id" id="counselor_id" value="{{ auth()->user()->counselor->id }}">
                                 @else
                                     {{-- Admin: show dropdown for selecting counselor --}}
                                     <select 
@@ -99,7 +97,7 @@
                                         @foreach($counselors as $counselor)
                                             <option 
                                                 value="{{ $counselor->id }}" 
-                                                @selected(old('counselor_id', $filters['counselor_id']) == $counselor->id)
+                                                @selected(old('counselor_id', $filters['counselor_id'] ?? '') == $counselor->id)
                                             >
                                                 {{ $counselor->user->name }}
                                             </option>
@@ -197,8 +195,9 @@
                 return;
             }
             
-            // Get counselor value
-            const counselorId = document.getElementById('counselor_id').value;
+            // Get counselor value (works for both hidden input and select)
+            const counselorIdElement = document.getElementById('counselor_id');
+            const counselorId = counselorIdElement ? counselorIdElement.value : '';
             
             // Build query parameters
             const params = new URLSearchParams({
@@ -227,13 +226,25 @@
         // Set max date to today for both date inputs
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('start_date').setAttribute('max', today);
-            document.getElementById('end_date').setAttribute('max', today);
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+            
+            if (startDateInput) {
+                startDateInput.setAttribute('max', today);
+            }
+            
+            if (endDateInput) {
+                endDateInput.setAttribute('max', today);
+            }
             
             // Update end date min when start date changes
-            document.getElementById('start_date').addEventListener('change', function() {
-                document.getElementById('end_date').setAttribute('min', this.value);
-            });
+            if (startDateInput) {
+                startDateInput.addEventListener('change', function() {
+                    if (endDateInput) {
+                        endDateInput.setAttribute('min', this.value);
+                    }
+                });
+            }
         });
     </script>
 </x-app-layout>
